@@ -6,7 +6,7 @@ mod utils;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{get_fasta, intersect, merge, sort};
+use commands::{get_fasta, intersect, merge, name_map, sort};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -22,8 +22,10 @@ fn main() -> Result<()> {
             bed,
             fasta,
             output,
+            map,
             threads,
-        } => get_fasta(bed, &fasta, output, threads)?,
+        } => get_fasta(bed, &fasta, output, map, threads)?,
+        Command::NameMap { input, output, map } => name_map(input, output, map)?,
     }
     Ok(())
 }
