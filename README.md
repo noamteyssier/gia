@@ -1,4 +1,4 @@
-# [ `gia` ]
+# gia
 
 gia: Genomic Interval Arithmetic
 
