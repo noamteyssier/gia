@@ -1,4 +1,4 @@
-use crate::io::{match_input, match_output, read_set, write_set};
+use crate::io::{match_input, match_output, read_set, write_records_iter};
 use anyhow::Result;
 use bedrs::{Container, Coordinates};
 
@@ -10,23 +10,22 @@ pub fn extend(
     right: Option<usize>,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
-    let mut set = read_set(input_handle)?;
-    if let Some(ext) = both {
-        set.apply_mut(|iv| {
-            iv.extend_left(&ext);
-            iv.extend_right(&ext);
-        })
-    } else {
-        set.apply_mut(|iv| {
-            if let Some(val) = left {
-                iv.extend_left(&val);
+    let mut iset = read_set(input_handle)?;
+    let extend_iter = iset.records_mut().into_iter().map(|iv| {
+        if let Some(ref val) = both {
+            iv.extend_left(val);
+            iv.extend_right(val);
+        } else {
+            if let Some(ref val) = left {
+                iv.extend_left(val);
             }
-            if let Some(val) = right {
-                iv.extend_right(&val);
+            if let Some(ref val) = right {
+                iv.extend_right(val);
             }
-        })
-    }
+        }
+        *iv
+    });
     let output_handle = match_output(output)?;
-    write_set(&set, output_handle)?;
+    write_records_iter(extend_iter, output_handle)?;
     Ok(())
 }
