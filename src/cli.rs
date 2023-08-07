@@ -17,6 +17,10 @@ pub enum Command {
         /// Output BED file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
+
+        /// Assume input is sorted (default=false)
+        #[clap(short, long)]
+        sorted: bool,
     },
 
     /// Sorts a BED file by chromosome, start, and end

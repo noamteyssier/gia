@@ -11,7 +11,11 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Command::Sort { input, output } => sort(input, output)?,
-        Command::Merge { input, output } => merge(input, output)?,
+        Command::Merge {
+            input,
+            output,
+            sorted,
+        } => merge(input, output, sorted)?,
     }
     Ok(())
 }
