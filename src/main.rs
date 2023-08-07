@@ -4,13 +4,14 @@ mod io;
 
 use anyhow::Result;
 use clap::Parser;
-use cli::Cli;
-use commands::sort;
+use cli::{Cli, Command};
+use commands::{merge, sort};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        cli::Command::Sort { input, output } => sort(input, output)?,
+        Command::Sort { input, output } => sort(input, output)?,
+        Command::Merge { input, output } => merge(input, output)?,
     }
     Ok(())
 }
