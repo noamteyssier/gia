@@ -5,7 +5,7 @@ mod io;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{merge, sort};
+use commands::{intersect, merge, sort};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -16,6 +16,7 @@ fn main() -> Result<()> {
             output,
             sorted,
         } => merge(input, output, sorted)?,
+        Command::Intersect { a, b, output } => intersect(a, b, output)?,
     }
     Ok(())
 }

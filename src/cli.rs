@@ -8,6 +8,18 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Intersects two BED files
+    Intersect {
+        #[clap(short, long)]
+        a: Option<String>,
+
+        #[clap(short, long)]
+        b: String,
+
+        #[clap(short, long)]
+        output: Option<String>,
+    },
+
     /// Merges intervals of a BED file with overlapping regions
     Merge {
         /// Input BED file to merge (default=stdin)
