@@ -12,7 +12,7 @@ pub fn intersect(a: Option<String>, b: String, output: Option<String>) -> Result
 
     let mut intersections = Vec::new();
     for iv in a_set.records() {
-        let overlapping = b_set.find_iter_sorted_unchecked(&iv);
+        let overlapping = b_set.find_iter_sorted_unchecked(iv);
         for ov in overlapping {
             let ix = match iv.intersect(ov) {
                 Some(ix) => ix,

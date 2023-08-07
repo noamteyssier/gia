@@ -1,10 +1,7 @@
 use anyhow::Result;
 
 pub fn setup_rayon(threads: Option<usize>) -> Result<()> {
-    let num_threads = match threads {
-        Some(threads) => threads,
-        None => 1,
-    };
+    let num_threads = if let Some(t) = threads { t } else { 1 };
     // rayon defaults to using all available threads
     // so no need to set it if the user didn't specify
     if num_threads > 0 {

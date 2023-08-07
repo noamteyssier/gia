@@ -40,8 +40,7 @@ pub fn get_fasta(
     let mutex = Mutex::new(output);
     let name_map = if let Some(path) = name_map {
         let handle = match_input(Some(path))?;
-        let map = read_name_map(handle)?;
-        map
+        read_name_map(handle)?
     } else {
         build_null_map(&set)
     };
@@ -52,7 +51,7 @@ pub fn get_fasta(
         .map(|iv| {
             let name = name_map.get(&iv.chr()).unwrap();
             let seq = fasta
-                .query(&name, iv.start(), iv.end())
+                .query(name, iv.start(), iv.end())
                 .expect("Could not query interval");
             let seq_str = String::from_utf8(seq).expect("Could not convert sequence to string");
             (name, iv.start(), iv.end(), seq_str)
