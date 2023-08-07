@@ -8,6 +8,25 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Extracts FASTA sequences using intervals from a BED file
+    GetFasta {
+        /// BED file containing intervals to extract
+        #[clap(short, long)]
+        bed: Option<String>,
+
+        /// FASTA file to extract sequences from (assumes <fasta>.fai exists)
+        #[clap(short, long)]
+        fasta: String,
+
+        /// Output FASTA file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Number of threads to use (use zero for all available cores)
+        #[clap(short, long, default_value = "1")]
+        threads: Option<usize>,
+    },
+
     /// Intersects two BED files
     Intersect {
         #[clap(short, long)]
