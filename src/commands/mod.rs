@@ -1,8 +1,10 @@
+mod extend;
 mod get_fasta;
 mod intersect;
 mod merge;
 mod name_map;
 mod sort;
+pub use extend::extend;
 pub use get_fasta::get_fasta;
 pub use intersect::intersect;
 pub use merge::merge;

@@ -8,6 +8,32 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Extends the intervals of a BED file
+    ///
+    /// The extension is either done on both sides at once
+    /// or on the left and right side separately
+    Extend {
+        /// Input BED file to extend (default=stdin)
+        #[clap(short, long)]
+        input: Option<String>,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Extend intervals on both sides by the same provided amount
+        #[clap(short, long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
+        both: Option<usize>,
+
+        /// Extend intervals on the left side by the provided amount
+        #[clap(short, long, required_unless_present_any(["both", "right"]))]
+        left: Option<usize>,
+
+        /// Extend intervals on the right side by the provided amount
+        #[clap(short, long, required_unless_present_any(["both", "left"]))]
+        right: Option<usize>,
+    },
+
     /// Intersects two BED files
     Intersect {
         #[clap(short, long)]
