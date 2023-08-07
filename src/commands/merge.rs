@@ -7,8 +7,7 @@ pub fn merge(input: Option<String>, output: Option<String>, sorted: bool) -> Res
     let mut set = read_set(input_handle)?;
     if !sorted {
         set.sort();
-    }
-    else {
+    } else {
         set.set_sorted();
     }
     let merged = set.merge()?;
