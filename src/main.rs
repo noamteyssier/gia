@@ -32,7 +32,8 @@ fn main() -> Result<()> {
             both,
             left,
             right,
-        } => extend(input, output, both, left, right)?,
+            genome,
+        } => extend(input, output, both, left, right, genome)?,
     }
     Ok(())
 }

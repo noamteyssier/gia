@@ -75,3 +75,15 @@ pub fn read_name_map<R: Read>(reader: R) -> Result<HashMap<usize, String>> {
         .collect::<Result<HashMap<usize, String>>>()?;
     Ok(map)
 }
+
+pub fn read_genome<R: Read>(reader: R) -> Result<HashMap<usize, usize>> {
+    let mut reader = build_reader(reader);
+    let map = reader
+        .deserialize()
+        .map(|record| {
+            let record: (usize, usize) = record?;
+            Ok(record)
+        })
+        .collect::<Result<HashMap<usize, usize>>>()?;
+    Ok(map)
+}

@@ -1,6 +1,35 @@
-use crate::io::{match_input, match_output, read_set, write_records_iter};
+use crate::io::{match_input, match_output, read_genome, read_set, write_records_iter};
 use anyhow::Result;
-use bedrs::{Container, Coordinates};
+use bedrs::{Container, Coordinates, GenomicInterval};
+use hashbrown::HashMap;
+
+fn extend_left(iv: &mut GenomicInterval<usize>, val: usize) {
+    if iv.start() < val {
+        iv.update_start(&0);
+    } else {
+        iv.extend_left(&val);
+    }
+}
+
+fn extend_right(
+    iv: &mut GenomicInterval<usize>,
+    val: usize,
+    genome: Option<&HashMap<usize, usize>>,
+) {
+    if let Some(ref genome) = genome {
+        if let Some(end) = genome.get(&iv.chr()) {
+            if iv.end() + val > *end {
+                iv.update_end(end);
+            } else {
+                iv.extend_right(&val);
+            }
+        } else {
+            panic!("Chromosome {} not found in genome", iv.chr());
+        }
+    } else {
+        iv.extend_right(&val);
+    }
+}
 
 pub fn extend(
     input: Option<String>,
@@ -8,23 +37,32 @@ pub fn extend(
     both: Option<usize>,
     left: Option<usize>,
     right: Option<usize>,
+    genome_path: Option<String>,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
     let mut iset = read_set(input_handle)?;
+    let genome = if let Some(path) = genome_path {
+        let genome_handle = match_input(Some(path))?;
+        let genome = read_genome(genome_handle)?;
+        Some(genome)
+    } else {
+        None
+    };
     let extend_iter = iset.records_mut().into_iter().map(|iv| {
         if let Some(ref val) = both {
-            iv.extend_left(val);
-            iv.extend_right(val);
+            extend_left(iv, *val);
+            extend_right(iv, *val, genome.as_ref());
         } else {
             if let Some(ref val) = left {
-                iv.extend_left(val);
+                extend_left(iv, *val);
             }
             if let Some(ref val) = right {
-                iv.extend_right(val);
+                extend_right(iv, *val, genome.as_ref());
             }
         }
         *iv
     });
+
     let output_handle = match_output(output)?;
     write_records_iter(extend_iter, output_handle)?;
     Ok(())

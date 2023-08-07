@@ -32,6 +32,10 @@ pub enum Command {
         /// Extend intervals on the right side by the provided amount
         #[clap(short, long, required_unless_present_any(["both", "left"]))]
         right: Option<usize>,
+
+        /// Genome file to validate extensions against
+        #[clap(short, long)]
+        genome: Option<String>,
     },
 
     /// Intersects two BED files
