@@ -40,12 +40,15 @@ pub enum Command {
 
     /// Intersects two BED files
     Intersect {
+        /// Input BED file to intersect (default=stdin)
         #[clap(short, long)]
         a: Option<String>,
 
+        /// Secondary BED file to intersect 
         #[clap(short, long)]
         b: String,
 
+        /// Output BED file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
     },
