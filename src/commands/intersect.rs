@@ -3,14 +3,14 @@ use anyhow::Result;
 use bedrs::{Container, Find, GenomicInterval, GenomicIntervalSet, Intersect};
 
 #[derive(Debug, Copy, Clone)]
-enum Method {
+enum OverlapMethod {
     Standard,
     FractionQuery(f64),
     FractionTarget(f64),
     FractionBoth(f64, f64),
     FractionEither(f64, f64),
 }
-impl Method {
+impl OverlapMethod {
     fn from_inputs(
         f_query: Option<f64>,
         f_target: Option<f64>,
@@ -34,30 +34,55 @@ impl Method {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+enum OutputMethod {
+    Intersection,
+    Query,
+    Target,
+    QueryUnique,
+}
+impl OutputMethod {
+    fn from_inputs(with_query: bool, with_target: bool, unique: bool) -> Self {
+        if with_query && with_target {
+            panic!("Cannot specify both query and target output")
+        } else if with_query {
+            if unique {
+                Self::QueryUnique
+            } else {
+                Self::Query
+            }
+        } else if with_target {
+            Self::Target
+        } else {
+            Self::Intersection
+        }
+    }
+}
+
 fn run_find<'a>(
     query: &'a GenomicInterval<usize>,
     target_set: &'a GenomicIntervalSet<usize>,
-    method: Method,
+    method: OverlapMethod,
 ) -> Result<Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>> {
     match method {
-        Method::Standard => {
+        OverlapMethod::Standard => {
             let iter = target_set.find_iter_sorted_unchecked(query);
             Ok(Box::new(iter.copied()))
         }
-        Method::FractionQuery(f) => {
+        OverlapMethod::FractionQuery(f) => {
             let iter = target_set.find_iter_sorted_query_frac_unchecked(query, f)?;
             Ok(Box::new(iter.copied()))
         }
-        Method::FractionTarget(f) => {
+        OverlapMethod::FractionTarget(f) => {
             let iter = target_set.find_iter_sorted_target_frac_unchecked(query, f)?;
             Ok(Box::new(iter.copied()))
         }
-        Method::FractionBoth(f_query, f_target) => {
+        OverlapMethod::FractionBoth(f_query, f_target) => {
             let iter =
                 target_set.find_iter_sorted_reciprocal_frac_unchecked(query, f_query, f_target)?;
             Ok(Box::new(iter.copied()))
         }
-        Method::FractionEither(f_query, f_target) => {
+        OverlapMethod::FractionEither(f_query, f_target) => {
             let iter = target_set
                 .find_iter_sorted_reciprocal_frac_either_unchecked(query, f_query, f_target)?;
             Ok(Box::new(iter.copied()))
@@ -96,17 +121,23 @@ pub fn intersect(
     fraction_target: Option<f64>,
     reciprocal: bool,
     either: bool,
+    with_query: bool,
+    with_target: bool,
+    unique: bool,
 ) -> Result<()> {
     let a_set = load_and_sort(a)?;
     let b_set = load_and_sort(Some(b))?;
-    let method = Method::from_inputs(fraction_query, fraction_target, reciprocal, either);
+    let overlap_method =
+        OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
+    let output_method = OutputMethod::from_inputs(with_query, with_target, unique);
+
     let ix_iter = a_set
         .records()
         .iter()
         .map(|iv| {
-            let overlaps = run_find(iv, &b_set, method).expect("Error in finding overlaps");
+            let overlaps = run_find(iv, &b_set, overlap_method).expect("Error in finding overlaps");
             let intersections =
-                run_intersections(iv, overlaps).expect("Error in finding intersections");
+                run_function(iv, overlaps, output_method).expect("Error in finding intersections");
             intersections
         })
         .flatten();
