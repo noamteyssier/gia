@@ -1,5 +1,5 @@
-use crate::io::{match_input, match_output, read_set, write_records};
-use anyhow::{bail, Result};
+use crate::io::{match_input, match_output, read_set, write_records_iter};
+use anyhow::Result;
 use bedrs::{Container, Find, GenomicInterval, GenomicIntervalSet, Intersect};
 
 #[derive(Debug, Copy, Clone)]
@@ -65,6 +65,27 @@ fn run_find<'a>(
     }
 }
 
+fn run_intersections<It>(overlapping: It) -> Result<impl Iterator<Item = GenomicInterval<usize>>>
+where
+    It: Iterator<Item = GenomicInterval<usize>>,
+{
+    let iter = overlapping.map(|ov| {
+        let ix = match ov.intersect(&ov) {
+            Some(ix) => ix,
+            None => panic!("Failed to intersect intervals: There may be a bug in FindIter"),
+        };
+        ix
+    });
+    Ok(iter)
+}
+
+fn load_and_sort(input: Option<String>) -> Result<GenomicIntervalSet<usize>> {
+    let handle = match_input(input)?;
+    let mut set = read_set(handle)?;
+    set.sort();
+    Ok(set)
+}
+
 pub fn intersect(
     a: Option<String>,
     b: String,
@@ -74,27 +95,20 @@ pub fn intersect(
     reciprocal: bool,
     either: bool,
 ) -> Result<()> {
-    let a_handle = match_input(a)?;
-    let b_handle = match_input(Some(b))?;
-    let mut a_set = read_set(a_handle)?;
-    let mut b_set = read_set(b_handle)?;
-    a_set.sort();
-    b_set.sort();
-
+    let a_set = load_and_sort(a)?;
+    let b_set = load_and_sort(Some(b))?;
     let method = Method::from_inputs(fraction_query, fraction_target, reciprocal, either);
-
-    let mut intersections = Vec::new();
-    for iv in a_set.records() {
-        let overlapping = run_find(iv, &b_set, method)?;
-        for ov in overlapping {
-            let ix = match iv.intersect(&ov) {
-                Some(ix) => ix,
-                None => bail!("Failed to intersect intervals: There may be a bug in FindIter"),
-            };
-            intersections.push(ix);
-        }
-    }
+    let ix_iter = a_set
+        .records()
+        .iter()
+        .map(|iv| {
+            let overlaps = run_find(iv, &b_set, method).expect("Error in finding overlaps");
+            let intersections =
+                run_intersections(overlaps).expect("Error in finding intersections");
+            intersections
+        })
+        .flatten();
     let output_handle = match_output(output)?;
-    write_records(&intersections, output_handle)?;
+    write_records_iter(ix_iter, output_handle)?;
     Ok(())
 }
