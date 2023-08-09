@@ -2,7 +2,7 @@ use anyhow::{bail, Result};
 use bedrs::{Container, Sample};
 
 use crate::{
-    io::{match_input, match_output, read_set, write_set},
+    io::{match_input, match_output, read_set, write_records_iter},
     utils::build_rng,
 };
 
@@ -31,14 +31,14 @@ pub fn sample(
         bail!("Must specify either number or fraction of intervals to sample")
     };
 
-    // sample intervals
-    let subset = set.sample_rng(num, &mut rng)?;
+    // sample intervals as iterator
+    let subset = set.sample_iter_rng(num, &mut rng)?.copied();
 
     // build output handle
     let output_handle = match_output(output)?;
 
     // write intervals to output
-    write_set(&subset, output_handle)?;
+    write_records_iter(subset, output_handle)?;
 
     Ok(())
 }
