@@ -25,7 +25,7 @@ pub fn random(
 
     let interval_gen = (0..n_intervals)
         .map(|_| rng_intervals.gen_range(l_intervals..=max_chr_len))
-        .map(|x| (x, x - l_intervals))
+        .map(|x| (x - l_intervals, x))
         .map(|(x, y)| (rng_chr.gen_range(1..=n_chr), x, y))
         .map(|(c, x, y)| GenomicInterval::new(c, x, y));
 
