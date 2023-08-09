@@ -106,6 +106,29 @@ pub enum Command {
         output: Option<String>,
     },
 
+    /// Randomly sample a BED file
+    Sample {
+        /// Input BED file to sample (default=stdin)
+        #[clap(short, long)]
+        input: Option<String>,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Number of intervals to sample (choose one of n or f)
+        #[clap(short, long, required_unless_present_any(&["fraction"]), conflicts_with_all(&["fraction"]))]
+        number: Option<usize>,
+
+        /// Fraction of intervals to sample (choose one of n or f)
+        #[clap(short, long, required_unless_present_any(&["number"]), conflicts_with_all(&["number"]))]
+        fraction: Option<f64>,
+
+        /// Seed to use for random number generation (no default)
+        #[clap(short, long)]
+        seed: Option<usize>,
+    },
+
     /// Extracts FASTA sequences using intervals from a BED file
     GetFasta {
         /// BED file containing intervals to extract
