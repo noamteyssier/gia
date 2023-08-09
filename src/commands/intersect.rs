@@ -65,14 +65,16 @@ fn run_find<'a>(
     }
 }
 
-fn run_intersections<It>(overlapping: It) -> Result<impl Iterator<Item = GenomicInterval<usize>>>
+fn run_intersections<'a, It>(iv: &'a GenomicInterval<usize>, overlapping: It) -> Result<impl Iterator<Item = GenomicInterval<usize>> + 'a>
 where
-    It: Iterator<Item = GenomicInterval<usize>>,
+    It: Iterator<Item = GenomicInterval<usize>> + 'a,
 {
     let iter = overlapping.map(|ov| {
-        let ix = match ov.intersect(&ov) {
+        let ix = match ov.intersect(iv) {
             Some(ix) => ix,
-            None => panic!("Failed to intersect intervals: There may be a bug in FindIter"),
+            None => {
+                panic!("Failed to intersect intervals: There may be a bug in FindIter")
+            },
         };
         ix
     });
@@ -104,7 +106,7 @@ pub fn intersect(
         .map(|iv| {
             let overlaps = run_find(iv, &b_set, method).expect("Error in finding overlaps");
             let intersections =
-                run_intersections(overlaps).expect("Error in finding intersections");
+                run_intersections(iv, overlaps).expect("Error in finding intersections");
             intersections
         })
         .flatten();
