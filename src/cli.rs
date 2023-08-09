@@ -126,6 +126,10 @@ pub enum Command {
         /// Output BED file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
+
+        /// Genome file to set boundaries for random intervals
+        #[clap(short, long, conflicts_with_all = &["max_chr_len", "n_chr"])]
+        genome: Option<String>,
     },
 
     /// Randomly sample a BED file

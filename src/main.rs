@@ -57,7 +57,16 @@ fn main() -> Result<()> {
             max_chr_len,
             seed,
             output,
-        } => random(n_intervals, l_intervals, n_chr, max_chr_len, seed, output)?,
+            genome,
+        } => random(
+            n_intervals,
+            l_intervals,
+            n_chr,
+            max_chr_len,
+            seed,
+            output,
+            genome,
+        )?,
         Command::Sample {
             input,
             output,
