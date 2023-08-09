@@ -90,7 +90,26 @@ fn run_find<'a>(
     }
 }
 
-fn run_intersections<'a, It>(iv: &'a GenomicInterval<usize>, overlapping: It) -> Result<impl Iterator<Item = GenomicInterval<usize>> + 'a>
+fn run_function<'a, It>(
+    iv: &'a GenomicInterval<usize>,
+    overlapping: It,
+    method: OutputMethod,
+) -> Result<Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>>
+where
+    It: Iterator<Item = GenomicInterval<usize>> + 'a,
+{
+    match method {
+        OutputMethod::Intersection => Ok(Box::new(iter_intersections(iv, overlapping)?)),
+        OutputMethod::Query => Ok(Box::new(iter_query(iv, overlapping, false)?)),
+        OutputMethod::QueryUnique => Ok(Box::new(iter_query(iv, overlapping, true)?)),
+        OutputMethod::Target => Ok(Box::new(iter_targets(overlapping)?)),
+    }
+}
+
+fn iter_intersections<'a, It>(
+    iv: &'a GenomicInterval<usize>,
+    overlapping: It,
+) -> Result<impl Iterator<Item = GenomicInterval<usize>> + 'a>
 where
     It: Iterator<Item = GenomicInterval<usize>> + 'a,
 {
@@ -99,10 +118,35 @@ where
             Some(ix) => ix,
             None => {
                 panic!("Failed to intersect intervals: There may be a bug in FindIter")
-            },
+            }
         };
         ix
     });
+    Ok(iter)
+}
+
+fn iter_query<'a, It>(
+    iv: &'a GenomicInterval<usize>,
+    overlapping: It,
+    unique: bool,
+) -> Result<Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>>
+where
+    It: Iterator<Item = GenomicInterval<usize>> + 'a,
+{
+    let iter = overlapping.map(|_| iv.clone());
+    if unique {
+        let iter = iter.take(1);
+        Ok(Box::new(iter.into_iter()))
+    } else {
+        Ok(Box::new(iter))
+    }
+}
+
+fn iter_targets<It>(overlapping: It) -> Result<impl Iterator<Item = GenomicInterval<usize>>>
+where
+    It: Iterator<Item = GenomicInterval<usize>>,
+{
+    let iter = overlapping.map(|ov| ov.clone());
     Ok(iter)
 }
 
