@@ -6,7 +6,7 @@ mod utils;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{extend, get_fasta, intersect, merge, name_map, sort};
+use commands::{extend, get_fasta, intersect, merge, name_map, random, sort};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -34,6 +34,14 @@ fn main() -> Result<()> {
             right,
             genome,
         } => extend(input, output, both, left, right, genome)?,
+        Command::Random {
+            n_intervals,
+            l_intervals,
+            n_chr,
+            max_chr_len,
+            seed,
+            output,
+        } => random(n_intervals, l_intervals, n_chr, max_chr_len, seed, output)?,
     }
     Ok(())
 }

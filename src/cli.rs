@@ -44,7 +44,7 @@ pub enum Command {
         #[clap(short, long)]
         a: Option<String>,
 
-        /// Secondary BED file to intersect 
+        /// Secondary BED file to intersect
         #[clap(short, long)]
         b: String,
 
@@ -75,6 +75,33 @@ pub enum Command {
         input: Option<String>,
 
         /// Output GIA file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+    },
+
+    /// Generates a random BED file given some parameterizations
+    Random {
+        /// Number of intervals to generate (default = 10_000)
+        #[clap(short, long, default_value = "10000")]
+        n_intervals: usize,
+
+        /// Length of intervals to generate (default = 150)
+        #[clap(short, long, default_value = "150")]
+        l_intervals: usize,
+
+        /// Number of chromosomes to generate (default = 23)
+        #[clap(short = 'c', long, default_value = "23")]
+        n_chr: usize,
+
+        /// Maximum length of chromosomes (default = 250_000_000)
+        #[clap(short, long, default_value = "250000000")]
+        max_chr_len: usize,
+
+        /// Seed to use for random number generation (no default)
+        #[clap(short, long)]
+        seed: Option<usize>,
+
+        /// Output BED file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
     },
