@@ -6,7 +6,7 @@ mod utils;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{extend, get_fasta, intersect, merge, name_map, random, sort};
+use commands::{extend, get_fasta, intersect, merge, name_map, random, sample, sort};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -42,6 +42,13 @@ fn main() -> Result<()> {
             seed,
             output,
         } => random(n_intervals, l_intervals, n_chr, max_chr_len, seed, output)?,
+        Command::Sample {
+            input,
+            output,
+            number,
+            fraction,
+            seed,
+        } => sample(input, output, number, fraction, seed)?,
     }
     Ok(())
 }
