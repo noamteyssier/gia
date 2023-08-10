@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bedrs::{Container, GenomicInterval, GenomicIntervalSet};
 use csv::ByteRecord;
 use hashbrown::HashMap;
@@ -32,7 +32,12 @@ pub fn read_set<R: Read>(reader: R) -> Result<GenomicIntervalSet<usize>> {
     let set = reader
         .deserialize()
         .map(|record| {
-            let record: GenomicInterval<usize> = record?;
+            let record: GenomicInterval<usize> = match record {
+                Ok(record) => record,
+                Err(e) => {
+                    bail!("Could not build bed record:\n\nIf your BED has non-integer chromosome names try rerunning with the `-N` flag:\n\nERROR: {}", e)
+                }
+            };
             Ok(record)
         })
         .collect::<Result<GenomicIntervalSet<usize>>>()?;
