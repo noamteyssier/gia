@@ -51,15 +51,12 @@ pub fn intersect(
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
     let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
 
-    let ix_iter = query_set
-        .records()
-        .iter()
-        .flat_map(|iv| {
-            let overlaps =
-                run_find(iv, &target_set, overlap_method).expect("Error in finding overlaps");
-            let intersections = run_function(iv, overlaps, output_method);
-            intersections
-        });
+    let ix_iter = query_set.records().iter().flat_map(|iv| {
+        let overlaps =
+            run_find(iv, &target_set, overlap_method).expect("Error in finding overlaps");
+        let intersections = run_function(iv, overlaps, output_method);
+        intersections
+    });
     let output_handle = match_output(output)?;
     write_records_iter_with(ix_iter, output_handle, name_index.as_ref())?;
     Ok(())

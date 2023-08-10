@@ -62,12 +62,10 @@ fn iter_intersections<'a, It>(
 where
     It: Iterator<Item = GenomicInterval<usize>> + 'a,
 {
-    overlapping.map(|ov| {
-        match ov.intersect(iv) {
-            Some(ix) => ix,
-            None => {
-                panic!("Failed to intersect intervals: There may be a bug in FindIter")
-            }
+    overlapping.map(|ov| match ov.intersect(iv) {
+        Some(ix) => ix,
+        None => {
+            panic!("Failed to intersect intervals: There may be a bug in FindIter")
         }
     })
 }
