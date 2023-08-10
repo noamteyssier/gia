@@ -1,8 +1,6 @@
 use anyhow::Result;
 use bedrs::{Container, GenomicIntervalSet};
-
 use crate::io::{match_input, match_output, read_set, write_records_iter};
-
 use super::{
     find::{run_find, OverlapMethod},
     iter::{run_function, OutputMethod},
