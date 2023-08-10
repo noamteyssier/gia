@@ -1,12 +1,24 @@
 use anyhow::Result;
 use bedrs::{Find, GenomicInterval, GenomicIntervalSet};
 
+/// Describes the method used to find overlaps between query and target intervals.
 #[derive(Debug, Copy, Clone)]
 pub enum OverlapMethod {
+    /// Standard method: find all intervals in `query` that overlap with any interval in `target_set`.
     Standard,
+
+    /// Find all intervals in `query` that overlap with at least `f_query` fraction of the intervals in `target_set`.
     FractionQuery(f64),
+
+    /// Find all intervals in `query` that overlap with at least `f_target` fraction of the intervals in `target_set`.
     FractionTarget(f64),
+
+    /// Find all intervals in `query` that overlap with at least `f_query` fraction of the intervals in `target_set`,
+    /// and all intervals in `target_set` that overlap with at least `f_target` fraction of the intervals in `query`.
     FractionBoth(f64, f64),
+
+    /// Find all intervals in `query` that overlap with at least `f_query` fraction of the intervals in `target_set`,
+    /// or all intervals in `target_set` that overlap with at least `f_target` fraction of the intervals in `query`.
     FractionEither(f64, f64),
 }
 impl OverlapMethod {
