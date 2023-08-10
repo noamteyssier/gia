@@ -11,12 +11,17 @@ use commands::{extend, get_fasta, intersect, merge, name_map, random, sample, so
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Command::Sort { input, output } => sort(input, output)?,
+        Command::Sort {
+            input,
+            output,
+            named,
+        } => sort(input, output, named)?,
         Command::Merge {
             input,
             output,
             sorted,
-        } => merge(input, output, sorted)?,
+            named,
+        } => merge(input, output, sorted, named)?,
         Command::Intersect {
             a,
             b,
@@ -50,7 +55,8 @@ fn main() -> Result<()> {
             output,
             map,
             threads,
-        } => get_fasta(bed, &fasta, output, map, threads)?,
+            named,
+        } => get_fasta(bed, &fasta, output, map, threads, named)?,
         Command::NameMap { input, output, map } => name_map(input, output, map)?,
         Command::Extend {
             input,
@@ -84,7 +90,8 @@ fn main() -> Result<()> {
             number,
             fraction,
             seed,
-        } => sample(input, output, number, fraction, seed)?,
+            named,
+        } => sample(input, output, number, fraction, seed, named)?,
     }
     Ok(())
 }

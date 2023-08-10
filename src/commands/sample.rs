@@ -2,7 +2,7 @@ use anyhow::{bail, Result};
 use bedrs::{Container, Sample};
 
 use crate::{
-    io::{match_input, match_output, read_set, write_records_iter},
+    io::{match_input, match_output, read_set_with, write_records_iter_with},
     utils::build_rng,
 };
 
@@ -12,12 +12,13 @@ pub fn sample(
     number: Option<usize>,
     fraction: Option<f64>,
     seed: Option<usize>,
+    named: bool,
 ) -> Result<()> {
     // read input
     let input_handle = match_input(input)?;
 
     // load interval set
-    let set = read_set(input_handle)?;
+    let (set, name_index) = read_set_with(input_handle, named)?;
 
     // build rng
     let mut rng = build_rng(seed);
@@ -38,7 +39,7 @@ pub fn sample(
     let output_handle = match_output(output)?;
 
     // write intervals to output
-    write_records_iter(subset, output_handle)?;
+    write_records_iter_with(subset, output_handle, name_index.as_ref())?;
 
     Ok(())
 }

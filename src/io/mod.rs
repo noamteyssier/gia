@@ -8,7 +8,8 @@ pub use read::{
     read_genome, read_name_map, read_named_set, read_set, read_set_with, read_two_named_sets,
 };
 pub use write::{
-    write_named_records_iter, write_records, write_records_iter, write_records_iter_with, write_set,
+    write_named_records_iter, write_records, write_records_iter, write_records_iter_with,
+    write_records_with, write_set, write_set_with,
 };
 
 use hashbrown::HashMap;

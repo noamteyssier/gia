@@ -1,10 +1,10 @@
 use std::sync::Mutex;
 
 use crate::{
-    io::{match_input, match_output, read_name_map, read_set, FastaIndex, IndexedFasta},
+    io::{match_input, match_output, read_name_map, read_set_with, FastaIndex, IndexedFasta},
     utils::setup_rayon,
 };
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bedrs::{Container, Coordinates, GenomicIntervalSet};
 use hashbrown::HashMap;
 use rayon::prelude::*;
@@ -30,16 +30,23 @@ pub fn get_fasta(
     output: Option<String>,
     name_map: Option<String>,
     threads: Option<usize>,
+    named: bool,
 ) -> Result<()> {
     setup_rayon(threads)?;
     let handle = match_input(bed)?;
-    let set = read_set(handle)?;
+    let (set, name_index) = read_set_with(handle, named)?;
     let fasta_index = build_fasta_index(fasta)?;
     let fasta = IndexedFasta::new(fasta_index, fasta.to_string());
     let output = match_output(output)?;
     let mutex = Mutex::new(output);
-    let name_map = if let Some(path) = name_map {
-        let handle = match_input(Some(path))?;
+
+    if name_index.is_some() && name_map.is_some() {
+        bail!("Cannot use both name index and name map");
+    }
+    let name_index = if let Some(name_index) = name_index {
+        name_index
+    } else if let Some(oath) = name_map {
+        let handle = match_input(Some(oath))?;
         read_name_map(handle)?
     } else {
         build_null_map(&set)
@@ -49,7 +56,7 @@ pub fn get_fasta(
         .into_par_iter()
         .filter(|iv| iv.start() != iv.end())
         .map(|iv| {
-            let name = name_map.get(&iv.chr()).unwrap();
+            let name = name_index.get(&iv.chr()).unwrap();
             let seq = fasta
                 .query(name, iv.start(), iv.end())
                 .expect("Could not query interval");

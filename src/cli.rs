@@ -113,6 +113,10 @@ pub enum Command {
         /// Assume input is sorted (default=false)
         #[clap(short, long)]
         sorted: bool,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 
     /// Sorts a BED file by chromosome, start, and end
@@ -124,6 +128,10 @@ pub enum Command {
         /// Output GIA file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 
     /// Generates a random BED file given some parameterizations
@@ -178,6 +186,10 @@ pub enum Command {
         /// Seed to use for random number generation (no default)
         #[clap(short, long)]
         seed: Option<usize>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 
     /// Extracts FASTA sequences using intervals from a BED file
@@ -201,6 +213,10 @@ pub enum Command {
         /// Number of threads to use (use zero for all available cores)
         #[clap(short, long, default_value = "1")]
         threads: Option<usize>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 
     /// Builds a two column map of chromosome names to integers
