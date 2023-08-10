@@ -36,6 +36,10 @@ pub enum Command {
         /// Genome file to validate extensions against
         #[clap(short, long)]
         genome: Option<String>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 
     /// Intersects two BED files
@@ -90,6 +94,10 @@ pub enum Command {
         /// (i.e. the inverse of the intersection)
         #[clap(short = 'v', long, conflicts_with_all = &["with_query", "with_target", "unique"])]
         inverse: bool,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 
     /// Merges intervals of a BED file with overlapping regions
