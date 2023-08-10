@@ -73,6 +73,23 @@ pub enum Command {
         /// Requires that either fraction provided with `-f` or `-F` is met
         #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
         either: bool,
+
+        /// Return the records from a that overlap with b instead of the intersection
+        #[clap(short = 'q', long, conflicts_with = "with_target")]
+        with_query: bool,
+
+        /// Return the records from b that overlap with a instead of the intersection
+        #[clap(short = 't', long, conflicts_with = "with_query")]
+        with_target: bool,
+
+        /// Only write the query record once if it overlaps with multiple target records
+        #[clap(short, long, requires = "with_query", conflicts_with = "with_target")]
+        unique: bool,
+
+        /// Only report the intervals in the query that do not overlap with the target
+        /// (i.e. the inverse of the intersection)
+        #[clap(short = 'v', long, conflicts_with_all = &["with_query", "with_target", "unique"])]
+        inverse: bool,
     },
 
     /// Merges intervals of a BED file with overlapping regions

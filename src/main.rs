@@ -25,6 +25,10 @@ fn main() -> Result<()> {
             fraction_target,
             reciprocal,
             either,
+            with_query,
+            with_target,
+            unique,
+            inverse,
         } => intersect(
             a,
             b,
@@ -33,6 +37,10 @@ fn main() -> Result<()> {
             fraction_target,
             reciprocal,
             either,
+            with_query,
+            with_target,
+            unique,
+            inverse,
         )?,
         Command::GetFasta {
             bed,
