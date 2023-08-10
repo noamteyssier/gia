@@ -35,12 +35,10 @@ impl OverlapMethod {
             Self::FractionQuery(f_query.unwrap())
         } else if f_query.is_none() && f_target.is_some() {
             Self::FractionTarget(f_target.unwrap())
+        } else if either {
+            Self::FractionEither(f_query.unwrap(), f_target.unwrap())
         } else {
-            if either {
-                Self::FractionEither(f_query.unwrap(), f_target.unwrap())
-            } else {
-                Self::FractionBoth(f_query.unwrap(), f_target.unwrap())
-            }
+            Self::FractionBoth(f_query.unwrap(), f_target.unwrap())
         }
     }
 }
