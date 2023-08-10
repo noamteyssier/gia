@@ -17,7 +17,7 @@ pub fn write_set_with<W: Write>(
     name_index: Option<&NameIndex>,
 ) -> Result<()> {
     if let Some(name_index) = name_index {
-        write_named_set(set, writer, &name_index)?;
+        write_named_set(set, writer, name_index)?;
     } else {
         write_set(set, writer)?;
     }
@@ -48,7 +48,7 @@ pub fn write_records_with<W: Write>(
     name_index: Option<&NameIndex>,
 ) -> Result<()> {
     if let Some(name_index) = name_index {
-        write_named_records(records, writer, &name_index)?;
+        write_named_records(records, writer, name_index)?;
     } else {
         write_records(records, writer)?;
     }
@@ -83,7 +83,7 @@ where
     I: Iterator<Item = GenomicInterval<usize>>,
 {
     if let Some(name_index) = name_index {
-        write_named_records_iter(records, writer, &name_index)?;
+        write_named_records_iter(records, writer, name_index)?;
     } else {
         write_records_iter(records, writer)?;
     }

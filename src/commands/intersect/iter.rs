@@ -82,7 +82,7 @@ fn iter_query<'a, It>(
 where
     It: Iterator<Item = GenomicInterval<usize>> + 'a,
 {
-    let iter = overlapping.map(|_| iv.clone());
+    let iter = overlapping.map(|_| *iv);
     if unique {
         let iter = iter.take(1);
         Box::new(iter.into_iter())
@@ -95,7 +95,7 @@ fn iter_targets<It>(overlapping: It) -> impl Iterator<Item = GenomicInterval<usi
 where
     It: Iterator<Item = GenomicInterval<usize>>,
 {
-    overlapping.map(|ov| ov.clone())
+    overlapping
 }
 
 fn iter_inverse<'a, It>(
@@ -107,7 +107,7 @@ where
 {
     let mut overlapping = overlapping.peekable();
     if overlapping.next().is_none() {
-        Box::new(std::iter::once(iv.clone()))
+        Box::new(std::iter::once(*iv))
     } else {
         Box::new(std::iter::empty())
     }
