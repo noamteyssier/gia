@@ -1,10 +1,10 @@
-use anyhow::Result;
-use bedrs::{Container, GenomicIntervalSet};
-use crate::io::{match_input, match_output, read_set, write_records_iter};
 use super::{
     find::{run_find, OverlapMethod},
     iter::{run_function, OutputMethod},
 };
+use crate::io::{match_input, match_output, read_set, write_records_iter};
+use anyhow::Result;
+use bedrs::{Container, GenomicIntervalSet};
 
 fn load_and_sort(input: Option<String>) -> Result<GenomicIntervalSet<usize>> {
     let handle = match_input(input)?;
