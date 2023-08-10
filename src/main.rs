@@ -29,6 +29,7 @@ fn main() -> Result<()> {
             with_target,
             unique,
             inverse,
+            named,
         } => intersect(
             a,
             b,
@@ -41,6 +42,7 @@ fn main() -> Result<()> {
             with_target,
             unique,
             inverse,
+            named,
         )?,
         Command::GetFasta {
             bed,
@@ -57,7 +59,8 @@ fn main() -> Result<()> {
             left,
             right,
             genome,
-        } => extend(input, output, both, left, right, genome)?,
+            named,
+        } => extend(input, output, both, left, right, genome, named)?,
         Command::Random {
             n_intervals,
             l_intervals,
