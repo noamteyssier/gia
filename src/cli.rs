@@ -120,6 +120,14 @@ pub enum Command {
     },
 
     /// Sorts a BED file by chromosome, start, and end
+    ///
+    /// Note that if using the `-N` flag, the sorting is
+    /// done on the internal numerical representation of
+    /// the chr name and may not match lexigraphical or
+    /// numerical sorting of the input names.
+    ///
+    /// i.e. all the chromosomes will be internally sorted,
+    /// but the names may not be in the order you expect.
     Sort {
         /// Input GIA file to sort (default=stdin)
         #[clap(short, long)]

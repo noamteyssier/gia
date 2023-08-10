@@ -27,6 +27,14 @@ pub fn sample(
     let num = if let Some(n) = number {
         n
     } else if let Some(f) = fraction {
+        if f > 1.0 {
+            bail!(
+                "Fraction must be less than or equal to 1.0:\n\ninput: {}",
+                f
+            )
+        } else if f <= 0.0 {
+            bail!("Fraction must be greater than 0.0:\n\ninput: {}", f)
+        }
         (f * set.len() as f64) as usize
     } else {
         bail!("Must specify either number or fraction of intervals to sample")
