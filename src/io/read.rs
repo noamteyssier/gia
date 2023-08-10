@@ -14,7 +14,10 @@ pub fn build_reader<R: Read>(reader: R) -> csv::Reader<R> {
         .from_reader(reader)
 }
 
-pub fn read_set_with<R: Read>(reader: R, named: bool) -> Result<(GenomicIntervalSet<usize>, Option<NameIndex>)> {
+pub fn read_set_with<R: Read>(
+    reader: R,
+    named: bool,
+) -> Result<(GenomicIntervalSet<usize>, Option<NameIndex>)> {
     if named {
         let (set, idx_map) = read_named_set(reader)?;
         Ok((set, Some(idx_map)))
@@ -45,7 +48,14 @@ pub fn read_named_set<R: Read>(reader: R) -> Result<(GenomicIntervalSet<usize>, 
 }
 
 /// Reads two files into two GenomicIntervalSets and a NameIndex
-pub fn read_two_named_sets<R: Read>(reader_1: R, reader_2: R) -> Result<(GenomicIntervalSet<usize>, GenomicIntervalSet<usize>, NameIndex)> {
+pub fn read_two_named_sets<R: Read>(
+    reader_1: R,
+    reader_2: R,
+) -> Result<(
+    GenomicIntervalSet<usize>,
+    GenomicIntervalSet<usize>,
+    NameIndex,
+)> {
     let mut name_map = HashMap::new();
     let mut idx_map = HashMap::new();
     let set_1 = convert_set(reader_1, &mut name_map, &mut idx_map)?;
@@ -59,8 +69,8 @@ pub fn read_two_named_sets<R: Read>(reader_1: R, reader_2: R) -> Result<(Genomic
 /// chromosome names and indices. This is useful for reading multiple files
 /// and keeping track of the same chromosome names and indices.
 fn convert_set<R: Read>(
-    reader: R, 
-    name_map: &mut HashMap<String, usize>, 
+    reader: R,
+    name_map: &mut HashMap<String, usize>,
     idx_map: &mut HashMap<usize, String>,
 ) -> Result<GenomicIntervalSet<usize>> {
     let mut reader = build_reader(reader);

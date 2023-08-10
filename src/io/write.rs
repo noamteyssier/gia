@@ -1,9 +1,8 @@
+use super::NameIndex;
 use anyhow::Result;
-use bedrs::{Container, GenomicInterval, GenomicIntervalSet, Coordinates};
+use bedrs::{Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;
 use std::io::Write;
-use super::NameIndex;
-
 
 pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
     csv::WriterBuilder::new()
@@ -12,7 +11,11 @@ pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
         .from_writer(writer)
 }
 
-pub fn write_set_with<W: Write>(set: &GenomicIntervalSet<usize>, writer: W, name_index: Option<&NameIndex>) -> Result<()> {
+pub fn write_set_with<W: Write>(
+    set: &GenomicIntervalSet<usize>,
+    writer: W,
+    name_index: Option<&NameIndex>,
+) -> Result<()> {
     if let Some(name_index) = name_index {
         write_named_set(set, writer, &name_index)?;
     } else {
@@ -28,14 +31,22 @@ pub fn write_set<W: Write>(set: &GenomicIntervalSet<usize>, writer: W) -> Result
     Ok(())
 }
 
-pub fn write_named_set<W: Write>(set: &GenomicIntervalSet<usize>, writer: W, name_index: &NameIndex) -> Result<()> {
+pub fn write_named_set<W: Write>(
+    set: &GenomicIntervalSet<usize>,
+    writer: W,
+    name_index: &NameIndex,
+) -> Result<()> {
     let mut wtr = build_writer(writer);
     write_internal_named(set.records(), &mut wtr, name_index)?;
     wtr.flush()?;
     Ok(())
 }
 
-pub fn write_records_with<W: Write>(records: &[GenomicInterval<usize>], writer: W, name_index: Option<&NameIndex>) -> Result<()> {
+pub fn write_records_with<W: Write>(
+    records: &[GenomicInterval<usize>],
+    writer: W,
+    name_index: Option<&NameIndex>,
+) -> Result<()> {
     if let Some(name_index) = name_index {
         write_named_records(records, writer, &name_index)?;
     } else {
@@ -51,14 +62,22 @@ pub fn write_records<W: Write>(records: &[GenomicInterval<usize>], writer: W) ->
     Ok(())
 }
 
-pub fn write_named_records<W: Write>(records: &[GenomicInterval<usize>], writer: W, name_index: &NameIndex) -> Result<()> {
+pub fn write_named_records<W: Write>(
+    records: &[GenomicInterval<usize>],
+    writer: W,
+    name_index: &NameIndex,
+) -> Result<()> {
     let mut wtr = build_writer(writer);
     write_internal_named(records, &mut wtr, name_index)?;
     wtr.flush()?;
     Ok(())
 }
 
-pub fn write_records_iter_with<W, I>(records: I, writer: W, name_index: Option<&NameIndex>) -> Result<()> 
+pub fn write_records_iter_with<W, I>(
+    records: I,
+    writer: W,
+    name_index: Option<&NameIndex>,
+) -> Result<()>
 where
     W: Write,
     I: Iterator<Item = GenomicInterval<usize>>,
@@ -105,7 +124,11 @@ fn write_internal<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer
     Ok(())
 }
 
-fn write_internal_named<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer<W>, name_map: &NameIndex) -> Result<()> {
+fn write_internal_named<W: Write>(
+    records: &[GenomicInterval<usize>],
+    wtr: &mut Writer<W>,
+    name_map: &NameIndex,
+) -> Result<()> {
     for interval in records.iter() {
         let chr = name_map.get(&interval.chr()).unwrap();
         let named_interval = (chr, interval.start(), interval.end());

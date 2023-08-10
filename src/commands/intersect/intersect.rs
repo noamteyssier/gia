@@ -2,15 +2,21 @@ use super::{
     find::{run_find, OverlapMethod},
     iter::{run_function, OutputMethod},
 };
-use crate::io::{match_input, match_output, read_set, NameIndex, read_two_named_sets, write_records_iter_with};
+use crate::io::{
+    match_input, match_output, read_set, read_two_named_sets, write_records_iter_with, NameIndex,
+};
 use anyhow::Result;
 use bedrs::{Container, GenomicIntervalSet};
 
 fn load_pairs(
-    query_input: Option<String>, 
-    target_input: Option<String>, 
-    named: bool
-) -> Result<(GenomicIntervalSet<usize>, GenomicIntervalSet<usize>, Option<NameIndex>)> {
+    query_input: Option<String>,
+    target_input: Option<String>,
+    named: bool,
+) -> Result<(
+    GenomicIntervalSet<usize>,
+    GenomicIntervalSet<usize>,
+    Option<NameIndex>,
+)> {
     let query_handle = match_input(query_input)?;
     let target_handle = match_input(target_input)?;
     let (mut query_set, mut target_set, name_index) = if named {
@@ -49,7 +55,8 @@ pub fn intersect(
         .records()
         .iter()
         .map(|iv| {
-            let overlaps = run_find(iv, &target_set, overlap_method).expect("Error in finding overlaps");
+            let overlaps =
+                run_find(iv, &target_set, overlap_method).expect("Error in finding overlaps");
             let intersections = run_function(iv, overlaps, output_method);
             intersections
         })
