@@ -54,13 +54,12 @@ pub fn intersect(
     let ix_iter = query_set
         .records()
         .iter()
-        .map(|iv| {
+        .flat_map(|iv| {
             let overlaps =
                 run_find(iv, &target_set, overlap_method).expect("Error in finding overlaps");
             let intersections = run_function(iv, overlaps, output_method);
             intersections
-        })
-        .flatten();
+        });
     let output_handle = match_output(output)?;
     write_records_iter_with(ix_iter, output_handle, name_index.as_ref())?;
     Ok(())
