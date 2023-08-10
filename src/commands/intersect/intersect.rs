@@ -2,15 +2,28 @@ use super::{
     find::{run_find, OverlapMethod},
     iter::{run_function, OutputMethod},
 };
-use crate::io::{match_input, match_output, read_set, write_records_iter};
+use crate::io::{match_input, match_output, read_set, NameIndex, read_two_named_sets, write_records_iter_with};
 use anyhow::Result;
 use bedrs::{Container, GenomicIntervalSet};
 
-fn load_and_sort(input: Option<String>) -> Result<GenomicIntervalSet<usize>> {
-    let handle = match_input(input)?;
-    let mut set = read_set(handle)?;
-    set.sort();
-    Ok(set)
+fn load_pairs(
+    query_input: Option<String>, 
+    target_input: Option<String>, 
+    named: bool
+) -> Result<(GenomicIntervalSet<usize>, GenomicIntervalSet<usize>, Option<NameIndex>)> {
+    let query_handle = match_input(query_input)?;
+    let target_handle = match_input(target_input)?;
+    let (mut query_set, mut target_set, name_index) = if named {
+        let (query_set, target_set, name_index) = read_two_named_sets(query_handle, target_handle)?;
+        (query_set, target_set, Some(name_index))
+    } else {
+        let query_set = read_set(query_handle)?;
+        let target_set = read_set(target_handle)?;
+        (query_set, target_set, None)
+    };
+    query_set.sort();
+    target_set.sort();
+    Ok((query_set, target_set, name_index))
 }
 
 pub fn intersect(
@@ -25,23 +38,23 @@ pub fn intersect(
     with_target: bool,
     unique: bool,
     inverse: bool,
+    named: bool,
 ) -> Result<()> {
-    let a_set = load_and_sort(a)?;
-    let b_set = load_and_sort(Some(b))?;
+    let (query_set, target_set, name_index) = load_pairs(a, Some(b), named)?;
     let overlap_method =
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
     let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
 
-    let ix_iter = a_set
+    let ix_iter = query_set
         .records()
         .iter()
         .map(|iv| {
-            let overlaps = run_find(iv, &b_set, overlap_method).expect("Error in finding overlaps");
+            let overlaps = run_find(iv, &target_set, overlap_method).expect("Error in finding overlaps");
             let intersections = run_function(iv, overlaps, output_method);
             intersections
         })
         .flatten();
     let output_handle = match_output(output)?;
-    write_records_iter(ix_iter, output_handle)?;
+    write_records_iter_with(ix_iter, output_handle, name_index.as_ref())?;
     Ok(())
 }

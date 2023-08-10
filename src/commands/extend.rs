@@ -1,4 +1,4 @@
-use crate::io::{match_input, match_output, read_genome, read_set, write_records_iter};
+use crate::io::{match_input, match_output, read_genome, read_set_with, write_records_iter_with};
 use anyhow::Result;
 use bedrs::{Container, Coordinates, GenomicInterval};
 use hashbrown::HashMap;
@@ -38,9 +38,10 @@ pub fn extend(
     left: Option<usize>,
     right: Option<usize>,
     genome_path: Option<String>,
+    named: bool,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
-    let mut iset = read_set(input_handle)?;
+    let (mut iset, name_index) = read_set_with(input_handle, named)?;
     let genome = if let Some(path) = genome_path {
         let genome_handle = match_input(Some(path))?;
         let genome = read_genome(genome_handle)?;
@@ -64,6 +65,6 @@ pub fn extend(
     });
 
     let output_handle = match_output(output)?;
-    write_records_iter(extend_iter, output_handle)?;
+    write_records_iter_with(extend_iter, output_handle, name_index.as_ref())?;
     Ok(())
 }
