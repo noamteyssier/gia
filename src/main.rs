@@ -28,6 +28,7 @@ fn main() -> Result<()> {
             with_query,
             with_target,
             unique,
+            inverse,
         } => intersect(
             a,
             b,
@@ -39,6 +40,7 @@ fn main() -> Result<()> {
             with_query,
             with_target,
             unique,
+            inverse,
         )?,
         Command::GetFasta {
             bed,
