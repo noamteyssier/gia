@@ -1,10 +1,7 @@
-use super::{
-    find::{run_find, OverlapMethod},
-    iter::{run_function, OutputMethod},
-};
-use crate::io::{
+use super::iter::{run_function, OutputMethod};
+use crate::{io::{
     match_input, match_output, read_set, read_two_named_sets, write_records_iter_with, NameIndex,
-};
+}, commands::{OverlapMethod, run_find}};
 use anyhow::Result;
 use bedrs::{Container, GenomicIntervalSet};
 
