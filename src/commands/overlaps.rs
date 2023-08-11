@@ -1,5 +1,5 @@
 use anyhow::Result;
-use bedrs::{Find, GenomicInterval, GenomicIntervalSet};
+use bedrs::{Find, Container, traits::{IntervalBounds, ValueBounds}};
 
 /// Describes the method used to find overlaps between query and target intervals.
 #[derive(Debug, Copy, Clone)]
@@ -43,11 +43,16 @@ impl OverlapMethod {
     }
 }
 
-pub fn run_find<'a>(
-    query: &'a GenomicInterval<usize>,
-    target_set: &'a GenomicIntervalSet<usize>,
+pub fn run_find<'a, C, I, T>(
+    query: &'a I,
+    target_set: &'a C,
     method: OverlapMethod,
-) -> Result<Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>> {
+) -> Result<Box<dyn Iterator<Item = I> + 'a>> 
+where
+    C: Container<T, I>,
+    I: IntervalBounds<T> + Copy,
+    T: ValueBounds + 'a,
+{
     match method {
         OverlapMethod::Standard => {
             let iter = target_set.find_iter_sorted_unchecked(query);
@@ -73,3 +78,4 @@ pub fn run_find<'a>(
         }
     }
 }
+
