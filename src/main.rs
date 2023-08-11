@@ -6,7 +6,7 @@ mod utils;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{extend, get_fasta, intersect, merge, name_map, random, sample, sort};
+use commands::{extend, get_fasta, intersect, merge, name_map, random, sample, sort, subtract};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -49,6 +49,19 @@ fn main() -> Result<()> {
             inverse,
             named,
         )?,
+        Command::Subtract { 
+            a, 
+            b, 
+            output, 
+            fraction_query, 
+            fraction_target, 
+            reciprocal, 
+            either, 
+            unmerged,
+            named,
+        } => {
+            subtract(a, b, output, fraction_query, fraction_target, reciprocal, either, unmerged, named)?;
+        }
         Command::GetFasta {
             bed,
             fasta,
