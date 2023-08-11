@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.72"
-bedrs = { version = "0.0.41", features = ["serde"] }
+bedrs = { version = "0.0.44", features = ["serde"] }
 clap = { version = "4.3.19", features = ["derive"] }
 csv = "1.2.2"
 hashbrown = "0.14.0"
