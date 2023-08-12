@@ -21,7 +21,8 @@ fn main() -> Result<()> {
             output,
             sorted,
             named,
-        } => merge(input, output, sorted, named)?,
+            stream,
+        } => merge(input, output, sorted, named, stream)?,
         Command::Intersect {
             a,
             b,

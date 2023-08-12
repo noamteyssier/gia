@@ -167,6 +167,13 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Stream the input file instead of loading it into memory
+        ///
+        /// Note that this requires the input file to be sorted
+        /// and will result in undefined behavior if it is not.
+        #[clap(short = 'S', long)]
+        stream: bool,
     },
 
     /// Sorts a BED file by chromosome, start, and end
