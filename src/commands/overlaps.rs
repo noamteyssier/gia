@@ -1,5 +1,8 @@
 use anyhow::Result;
-use bedrs::{Find, Container, traits::{IntervalBounds, ValueBounds}};
+use bedrs::{
+    traits::{IntervalBounds, ValueBounds},
+    Container, Find,
+};
 
 /// Describes the method used to find overlaps between query and target intervals.
 #[derive(Debug, Copy, Clone)]
@@ -47,7 +50,7 @@ pub fn run_find<'a, C, I, T>(
     query: &'a I,
     target_set: &'a C,
     method: OverlapMethod,
-) -> Result<Box<dyn Iterator<Item = I> + 'a>> 
+) -> Result<Box<dyn Iterator<Item = I> + 'a>>
 where
     C: Container<T, I>,
     I: IntervalBounds<T> + Copy,
@@ -78,4 +81,3 @@ where
         }
     }
 }
-

@@ -23,7 +23,7 @@ where
     Ok(())
 }
 
-fn merge_streamed<R, W>(input_handle: R, output_handle: W, named: bool) -> Result<()>
+fn merge_streamed<R, W>(input_handle: R, output_handle: W) -> Result<()>
 where
     R: Read,
     W: Write,
@@ -45,7 +45,7 @@ pub fn merge(
     let input_handle = match_input(input)?;
     let output_handle = match_output(output)?;
     if stream {
-        merge_streamed(input_handle, output_handle, named)
+        merge_streamed(input_handle, output_handle)
     } else {
         merge_in_memory(input_handle, output_handle, sorted, named)
     }
