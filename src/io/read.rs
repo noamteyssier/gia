@@ -1,7 +1,11 @@
 use anyhow::{bail, Result};
-use bedrs::{Container, GenomicInterval, GenomicIntervalSet};
+use bedrs::{
+    traits::{IntervalBounds, ValueBounds},
+    Container, GenomicInterval, GenomicIntervalSet,
+};
 use csv::ByteRecord;
 use hashbrown::HashMap;
+use serde::de::DeserializeOwned;
 use std::io::Read;
 
 use super::{NameIndex, NamedInterval};
@@ -42,6 +46,26 @@ pub fn read_set<R: Read>(reader: R) -> Result<GenomicIntervalSet<usize>> {
         })
         .collect::<Result<GenomicIntervalSet<usize>>>()?;
     Ok(set)
+}
+
+pub fn read_iter<'a, R, I, T>(reader: &'a mut csv::Reader<R>) -> Box<dyn Iterator<Item = I> + 'a>
+where
+    R: Read,
+    I: IntervalBounds<T> + DeserializeOwned + 'a,
+    T: ValueBounds,
+{
+    let record_iter = reader
+        .deserialize()
+        .map(|record| {
+            let record: I = match record {
+                Ok(record) => record,
+                Err(e) => {
+                    panic!("Could not build bed record:\n\nIf your BED has non-integer chromosome names try rerunning with the `-N` flag:\n\nERROR: {}", e)
+                }
+            };
+            record
+        });
+    Box::new(record_iter)
 }
 
 /// Reads a single file into a GenomicIntervalSet and a NameIndex
