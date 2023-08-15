@@ -6,7 +6,9 @@ mod utils;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
-use commands::{extend, get_fasta, intersect, merge, name_map, random, sample, sort, subtract};
+use commands::{
+    extend, get_fasta, intersect, intersect_stream, merge, name_map, random, sample, sort, subtract,
+};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -36,7 +38,37 @@ fn main() -> Result<()> {
             unique,
             inverse,
             named,
-        } => intersect(
+            stream,
+        } => {
+            if stream {
+                intersect_stream(
+                    a,
+                    b,
+                    output,
+                    fraction_query,
+                    fraction_target,
+                    reciprocal,
+                    either,
+                    named,
+                )?
+            } else {
+                intersect(
+                    a,
+                    b,
+                    output,
+                    fraction_query,
+                    fraction_target,
+                    reciprocal,
+                    either,
+                    with_query,
+                    with_target,
+                    unique,
+                    inverse,
+                    named,
+                )?
+            }
+        }
+        Command::Subtract {
             a,
             b,
             output,
@@ -44,24 +76,20 @@ fn main() -> Result<()> {
             fraction_target,
             reciprocal,
             either,
-            with_query,
-            with_target,
-            unique,
-            inverse,
-            named,
-        )?,
-        Command::Subtract { 
-            a, 
-            b, 
-            output, 
-            fraction_query, 
-            fraction_target, 
-            reciprocal, 
-            either, 
             unmerged,
             named,
         } => {
-            subtract(a, b, output, fraction_query, fraction_target, reciprocal, either, unmerged, named)?;
+            subtract(
+                a,
+                b,
+                output,
+                fraction_query,
+                fraction_target,
+                reciprocal,
+                either,
+                unmerged,
+                named,
+            )?;
         }
         Command::GetFasta {
             bed,
