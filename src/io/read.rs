@@ -1,3 +1,4 @@
+use super::{NameIndex, NamedInterval};
 use anyhow::{bail, Result};
 use bedrs::{
     traits::{IntervalBounds, ValueBounds},
@@ -7,8 +8,6 @@ use csv::ByteRecord;
 use hashbrown::HashMap;
 use serde::de::DeserializeOwned;
 use std::io::Read;
-
-use super::{NameIndex, NamedInterval};
 
 pub fn build_reader<R: Read>(reader: R) -> csv::Reader<R> {
     csv::ReaderBuilder::new()

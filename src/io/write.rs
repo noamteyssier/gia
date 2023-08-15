@@ -2,6 +2,7 @@ use super::NameIndex;
 use anyhow::Result;
 use bedrs::{Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;
+use dashmap::DashMap;
 use std::io::Write;
 
 pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
@@ -106,6 +107,21 @@ pub fn write_named_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usi
     records: I,
     writer: W,
     name_map: &NameIndex,
+) -> Result<()> {
+    let mut wtr = build_writer(writer);
+    for record in records {
+        let chr = name_map.get(&record.chr()).unwrap();
+        let named_interval = (chr, record.start(), record.end());
+        wtr.serialize(named_interval)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
+    records: I,
+    writer: W,
+    name_map: &DashMap<usize, String>,
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
     for record in records {
