@@ -98,6 +98,11 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Stream the input files instead of loading them into memory
+        /// (only works if both files are sorted)
+        #[clap(short, long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
+        stream: bool,
     },
 
     /// Subtracts two BED files
@@ -167,6 +172,15 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Stream the input file instead of loading it into memory
+        ///
+        /// Note that this requires the input file to be sorted
+        /// and will result in undefined behavior if it is not.
+        ///
+        /// Currently does not support non-integer chromosome names.
+        #[clap(short = 'S', long, conflicts_with = "named")]
+        stream: bool,
     },
 
     /// Sorts a BED file by chromosome, start, and end

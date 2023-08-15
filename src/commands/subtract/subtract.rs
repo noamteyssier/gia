@@ -1,6 +1,15 @@
+use crate::{
+    commands::{run_find, OverlapMethod},
+    io::{
+        match_input, match_output, read_set, read_two_named_sets, write_records_iter_with,
+        NameIndex,
+    },
+};
 use anyhow::Result;
-use bedrs::{GenomicIntervalSet, Container, Subtract, Merge, traits::{IntervalBounds, ValueBounds}};
-use crate::{io::{NameIndex, match_input, read_two_named_sets, read_set, write_records_iter_with, match_output}, commands::{OverlapMethod, run_find}};
+use bedrs::{
+    traits::{IntervalBounds, ValueBounds},
+    Container, GenomicIntervalSet, Merge, Subtract,
+};
 
 fn load_pairs(
     query_input: Option<String>,
@@ -50,7 +59,11 @@ where
     }
 }
 
-fn iter_subtraction<'a, A, B, I, T>(aset: &'a A, bset: &'a B, method: &'a OverlapMethod) -> Box<dyn Iterator<Item = I> + 'a> 
+fn iter_subtraction<'a, A, B, I, T>(
+    aset: &'a A,
+    bset: &'a B,
+    method: &'a OverlapMethod,
+) -> Box<dyn Iterator<Item = I> + 'a>
 where
     A: Container<T, I> + 'a,
     B: Container<T, I> + 'a,
@@ -60,10 +73,9 @@ where
     let sub_iter = aset.records().iter().flat_map(|iv| {
         let overlaps = run_find(iv, bset, *method).expect("Error in finding overlaps");
         queued_diff(iv, overlaps)
-    });   
+    });
     Box::new(sub_iter)
 }
-
 
 pub fn subtract(
     query_path: Option<String>,

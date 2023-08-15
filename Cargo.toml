@@ -1,15 +1,16 @@
 [package]
 name = "gia"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.72"
-bedrs = { version = "0.0.44", features = ["serde"] }
+bedrs = { version = "0.0.46", features = ["serde"] }
 clap = { version = "4.3.19", features = ["derive"] }
 csv = "1.2.2"
+dashmap = { version = "5.5.0", features = ["serde"] }
 hashbrown = "0.14.0"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
