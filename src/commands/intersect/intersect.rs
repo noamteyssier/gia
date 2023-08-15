@@ -1,9 +1,17 @@
 use super::iter::{run_function, OutputMethod};
-use crate::{io::{
-    match_input, match_output, read_set, read_two_named_sets, write_records_iter_with, NameIndex,
-}, commands::{OverlapMethod, run_find}};
+use crate::{
+    commands::{run_find, OverlapMethod},
+    io::{
+        build_reader, match_input, match_output, read_set, read_two_named_sets,
+        write_named_records_iter_dashmap, write_records_iter_with, NameIndex, NamedIter,
+        UnnamedIter,
+    },
+};
 use anyhow::Result;
-use bedrs::{Container, GenomicIntervalSet};
+use bedrs::{
+    types::iterator::QueryMethod, Container, GenomicIntervalSet, IntersectIter, MergeIter,
+};
+use dashmap::DashMap;
 
 fn load_pairs(
     query_input: Option<String>,
@@ -56,5 +64,76 @@ pub fn intersect(
     });
     let output_handle = match_output(output)?;
     write_records_iter_with(ix_iter, output_handle, name_index.as_ref())?;
+    Ok(())
+}
+
+fn assign_method(
+    fraction_query: Option<f64>,
+    fraction_target: Option<f64>,
+    reciprocal: bool,
+    either: bool,
+) -> QueryMethod<usize> {
+    let fraction_target = if reciprocal {
+        fraction_query
+    } else {
+        fraction_target
+    };
+    if fraction_query.is_some() && fraction_target.is_some() {
+        if either {
+            QueryMethod::CompareReciprocalFractionOr(
+                fraction_query.unwrap(),
+                fraction_target.unwrap(),
+            )
+        } else {
+            QueryMethod::CompareReciprocalFractionAnd(
+                fraction_query.unwrap(),
+                fraction_target.unwrap(),
+            )
+        }
+    } else if fraction_query.is_some() {
+        QueryMethod::CompareByQueryFraction(fraction_query.unwrap())
+    } else if fraction_target.is_some() {
+        QueryMethod::CompareByTargetFraction(fraction_target.unwrap())
+    } else {
+        QueryMethod::Compare
+    }
+}
+
+pub fn intersect_stream(
+    a: Option<String>,
+    b: String,
+    output: Option<String>,
+    fraction_query: Option<f64>,
+    fraction_target: Option<f64>,
+    reciprocal: bool,
+    either: bool,
+    named: bool,
+) -> Result<()> {
+    let query_handle = match_input(a)?;
+    let target_handle = match_input(Some(b))?;
+    let mut query_csv = build_reader(query_handle);
+    let mut target_csv = build_reader(target_handle);
+    let output_handle = match_output(output)?;
+    let method = assign_method(fraction_query, fraction_target, reciprocal, either);
+
+    if named {
+        let name_index = DashMap::new();
+        let idx_map = DashMap::new();
+        let query_iter = NamedIter::new(&mut query_csv, &name_index, &idx_map);
+        let target_iter = NamedIter::new(&mut target_csv, &name_index, &idx_map);
+        let merged_query_iter = MergeIter::new(query_iter);
+        let merged_target_iter = MergeIter::new(target_iter);
+        let intersect_iter =
+            IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
+        write_named_records_iter_dashmap(intersect_iter, output_handle, &idx_map)?;
+    } else {
+        let query_iter = UnnamedIter::new(&mut query_csv);
+        let target_iter = UnnamedIter::new(&mut target_csv);
+        let merged_query_iter = MergeIter::new(query_iter);
+        let merged_target_iter = MergeIter::new(target_iter);
+        let intersect_iter =
+            IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
+        write_records_iter_with(intersect_iter, output_handle, None)?;
+    }
     Ok(())
 }
