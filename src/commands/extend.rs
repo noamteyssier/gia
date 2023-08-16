@@ -17,7 +17,7 @@ fn extend_right(
     genome: Option<&HashMap<usize, usize>>,
 ) {
     if let Some(ref genome) = genome {
-        if let Some(end) = genome.get(&iv.chr()) {
+        if let Some(end) = genome.get(iv.chr()) {
             if iv.end() + val > *end {
                 iv.update_end(end);
             } else {

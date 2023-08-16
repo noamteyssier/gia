@@ -1,7 +1,7 @@
 use super::{NameIndex, NamedInterval};
 use anyhow::{bail, Result};
 use bedrs::{
-    traits::{IntervalBounds, ValueBounds},
+    traits::{ChromBounds, IntervalBounds, ValueBounds},
     Container, GenomicInterval, GenomicIntervalSet,
 };
 use csv::ByteRecord;
@@ -47,10 +47,11 @@ pub fn read_set<R: Read>(reader: R) -> Result<GenomicIntervalSet<usize>> {
     Ok(set)
 }
 
-pub fn read_iter<'a, R, I, T>(reader: &'a mut csv::Reader<R>) -> Box<dyn Iterator<Item = I> + 'a>
+pub fn read_iter<'a, R, I, C, T>(reader: &'a mut csv::Reader<R>) -> Box<dyn Iterator<Item = I> + 'a>
 where
     R: Read,
-    I: IntervalBounds<T> + DeserializeOwned + 'a,
+    I: IntervalBounds<C, T> + DeserializeOwned + 'a,
+    C: ChromBounds,
     T: ValueBounds,
 {
     let record_iter = reader

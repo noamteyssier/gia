@@ -7,7 +7,7 @@ use crate::{
 };
 use anyhow::Result;
 use bedrs::{
-    traits::{IntervalBounds, ValueBounds},
+    traits::{ChromBounds, IntervalBounds, ValueBounds},
     Container, GenomicIntervalSet, Merge, Subtract,
 };
 
@@ -35,10 +35,11 @@ fn load_pairs(
     Ok((query_set, target_set, name_index))
 }
 
-fn queued_diff<It, I, T>(query: &I, overlaps: It) -> Box<dyn Iterator<Item = I>>
+fn queued_diff<It, I, C, T>(query: &I, overlaps: It) -> Box<dyn Iterator<Item = I>>
 where
     It: Iterator<Item = I>,
-    I: IntervalBounds<T> + Copy + 'static,
+    I: IntervalBounds<C, T> + Copy + 'static,
+    C: ChromBounds,
     T: ValueBounds,
 {
     let mut differences = Vec::new();
@@ -59,15 +60,16 @@ where
     }
 }
 
-fn iter_subtraction<'a, A, B, I, T>(
+fn iter_subtraction<'a, A, B, I, C, T>(
     aset: &'a A,
     bset: &'a B,
     method: &'a OverlapMethod,
 ) -> Box<dyn Iterator<Item = I> + 'a>
 where
-    A: Container<T, I> + 'a,
-    B: Container<T, I> + 'a,
-    I: IntervalBounds<T> + Copy + 'static,
+    A: Container<C, T, I> + 'a,
+    B: Container<C, T, I> + 'a,
+    I: IntervalBounds<C, T> + Copy + 'static,
+    C: ChromBounds,
     T: ValueBounds,
 {
     let sub_iter = aset.records().iter().flat_map(|iv| {

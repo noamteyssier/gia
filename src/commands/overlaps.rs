@@ -1,6 +1,6 @@
 use anyhow::Result;
 use bedrs::{
-    traits::{IntervalBounds, ValueBounds},
+    traits::{ChromBounds, IntervalBounds, ValueBounds},
     Container, Find,
 };
 
@@ -46,38 +46,39 @@ impl OverlapMethod {
     }
 }
 
-pub fn run_find<'a, C, I, T>(
+pub fn run_find<'a, Co, I, C, T>(
     query: &'a I,
-    target_set: &'a C,
+    target_set: &'a Co,
     method: OverlapMethod,
 ) -> Result<Box<dyn Iterator<Item = I> + 'a>>
 where
-    C: Container<T, I>,
-    I: IntervalBounds<T> + Copy,
+    Co: Container<C, T, I>,
+    I: IntervalBounds<C, T>,
+    C: ChromBounds + 'a,
     T: ValueBounds + 'a,
 {
     match method {
         OverlapMethod::Standard => {
             let iter = target_set.find_iter_sorted_unchecked(query);
-            Ok(Box::new(iter.copied()))
+            Ok(Box::new(iter.cloned()))
         }
         OverlapMethod::FractionQuery(f) => {
             let iter = target_set.find_iter_sorted_query_frac_unchecked(query, f)?;
-            Ok(Box::new(iter.copied()))
+            Ok(Box::new(iter.cloned()))
         }
         OverlapMethod::FractionTarget(f) => {
             let iter = target_set.find_iter_sorted_target_frac_unchecked(query, f)?;
-            Ok(Box::new(iter.copied()))
+            Ok(Box::new(iter.cloned()))
         }
         OverlapMethod::FractionBoth(f_query, f_target) => {
             let iter =
                 target_set.find_iter_sorted_reciprocal_frac_unchecked(query, f_query, f_target)?;
-            Ok(Box::new(iter.copied()))
+            Ok(Box::new(iter.cloned()))
         }
         OverlapMethod::FractionEither(f_query, f_target) => {
             let iter = target_set
                 .find_iter_sorted_reciprocal_frac_either_unchecked(query, f_query, f_target)?;
-            Ok(Box::new(iter.copied()))
+            Ok(Box::new(iter.cloned()))
         }
     }
 }

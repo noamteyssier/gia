@@ -110,7 +110,7 @@ pub fn write_named_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usi
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
     for record in records {
-        let chr = name_map.get(&record.chr()).unwrap();
+        let chr = name_map.get(record.chr()).unwrap();
         let named_interval = (chr, record.start(), record.end());
         wtr.serialize(named_interval)?;
     }
@@ -125,7 +125,7 @@ pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = GenomicInte
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
     for record in records {
-        let chr = name_map.get(&record.chr()).unwrap();
+        let chr = name_map.get(record.chr()).unwrap();
         let named_interval = (chr, record.start(), record.end());
         wtr.serialize(named_interval)?;
     }
@@ -146,7 +146,7 @@ fn write_internal_named<W: Write>(
     name_map: &NameIndex,
 ) -> Result<()> {
     for interval in records.iter() {
-        let chr = name_map.get(&interval.chr()).unwrap();
+        let chr = name_map.get(interval.chr()).unwrap();
         let named_interval = (chr, interval.start(), interval.end());
         wtr.serialize(named_interval)?;
     }

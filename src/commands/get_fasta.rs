@@ -17,8 +17,8 @@ fn build_fasta_index(fasta: &str) -> Result<FastaIndex> {
 fn build_null_map(set: &GenomicIntervalSet<usize>) -> HashMap<usize, String> {
     let mut map = HashMap::new();
     for iv in set.records() {
-        if !map.contains_key(&iv.chr()) {
-            map.insert(iv.chr(), format!("{}", iv.chr()));
+        if !map.contains_key(iv.chr()) {
+            map.insert(iv.chr().clone(), format!("{}", iv.chr()));
         }
     }
     map
@@ -56,7 +56,7 @@ pub fn get_fasta(
         .into_par_iter()
         .filter(|iv| iv.start() != iv.end())
         .map(|iv| {
-            let name = name_index.get(&iv.chr()).unwrap();
+            let name = name_index.get(iv.chr()).unwrap();
             let seq = fasta
                 .query(name, iv.start(), iv.end())
                 .expect("Could not query interval");
