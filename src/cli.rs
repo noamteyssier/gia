@@ -101,7 +101,7 @@ pub enum Command {
 
         /// Stream the input files instead of loading them into memory
         /// (only works if both files are sorted)
-        #[clap(short, long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
+        #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
         stream: bool,
     },
 
