@@ -1,3 +1,4 @@
+mod complement;
 mod extend;
 mod get_fasta;
 mod intersect;
@@ -8,6 +9,7 @@ mod random;
 mod sample;
 mod sort;
 mod subtract;
+pub use complement::complement;
 pub use extend::extend;
 pub use get_fasta::get_fasta;
 pub use intersect::{intersect, intersect_stream};
