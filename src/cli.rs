@@ -206,6 +206,32 @@ pub enum Command {
         named: bool,
     },
 
+    /// Generates the complement of a BED file
+    ///
+    /// This reports the regions that are not covered by the input
+    /// BED file but excludes regions preceding the first interval
+    /// and following the last interval.
+    Complement {
+        /// Input BED file to complement (default=stdin)
+        #[clap(short, long)]
+        input: Option<String>,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
+
+        /// Stream the input file instead of loading it into memory
+        ///
+        /// Note that this requires the input file to be sorted
+        /// and will result in undefined behavior if it is not.
+        #[clap(short = 'S', long, conflicts_with = "named")]
+        stream: bool,
+    },
+
     /// Generates a random BED file given some parameterizations
     Random {
         /// Number of intervals to generate (default = 10_000)

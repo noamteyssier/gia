@@ -7,12 +7,19 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    extend, get_fasta, intersect, intersect_stream, merge, name_map, random, sample, sort, subtract,
+    complement, extend, get_fasta, intersect, intersect_stream, merge, name_map, random, sample,
+    sort, subtract,
 };
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
+        Command::Complement {
+            input,
+            output,
+            named,
+            stream,
+        } => complement(input, output, named, stream)?,
         Command::Sort {
             input,
             output,
