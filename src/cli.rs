@@ -67,6 +67,10 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Specify that the input files are already sorted
+        #[clap(short, long)]
+        sorted: bool,
     },
 
     /// Intersects two BED files

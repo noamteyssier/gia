@@ -28,7 +28,8 @@ fn main() -> Result<()> {
             upstream,
             downstream,
             named,
-        } => closest(a, b, output, upstream, downstream, named)?,
+            sorted,
+        } => closest(a, b, output, upstream, downstream, named, sorted)?,
         Command::Sort {
             input,
             output,

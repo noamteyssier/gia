@@ -11,6 +11,7 @@ fn load_pairs(
     query_input: Option<String>,
     target_input: Option<String>,
     named: bool,
+    sorted: bool,
 ) -> Result<(
     GenomicIntervalSet<usize>,
     GenomicIntervalSet<usize>,
@@ -26,8 +27,13 @@ fn load_pairs(
         let target_set = read_set(target_handle)?;
         (query_set, target_set, None)
     };
-    query_set.sort();
-    target_set.sort();
+    if !sorted {
+        query_set.sort();
+        target_set.sort();
+    } else {
+        query_set.set_sorted();
+        target_set.set_sorted();
+    }
     Ok((query_set, target_set, name_index))
 }
 
@@ -45,8 +51,9 @@ pub fn closest(
     upstream: bool,
     downstream: bool,
     named: bool,
+    sorted: bool,
 ) -> Result<()> {
-    let (a_set, b_set, name_index) = load_pairs(a, Some(b), named)?;
+    let (a_set, b_set, name_index) = load_pairs(a, Some(b), named, sorted)?;
     let closest_method = if upstream {
         ClosestType::Upstream
     } else if downstream {
