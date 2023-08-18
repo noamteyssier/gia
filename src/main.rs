@@ -1,14 +1,15 @@
 mod cli;
 mod commands;
 mod io;
+mod types;
 mod utils;
 
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    complement, extend, get_fasta, intersect, intersect_stream, merge, name_map, random, sample,
-    sort, subtract,
+    closest, complement, extend, get_fasta, intersect, intersect_stream, merge, name_map, random,
+    sample, sort, subtract,
 };
 
 fn main() -> Result<()> {
@@ -20,6 +21,14 @@ fn main() -> Result<()> {
             named,
             stream,
         } => complement(input, output, named, stream)?,
+        Command::Closest {
+            a,
+            b,
+            output,
+            upstream,
+            downstream,
+            named,
+        } => closest(a, b, output, upstream, downstream, named)?,
         Command::Sort {
             input,
             output,

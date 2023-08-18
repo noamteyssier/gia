@@ -1,8 +1,11 @@
+use crate::types::IntervalPair;
+
 use super::NameIndex;
 use anyhow::Result;
-use bedrs::{Container, Coordinates, GenomicInterval, GenomicIntervalSet};
+use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;
 use dashmap::DashMap;
+use serde::Serialize;
 use std::io::Write;
 
 pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
@@ -98,6 +101,73 @@ pub fn write_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
     let mut wtr = build_writer(writer);
     for record in records {
         wtr.serialize(record)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_pairs_iter_with<W, I, It>(
+    records: It,
+    writer: W,
+    name_index: Option<&NameIndex>,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalPair<I, usize, usize>>,
+{
+    if let Some(name_index) = name_index {
+        write_named_pairs_iter(records, writer, name_index)?;
+    } else {
+        write_pairs_iter(records, writer)?;
+    }
+    Ok(())
+}
+
+pub fn write_pairs_iter<W, I, It>(records: It, writer: W) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalPair<I, usize, usize>>,
+{
+    let mut wtr = build_writer(writer);
+    for record in records {
+        let pair = (
+            record.iv_a.chr(),
+            record.iv_a.start(),
+            record.iv_a.end(),
+            record.iv_b.as_ref().map(|iv| iv.chr()),
+            record.iv_b.as_ref().map(|iv| iv.start()),
+            record.iv_b.as_ref().map(|iv| iv.end()),
+        );
+        wtr.serialize(pair)?;
+    }
+    Ok(())
+}
+
+pub fn write_named_pairs_iter<I, W, It>(records: It, writer: W, name_map: &NameIndex) -> Result<()>
+where
+    I: IntervalBounds<usize, usize>,
+    W: Write,
+    It: Iterator<Item = IntervalPair<I, usize, usize>>,
+{
+    let mut wtr = build_writer(writer);
+    for record in records {
+        let chr_a = name_map.get(record.iv_a.chr()).unwrap();
+        let chr_b = if let Some(ref iv_b) = record.iv_b {
+            Some(name_map.get(iv_b.chr()).unwrap())
+        } else {
+            None
+        };
+        let named_pair = (
+            chr_a,
+            record.iv_a.start(),
+            record.iv_a.end(),
+            chr_b,
+            record.iv_b.as_ref().map(|iv| iv.start()),
+            record.iv_b.as_ref().map(|iv| iv.end()),
+        );
+        wtr.serialize(named_pair)?;
     }
     wtr.flush()?;
     Ok(())
