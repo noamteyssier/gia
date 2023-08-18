@@ -1,3 +1,4 @@
+mod closest;
 mod complement;
 mod extend;
 mod get_fasta;
@@ -9,6 +10,7 @@ mod random;
 mod sample;
 mod sort;
 mod subtract;
+pub use closest::closest;
 pub use complement::complement;
 pub use extend::extend;
 pub use get_fasta::get_fasta;
