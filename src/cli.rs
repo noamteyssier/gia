@@ -42,6 +42,33 @@ pub enum Command {
         named: bool,
     },
 
+    /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
+    Closest {
+        /// Input BED file to find closest intervals for (default=stdin)
+        #[clap(short, long)]
+        a: Option<String>,
+
+        /// Secondary BED file to find closest intervals in
+        #[clap(short, long)]
+        b: String,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Report only the closest upstream interval
+        #[clap(short = 'u', long, conflicts_with = "downstream")]
+        upstream: bool,
+
+        /// Report only the closest downstream interval
+        #[clap(short = 'd', long, conflicts_with = "upstream")]
+        downstream: bool,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
+    },
+
     /// Intersects two BED files
     Intersect {
         /// Input BED file to intersect (default=stdin)
