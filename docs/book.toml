@@ -1,0 +1,6 @@
+[book]
+authors = ["noam teyssier"]
+language = "en"
+multilingual = false
+src = "src"
+title = "gia"
