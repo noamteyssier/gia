@@ -339,10 +339,6 @@ pub enum Command {
         #[clap(short, long)]
         map: Option<String>,
 
-        /// Number of threads to use (use zero for all available cores)
-        #[clap(short, long, default_value = "1")]
-        threads: Option<usize>,
-
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
