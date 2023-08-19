@@ -113,9 +113,8 @@ fn main() -> Result<()> {
             fasta,
             output,
             map,
-            threads,
             named,
-        } => get_fasta(bed, &fasta, output, map, threads, named)?,
+        } => get_fasta(bed, &fasta, output, map, named)?,
         Command::NameMap { input, output, map } => name_map(input, output, map)?,
         Command::Extend {
             input,
