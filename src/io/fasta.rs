@@ -1,10 +1,8 @@
-use std::{
-    fs::File,
-    io::{Read, Seek, SeekFrom},
-};
+use std::{fs::File, io::Read};
 
 use anyhow::{bail, Result};
 use hashbrown::HashMap;
+use memmap2::Mmap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -53,25 +51,32 @@ impl FastaIndex {
 #[derive(Debug)]
 pub struct IndexedFasta {
     index: FastaIndex,
-    path: String,
+    map: Mmap,
+    buffer: Vec<u8>,
 }
 impl IndexedFasta {
-    pub fn new(index: FastaIndex, path: String) -> Self {
-        Self { index, path }
+    pub fn new(index: FastaIndex, path: &str) -> Result<Self> {
+        let file = File::open(path)?;
+        let mmap = unsafe { Mmap::map(&file)? };
+        let buffer = Vec::new();
+        Ok(Self {
+            index,
+            map: mmap,
+            buffer,
+        })
     }
 
-    pub fn query(&self, name: &str, start: usize, end: usize) -> Result<Vec<u8>> {
+    pub fn query(&mut self, name: &str, start: usize, end: usize) -> Result<&[u8]> {
         let entry = match self.index.get(name) {
             Some(entry) => entry,
             None => bail!("No entry found for {}", name),
         };
-        let mut file = File::open(&self.path)?;
+        self.buffer.clear();
         let query_pos = QueryPosition::new(start, end, entry);
-        let mut buffer = vec![0; query_pos.buffer_size];
-        file.seek(SeekFrom::Start(query_pos.pos as u64))?;
-        file.read_exact(&mut buffer)?;
-        buffer.retain(|&c| c != b'\n');
-        Ok(buffer)
+        let seq_slice = &self.map[query_pos.pos..query_pos.pos + query_pos.buffer_size];
+        self.buffer.extend_from_slice(seq_slice);
+        self.buffer.retain(|&c| c != b'\n');
+        Ok(&self.buffer)
     }
 }
 
