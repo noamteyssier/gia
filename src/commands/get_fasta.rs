@@ -1,13 +1,10 @@
-use std::sync::Mutex;
-
-use crate::{
-    io::{match_input, match_output, read_name_map, read_set_with, FastaIndex, IndexedFasta},
-    utils::setup_rayon,
+use crate::io::{
+    match_input, match_output, read_name_map, read_set_with, FastaIndex, IndexedFasta,
 };
 use anyhow::{bail, Result};
 use bedrs::{Container, Coordinates, GenomicIntervalSet};
 use hashbrown::HashMap;
-use rayon::prelude::*;
+use std::str::from_utf8;
 
 fn build_fasta_index(fasta: &str) -> Result<FastaIndex> {
     let index_path = format!("{}.fai", fasta);
@@ -29,16 +26,13 @@ pub fn get_fasta(
     fasta: &str,
     output: Option<String>,
     name_map: Option<String>,
-    threads: Option<usize>,
     named: bool,
 ) -> Result<()> {
-    setup_rayon(threads)?;
     let handle = match_input(bed)?;
     let (set, name_index) = read_set_with(handle, named)?;
     let fasta_index = build_fasta_index(fasta)?;
-    let fasta = IndexedFasta::new(fasta_index, fasta.to_string());
-    let output = match_output(output)?;
-    let mutex = Mutex::new(output);
+    let mut fasta = IndexedFasta::new(fasta_index, fasta)?;
+    let mut output = match_output(output)?;
 
     if name_index.is_some() && name_map.is_some() {
         bail!("Cannot use both name index and name map");
@@ -52,23 +46,22 @@ pub fn get_fasta(
         build_null_map(&set)
     };
 
-    set.records()
-        .into_par_iter()
-        .filter(|iv| iv.start() != iv.end())
-        .map(|iv| {
-            let name = name_index.get(iv.chr()).unwrap();
-            let seq = fasta
-                .query(name, iv.start(), iv.end())
-                .expect("Could not query interval");
-            let seq_str = String::from_utf8(seq).expect("Could not convert sequence to string");
-            (name, iv.start(), iv.end(), seq_str)
-        })
-        .for_each(|(name, start, end, seq)| {
-            let mut guarded_output = mutex.lock().expect("Could not lock output");
-            guarded_output
-                .write_fmt(format_args!(">{}:{}-{}\n{}\n", name, start, end, seq))
-                .expect("Could not write to output");
-        });
+    let iv_iter = set
+        .records()
+        .into_iter()
+        .filter(|iv| iv.start() != iv.end());
+    for iv in iv_iter {
+        let name = name_index.get(iv.chr()).expect("Could not get name");
+        let seq = fasta.query(name, iv.start(), iv.end())?;
+        let seq_str = from_utf8(&seq)?;
+        output.write_fmt(format_args!(
+            ">{}:{}-{}\n{}\n",
+            name,
+            iv.start(),
+            iv.end(),
+            seq_str
+        ))?
+    }
 
     Ok(())
 }
