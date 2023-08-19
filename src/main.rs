@@ -15,12 +15,6 @@ use commands::{
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Command::Complement {
-            input,
-            output,
-            named,
-            stream,
-        } => complement(input, output, named, stream)?,
         Command::Closest {
             a,
             b,
@@ -30,18 +24,28 @@ fn main() -> Result<()> {
             named,
             sorted,
         } => closest(a, b, output, upstream, downstream, named, sorted)?,
-        Command::Sort {
+        Command::Complement {
             input,
             output,
-            named,
-        } => sort(input, output, named)?,
-        Command::Merge {
-            input,
-            output,
-            sorted,
             named,
             stream,
-        } => merge(input, output, sorted, named, stream)?,
+        } => complement(input, output, named, stream)?,
+        Command::Extend {
+            input,
+            output,
+            both,
+            left,
+            right,
+            genome,
+            named,
+        } => extend(input, output, both, left, right, genome, named)?,
+        Command::GetFasta {
+            bed,
+            fasta,
+            output,
+            map,
+            named,
+        } => get_fasta(bed, &fasta, output, map, named)?,
         Command::Intersect {
             a,
             b,
@@ -85,46 +89,14 @@ fn main() -> Result<()> {
                 )?
             }
         }
-        Command::Subtract {
-            a,
-            b,
-            output,
-            fraction_query,
-            fraction_target,
-            reciprocal,
-            either,
-            unmerged,
-            named,
-        } => {
-            subtract(
-                a,
-                b,
-                output,
-                fraction_query,
-                fraction_target,
-                reciprocal,
-                either,
-                unmerged,
-                named,
-            )?;
-        }
-        Command::GetFasta {
-            bed,
-            fasta,
-            output,
-            map,
-            named,
-        } => get_fasta(bed, &fasta, output, map, named)?,
-        Command::NameMap { input, output, map } => name_map(input, output, map)?,
-        Command::Extend {
+        Command::Merge {
             input,
             output,
-            both,
-            left,
-            right,
-            genome,
+            sorted,
             named,
-        } => extend(input, output, both, left, right, genome, named)?,
+            stream,
+        } => merge(input, output, sorted, named, stream)?,
+        Command::NameMap { input, output, map } => name_map(input, output, map)?,
         Command::Random {
             n_intervals,
             l_intervals,
@@ -150,6 +122,34 @@ fn main() -> Result<()> {
             seed,
             named,
         } => sample(input, output, number, fraction, seed, named)?,
+        Command::Sort {
+            input,
+            output,
+            named,
+        } => sort(input, output, named)?,
+        Command::Subtract {
+            a,
+            b,
+            output,
+            fraction_query,
+            fraction_target,
+            reciprocal,
+            either,
+            unmerged,
+            named,
+        } => {
+            subtract(
+                a,
+                b,
+                output,
+                fraction_query,
+                fraction_target,
+                reciprocal,
+                either,
+                unmerged,
+                named,
+            )?;
+        }
     }
     Ok(())
 }

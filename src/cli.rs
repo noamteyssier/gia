@@ -8,6 +8,63 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
+    Closest {
+        /// Input BED file to find closest intervals for (default=stdin)
+        #[clap(short, long)]
+        a: Option<String>,
+
+        /// Secondary BED file to find closest intervals in
+        #[clap(short, long)]
+        b: String,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Report only the closest upstream interval
+        #[clap(short = 'u', long, conflicts_with = "downstream")]
+        upstream: bool,
+
+        /// Report only the closest downstream interval
+        #[clap(short = 'd', long, conflicts_with = "upstream")]
+        downstream: bool,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
+
+        /// Specify that the input files are already sorted
+        #[clap(short, long)]
+        sorted: bool,
+    },
+
+    /// Generates the complement of a BED file
+    ///
+    /// This reports the regions that are not covered by the input
+    /// BED file but excludes regions preceding the first interval
+    /// and following the last interval.
+    Complement {
+        /// Input BED file to complement (default=stdin)
+        #[clap(short, long)]
+        input: Option<String>,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
+
+        /// Stream the input file instead of loading it into memory
+        ///
+        /// Note that this requires the input file to be sorted
+        /// and will result in undefined behavior if it is not.
+        #[clap(short = 'S', long, conflicts_with = "named")]
+        stream: bool,
+    },
+
     /// Extends the intervals of a BED file
     ///
     /// The extension is either done on both sides at once
@@ -42,35 +99,27 @@ pub enum Command {
         named: bool,
     },
 
-    /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
-    Closest {
-        /// Input BED file to find closest intervals for (default=stdin)
+    /// Extracts FASTA sequences using intervals from a BED file
+    GetFasta {
+        /// BED file containing intervals to extract
         #[clap(short, long)]
-        a: Option<String>,
+        bed: Option<String>,
 
-        /// Secondary BED file to find closest intervals in
+        /// FASTA file to extract sequences from (assumes <fasta>.fai exists)
         #[clap(short, long)]
-        b: String,
+        fasta: String,
 
-        /// Output BED file to write to (default=stdout)
+        /// Output FASTA file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
 
-        /// Report only the closest upstream interval
-        #[clap(short = 'u', long, conflicts_with = "downstream")]
-        upstream: bool,
-
-        /// Report only the closest downstream interval
-        #[clap(short = 'd', long, conflicts_with = "upstream")]
-        downstream: bool,
+        /// Name map file to use (in case chromosome names are non-integers)
+        #[clap(short, long)]
+        map: Option<String>,
 
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
-
-        /// Specify that the input files are already sorted
-        #[clap(short, long)]
-        sorted: bool,
     },
 
     /// Intersects two BED files
@@ -136,56 +185,6 @@ pub enum Command {
         stream: bool,
     },
 
-    /// Subtracts two BED files
-    ///
-    /// Will remove subtract `b` from `a`
-    Subtract {
-        /// Input BED file to subtract from (default=stdin)
-        #[clap(short, long)]
-        a: Option<String>,
-
-        /// Secondary BED file to subtract with
-        #[clap(short, long)]
-        b: String,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Minimum fraction of a's interval that must be covered by b's interval
-        #[clap(short = 'f', long)]
-        fraction_query: Option<f64>,
-
-        /// Minimum fraction of b's interval that must be covered by a's interval
-        #[clap(short = 'F', long)]
-        fraction_target: Option<f64>,
-
-        /// Require that the fraction provided with `-f` is reciprocal to both
-        /// query and target
-        #[clap(
-            short,
-            long,
-            requires = "fraction_query",
-            conflicts_with = "fraction_target"
-        )]
-        reciprocal: bool,
-
-        /// Requires that either fraction provided with `-f` or `-F` is met
-        #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
-        either: bool,
-
-        /// Keep the query records unmerged (i.e. report all subtractions)
-        ///
-        /// By default, the query records are merged to remove overlapping
-        /// regions.
-        #[clap(short, long)]
-        unmerged: bool,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-    },
-
     /// Merges intervals of a BED file with overlapping regions
     Merge {
         /// Input BED file to merge (default=stdin)
@@ -214,36 +213,15 @@ pub enum Command {
         stream: bool,
     },
 
-    /// Sorts a BED file by chromosome, start, and end
+    /// Builds a two column map of chromosome names to integers
+    /// and writes the map and BED file with integer chromosome names
+    /// to disk
     ///
-    /// Note that if using the `-N` flag, the sorting is
-    /// done on the internal numerical representation of
-    /// the chr name and may not match lexigraphical or
-    /// numerical sorting of the input names.
-    ///
-    /// i.e. all the chromosomes will be internally sorted,
-    /// but the names may not be in the order you expect.
-    Sort {
-        /// Input GIA file to sort (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output GIA file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-    },
-
-    /// Generates the complement of a BED file
-    ///
-    /// This reports the regions that are not covered by the input
-    /// BED file but excludes regions preceding the first interval
-    /// and following the last interval.
-    Complement {
-        /// Input BED file to complement (default=stdin)
+    /// The map file is a two column file with the first column
+    /// containing the integer chromosome index and the second column
+    /// containing the original chromosome name
+    NameMap {
+        /// Input BED file to map chromosome names (default=stdin)
         #[clap(short, long)]
         input: Option<String>,
 
@@ -251,16 +229,9 @@ pub enum Command {
         #[clap(short, long)]
         output: Option<String>,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Stream the input file instead of loading it into memory
-        ///
-        /// Note that this requires the input file to be sorted
-        /// and will result in undefined behavior if it is not.
-        #[clap(short = 'S', long, conflicts_with = "named")]
-        stream: bool,
+        /// Output map file to write to (default=name_map.tsv)
+        #[clap(short, long)]
+        map: Option<String>,
     },
 
     /// Generates a random BED file given some parameterizations
@@ -321,47 +292,76 @@ pub enum Command {
         named: bool,
     },
 
-    /// Extracts FASTA sequences using intervals from a BED file
-    GetFasta {
-        /// BED file containing intervals to extract
+    /// Sorts a BED file by chromosome, start, and end
+    ///
+    /// Note that if using the `-N` flag, the sorting is
+    /// done on the internal numerical representation of
+    /// the chr name and may not match lexigraphical or
+    /// numerical sorting of the input names.
+    ///
+    /// i.e. all the chromosomes will be internally sorted,
+    /// but the names may not be in the order you expect.
+    Sort {
+        /// Input GIA file to sort (default=stdin)
         #[clap(short, long)]
-        bed: Option<String>,
+        input: Option<String>,
 
-        /// FASTA file to extract sequences from (assumes <fasta>.fai exists)
-        #[clap(short, long)]
-        fasta: String,
-
-        /// Output FASTA file to write to (default=stdout)
+        /// Output GIA file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
-
-        /// Name map file to use (in case chromosome names are non-integers)
-        #[clap(short, long)]
-        map: Option<String>,
 
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
     },
 
-    /// Builds a two column map of chromosome names to integers
-    /// and writes the map and BED file with integer chromosome names
-    /// to disk
+    /// Subtracts two BED files
     ///
-    /// The map file is a two column file with the first column
-    /// containing the integer chromosome index and the second column
-    /// containing the original chromosome name
-    NameMap {
-        /// Input BED file to map chromosome names (default=stdin)
+    /// Will remove subtract `b` from `a`
+    Subtract {
+        /// Input BED file to subtract from (default=stdin)
         #[clap(short, long)]
-        input: Option<String>,
+        a: Option<String>,
+
+        /// Secondary BED file to subtract with
+        #[clap(short, long)]
+        b: String,
 
         /// Output BED file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
 
-        /// Output map file to write to (default=name_map.tsv)
+        /// Minimum fraction of a's interval that must be covered by b's interval
+        #[clap(short = 'f', long)]
+        fraction_query: Option<f64>,
+
+        /// Minimum fraction of b's interval that must be covered by a's interval
+        #[clap(short = 'F', long)]
+        fraction_target: Option<f64>,
+
+        /// Require that the fraction provided with `-f` is reciprocal to both
+        /// query and target
+        #[clap(
+            short,
+            long,
+            requires = "fraction_query",
+            conflicts_with = "fraction_target"
+        )]
+        reciprocal: bool,
+
+        /// Requires that either fraction provided with `-f` or `-F` is met
+        #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
+        either: bool,
+
+        /// Keep the query records unmerged (i.e. report all subtractions)
+        ///
+        /// By default, the query records are merged to remove overlapping
+        /// regions.
         #[clap(short, long)]
-        map: Option<String>,
+        unmerged: bool,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        named: bool,
     },
 }
