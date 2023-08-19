@@ -16,6 +16,12 @@ search constraints may not exist.
 
 ## Usage
 
+See full arguments and options using:
+
+```bash
+gia closest --help
+```
+
 ### Default Behavior
 
 ```text
