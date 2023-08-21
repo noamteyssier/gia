@@ -12,6 +12,7 @@
 - [Complement](./tools/complement.md)
 - [Extend](./tools/extend.md)
 - [Get Fasta](./tools/get_fasta.md)
+- [Intersect](./tools/intersect.md)
 - [Merge](./tools/merge.md)
 - [Random](./tools/random.md)
 - [Sample](./tools/sample.md)
