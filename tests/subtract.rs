@@ -2,7 +2,7 @@
 mod testing {
     use anyhow::Result;
     use assert_cmd::prelude::*;
-    use std::{process::Command, fmt::Display};
+    use std::{fmt::Display, process::Command};
 
     fn build_expected_str<T: Display>(expected: &Vec<(T, u32, u32)>) -> String {
         expected
@@ -11,7 +11,6 @@ mod testing {
             .collect::<Vec<String>>()
             .join("")
     }
-
 
     #[test]
     fn test_subtract_merged() -> Result<()> {
@@ -86,12 +85,7 @@ mod testing {
             .arg("-u")
             .output()?;
 
-        let expected = vec![
-            (1, 100, 200),
-            (1, 200, 300),
-            (1, 400, 475),
-            (1, 500, 550),
-        ];
+        let expected = vec![(1, 100, 200), (1, 200, 300), (1, 400, 475), (1, 500, 550)];
         let expected_str = build_expected_str(&expected);
         assert_eq!(output.stdout, expected_str.as_bytes());
         Ok(())
