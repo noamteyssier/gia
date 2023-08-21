@@ -2,6 +2,7 @@
 name = "gia"
 version = "0.1.10"
 edition = "2021"
+about = "A tool for set theoretic operations of genomic intervals"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
