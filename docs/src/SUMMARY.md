@@ -11,3 +11,4 @@
 - [Closest](./tools/closest.md)
 - [Complement](./tools/complement.md)
 - [Extend](./tools/extend.md)
+- [Get Fasta](./tools/get_fasta.md)
