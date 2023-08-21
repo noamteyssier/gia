@@ -14,7 +14,7 @@ mod testing {
 
     #[test]
     fn test_complement() -> Result<()> {
-        let input = "tests/datasets/complement_a.bed";
+        let input = "tests/datasets/complement/complement_a.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd.arg("complement").arg("-i").arg(input).output()?;
 
