@@ -70,7 +70,7 @@ chr1	20	30
 chr2	30	40
 ```
 
-#### Input Integer Fasta
+#### Input Non-Integer Fasta
 
 ```fasta
 >chr1
@@ -85,7 +85,7 @@ CGTAGCCGCGGCGTACGTAGCGCAGCAG
 TCGTAGCTACGTAG
 ```
 
-#### Output Integer Fasta
+#### Output Non-Integer Fasta
 
 ```fasta
 >chr1:20-30
