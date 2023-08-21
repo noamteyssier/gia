@@ -14,3 +14,4 @@
 - [Get Fasta](./tools/get_fasta.md)
 - [Merge](./tools/merge.md)
 - [Random](./tools/random.md)
+- [Sample](./tools/sample.md)
