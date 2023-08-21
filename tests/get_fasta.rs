@@ -6,8 +6,8 @@ mod testing {
 
     #[test]
     fn test_get_fasta() -> Result<()> {
-        let input = "tests/datasets/get_fasta/get_fasta.bed";
-        let fasta = "tests/datasets/get_fasta/example.fa";
+        let input = "tests/datasets/get_fasta/unnamed.bed";
+        let fasta = "tests/datasets/get_fasta/unnamed.fa";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
