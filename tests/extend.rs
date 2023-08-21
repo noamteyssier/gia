@@ -14,7 +14,7 @@ mod testing {
 
     #[test]
     fn test_extend_left() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
+        let input = "tests/datasets/extend/extend.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
@@ -31,7 +31,7 @@ mod testing {
 
     #[test]
     fn test_extend_right() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
+        let input = "tests/datasets/extend/extend.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
@@ -48,8 +48,8 @@ mod testing {
 
     #[test]
     fn test_extend_right_genome() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
-        let genome = "tests/datasets/extend.genome";
+        let input = "tests/datasets/extend/extend.bed";
+        let genome = "tests/datasets/extend/extend.genome";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
@@ -68,7 +68,7 @@ mod testing {
 
     #[test]
     fn test_extend_unequal_both() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
+        let input = "tests/datasets/extend/extend.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
@@ -87,8 +87,8 @@ mod testing {
 
     #[test]
     fn test_extend_unequal_both_genome() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
-        let genome = "tests/datasets/extend.genome";
+        let input = "tests/datasets/extend/extend.bed";
+        let genome = "tests/datasets/extend/extend.genome";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
@@ -109,7 +109,7 @@ mod testing {
 
     #[test]
     fn test_extend_both() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
+        let input = "tests/datasets/extend/extend.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
@@ -126,8 +126,8 @@ mod testing {
 
     #[test]
     fn test_extend_both_genome() -> Result<()> {
-        let input = "tests/datasets/extend.bed";
-        let genome = "tests/datasets/extend.genome";
+        let input = "tests/datasets/extend/extend.bed";
+        let genome = "tests/datasets/extend/extend.genome";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("extend")
