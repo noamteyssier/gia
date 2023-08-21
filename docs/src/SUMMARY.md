@@ -15,3 +15,4 @@
 - [Merge](./tools/merge.md)
 - [Random](./tools/random.md)
 - [Sample](./tools/sample.md)
+- [Sort](./tools/sort.md)
