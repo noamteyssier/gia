@@ -16,3 +16,4 @@
 - [Random](./tools/random.md)
 - [Sample](./tools/sample.md)
 - [Sort](./tools/sort.md)
+- [Subtract](./tools/subtract.md)
