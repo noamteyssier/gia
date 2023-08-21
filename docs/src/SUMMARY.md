@@ -10,3 +10,4 @@
 # Tools
 - [Closest](./tools/closest.md)
 - [Complement](./tools/complement.md)
+- [Extend](./tools/extend.md)

@@ -31,6 +31,10 @@ span of the incoming interval set.
 
 The span of the interval set is calculated by chromosome.
 
+```bash
+gia complement -i <input.bed>
+```
+
 > **Note:** Internal vs Complete Complement
 >
 > The internal complement of a set necessarily excludes the the chromosomal
