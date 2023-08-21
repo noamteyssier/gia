@@ -30,8 +30,8 @@ mod testing {
 
     #[test]
     fn test_closest() -> Result<()> {
-        let a = "tests/datasets/closest_a.bed";
-        let b = "tests/datasets/closest_b.bed";
+        let a = "tests/datasets/closest/closest_a.bed";
+        let b = "tests/datasets/closest/closest_b.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("closest")
@@ -54,8 +54,8 @@ mod testing {
 
     #[test]
     fn test_closest_downstream() -> Result<()> {
-        let a = "tests/datasets/closest_a.bed";
-        let b = "tests/datasets/closest_b.bed";
+        let a = "tests/datasets/closest/closest_a.bed";
+        let b = "tests/datasets/closest/closest_b.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("closest")
@@ -79,8 +79,8 @@ mod testing {
 
     #[test]
     fn test_closest_upstream() -> Result<()> {
-        let a = "tests/datasets/closest_a.bed";
-        let b = "tests/datasets/closest_b.bed";
+        let a = "tests/datasets/closest/closest_a.bed";
+        let b = "tests/datasets/closest/closest_b.bed";
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("closest")
