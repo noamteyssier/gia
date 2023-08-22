@@ -12,6 +12,7 @@ bedrs = { version = "0.1.7", features = ["serde"] }
 clap = { version = "4.3.19", features = ["derive"] }
 csv = "1.2.2"
 dashmap = { version = "5.5.0", features = ["serde"] }
+faiquery = "0.1.0"
 hashbrown = "0.14.0"
 memmap2 = "0.7.1"
 rand = "0.8.5"
