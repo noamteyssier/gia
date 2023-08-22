@@ -1,9 +1,7 @@
-mod fasta;
 mod general;
 mod iter;
 mod read;
 mod write;
-pub use fasta::{FastaIndex, IndexedFasta};
 pub use general::{match_input, match_output};
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{

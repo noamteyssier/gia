@@ -1,8 +1,7 @@
-use crate::io::{
-    match_input, match_output, read_name_map, read_set_with, FastaIndex, IndexedFasta,
-};
+use crate::io::{match_input, match_output, read_name_map, read_set_with};
 use anyhow::{bail, Result};
 use bedrs::{Container, Coordinates, GenomicIntervalSet};
+use faiquery::{FastaIndex, IndexedFasta};
 use hashbrown::HashMap;
 use std::str::from_utf8;
 
