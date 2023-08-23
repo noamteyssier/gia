@@ -32,7 +32,6 @@ mod testing {
             .arg(input)
             .arg("-f")
             .arg(fasta)
-            .arg("-N")
             .output()?;
         let expected = ">chr1:20-30\nAGCGACTACG\n>chr2:30-40\nCGATCGATCG\n";
         assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
