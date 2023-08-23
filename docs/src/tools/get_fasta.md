@@ -56,11 +56,11 @@ CGATCGATCG
 
 ### Extract Sequences with non-integer named bed and chromosome names
 
-If the chromosome names are non-integers we can use the `-N` flag to internally
-handle the non-integer names.
+If the chromosome names are non-integers, `gia` can handle the conversion
+and no extra flags are required.
 
 ```bash
-gia get-fasta -b <input.bed> -f <input.fa> -N
+gia get-fasta -b <input.bed> -f <input.fa>
 ```
 
 #### Input Non-Integer BED
