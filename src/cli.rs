@@ -113,14 +113,6 @@ pub enum Command {
         /// Output FASTA file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
-
-        /// Name map file to use (in case chromosome names are non-integers)
-        #[clap(short, long)]
-        map: Option<String>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
     },
 
     /// Intersects two BED files
