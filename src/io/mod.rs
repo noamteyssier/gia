@@ -5,7 +5,7 @@ mod write;
 pub use general::{match_input, match_output};
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{
-    build_reader, read_genome, read_iter, read_name_map, read_named_set, read_set, read_set_with,
+    build_reader, read_genome, read_iter, read_named_set, read_set, read_set_with,
     read_two_named_sets,
 };
 pub use write::{
