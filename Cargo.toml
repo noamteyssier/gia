@@ -1,6 +1,6 @@
 [package]
 name = "gia"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 about = "A tool for set theoretic operations of genomic intervals"
 
@@ -9,10 +9,11 @@ about = "A tool for set theoretic operations of genomic intervals"
 [dependencies]
 anyhow = "1.0.72"
 bedrs = { version = "0.1.7", features = ["serde"] }
+bstr = "1.6.0"
 clap = { version = "4.3.19", features = ["derive"] }
 csv = "1.2.2"
 dashmap = { version = "5.5.0", features = ["serde"] }
-faiquery = "0.1.0"
+faiquery = "0.1.3"
 hashbrown = "0.14.0"
 memmap2 = "0.7.1"
 rand = "0.8.5"
@@ -22,3 +23,6 @@ serde = { version = "1.0.183", features = ["derive"] }
 [dev-dependencies]
 assert_cmd = "2.0.11"
 predicates = "3.0.3"
+
+[profile.release]
+lto = true
