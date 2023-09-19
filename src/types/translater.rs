@@ -1,5 +1,10 @@
 use dashmap::DashMap;
 use hashbrown::HashMap;
+use human_sort::compare;
+
+pub trait Translate {
+    fn get_name(&self, idx: usize) -> Option<&str>;
+}
 
 pub struct Translater {
     name_to_idx: HashMap<String, usize>,
@@ -26,12 +31,50 @@ impl Translater {
     pub fn get_idx(&self, name: &str) -> Option<usize> {
         self.name_to_idx.get(name).copied()
     }
-    pub fn get_name(&self, idx: usize) -> Option<&str> {
-        self.idx_to_name.get(&idx).map(|s| s.as_str())
-    }
     #[allow(dead_code)]
     pub fn get_name_to_idx(&self) -> &HashMap<String, usize> {
         &self.name_to_idx
+    }
+    pub fn lex_sort(self) -> Retranslater {
+        let mut idx_to_rank = HashMap::with_capacity(self.idx_to_name.len());
+        let mut rank_to_name = HashMap::with_capacity(self.idx_to_name.len());
+        let mut ordering = self.idx_to_name.iter()
+            .map(|(idx, name)| (name, idx))
+            .collect::<Vec<_>>();
+        ordering.sort_by(|a, b| compare(a.0, b.0));
+        for (order, (name, idx)) in ordering.into_iter().enumerate() {
+            rank_to_name.insert(order, name.to_string());
+            idx_to_rank.insert(*idx, order);
+        }
+        Retranslater::new(idx_to_rank, rank_to_name)
+    }
+}
+impl Translate for Translater {
+    fn get_name(&self, idx: usize) -> Option<&str> {
+        self.idx_to_name.get(&idx).map(|s| s.as_str())
+    }
+}
+
+#[derive(Debug)]
+pub struct Retranslater {
+    idx_to_rank: HashMap<usize, usize>,
+    rank_to_name: HashMap<usize, String>,
+}
+impl Retranslater {
+    pub fn new(idx_to_rank: HashMap<usize, usize>, rank_to_name: HashMap<usize, String>) -> Self {
+        Self {
+            idx_to_rank,
+            rank_to_name,
+        }
+    }
+
+    pub fn get_rank(&self, idx: usize) -> Option<usize> {
+        self.idx_to_rank.get(&idx).copied()
+    }
+}
+impl Translate for Retranslater {
+    fn get_name(&self, rank: usize) -> Option<&str> {
+        self.rank_to_name.get(&rank).map(|s| s.as_str())
     }
 }
 
