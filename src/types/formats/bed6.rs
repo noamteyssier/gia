@@ -34,6 +34,24 @@ pub struct NumericBed6Set {
     max_len: Option<usize>,
     is_sorted: bool,
 }
+impl FromIterator<NumericBed6> for NumericBed6Set {
+    fn from_iter<I: IntoIterator<Item = NumericBed6>>(iter: I) -> Self {
+        let mut max_len = 0;
+        let records = iter
+            .into_iter()
+            .map(|interval| {
+                max_len = max_len.max(interval.len());
+                interval
+            })
+            .collect();
+        let max_len = if max_len == 0 { None } else { Some(max_len) };
+        Self {
+            records,
+            max_len,
+            is_sorted: false,
+        }
+    }
+}
 impl Container<usize, usize, NumericBed6> for NumericBed6Set {
     fn new(records: Vec<NumericBed6>) -> Self {
         let max_len = records.iter().map(|iv| iv.len()).max();
