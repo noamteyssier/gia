@@ -1,5 +1,5 @@
 use crate::io::{
-    build_reader, match_input, match_output, read_iter, read_set_with, write_records_iter,
+    build_reader, iter_bed3_unnamed, match_input, match_output, read_bed3_set, write_records_iter,
     write_records_iter_with,
 };
 use anyhow::Result;
@@ -12,7 +12,7 @@ fn complement_inplace(input: Option<String>, output: Option<String>, named: bool
     let input_handle = match_input(input)?;
 
     // Read records into a set
-    let (mut iset, translater) = read_set_with(input_handle, named)?;
+    let (mut iset, translater) = read_bed3_set(input_handle, named)?;
 
     // Sort the set
     iset.sort();
@@ -40,7 +40,8 @@ fn complement_stream(input: Option<String>, output: Option<String>) -> Result<()
     let mut csv_reader = build_reader(input_handle);
 
     // Build the record iterator
-    let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> = read_iter(&mut csv_reader);
+    let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> =
+        iter_bed3_unnamed(&mut csv_reader);
 
     // Pipe the record iterator into the merge iterator
     let merged_iter = MergeIter::new(record_iter);

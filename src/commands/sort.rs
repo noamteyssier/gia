@@ -1,5 +1,5 @@
 use crate::{
-    io::{match_input, match_output, read_set_with, write_set_with},
+    io::{match_input, match_output, read_bed3_set, write_set_with},
     types::{Retranslater, Translater},
 };
 use anyhow::Result;
@@ -16,7 +16,7 @@ pub fn reorder_chroms(set: &mut GenomicIntervalSet<usize>, translater: Translate
 
 pub fn sort(input: Option<String>, output: Option<String>, named: bool) -> Result<()> {
     let input_handle = match_input(input)?;
-    let (mut set, translater) = read_set_with(input_handle, named)?;
+    let (mut set, translater) = read_bed3_set(input_handle, named)?;
     let translater = if let Some(t) = translater {
         Some(reorder_chroms(&mut set, t))
     } else {

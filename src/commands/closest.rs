@@ -1,5 +1,8 @@
 use crate::{
-    io::{match_input, match_output, read_set, read_two_named_sets, write_pairs_iter_with},
+    io::{
+        match_input, match_output, read_bed3_set_unnamed, read_paired_bed3_named,
+        write_pairs_iter_with,
+    },
     types::{IntervalPair, Translater},
 };
 use anyhow::Result;
@@ -18,11 +21,12 @@ fn load_pairs(
     let query_handle = match_input(query_input)?;
     let target_handle = match_input(target_input)?;
     let (mut query_set, mut target_set, translater) = if named {
-        let (query_set, target_set, translater) = read_two_named_sets(query_handle, target_handle)?;
+        let (query_set, target_set, translater) =
+            read_paired_bed3_named(query_handle, target_handle)?;
         (query_set, target_set, Some(translater))
     } else {
-        let query_set = read_set(query_handle)?;
-        let target_set = read_set(target_handle)?;
+        let query_set = read_bed3_set_unnamed(query_handle)?;
+        let target_set = read_bed3_set_unnamed(target_handle)?;
         (query_set, target_set, None)
     };
     if !sorted {
@@ -105,7 +109,7 @@ mod testing {
     ///                         i-j
     fn closest() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
-        let set = read_set(interval_text.as_bytes()).unwrap();
+        let set = read_bed3_set_unnamed(interval_text.as_bytes()).unwrap();
         let query_set = GenomicIntervalSet::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
@@ -129,7 +133,7 @@ mod testing {
     ///                         i-j
     fn closest_upstream() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
-        let set = read_set(interval_text.as_bytes()).unwrap();
+        let set = read_bed3_set_unnamed(interval_text.as_bytes()).unwrap();
         let query_set = GenomicIntervalSet::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
@@ -153,7 +157,7 @@ mod testing {
     /// None
     fn closest_downstream() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
-        let set = read_set(interval_text.as_bytes()).unwrap();
+        let set = read_bed3_set_unnamed(interval_text.as_bytes()).unwrap();
         let query_set = GenomicIntervalSet::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),

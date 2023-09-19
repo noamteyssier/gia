@@ -1,6 +1,9 @@
 use crate::{
     commands::{run_find, OverlapMethod},
-    io::{match_input, match_output, read_set, read_two_named_sets, write_records_iter_with},
+    io::{
+        match_input, match_output, read_bed3_set_unnamed, read_paired_bed3_named,
+        write_records_iter_with,
+    },
     types::Translater,
 };
 use anyhow::Result;
@@ -21,11 +24,12 @@ fn load_pairs(
     let query_handle = match_input(query_input)?;
     let target_handle = match_input(target_input)?;
     let (mut query_set, mut target_set, translater) = if named {
-        let (query_set, target_set, translater) = read_two_named_sets(query_handle, target_handle)?;
+        let (query_set, target_set, translater) =
+            read_paired_bed3_named(query_handle, target_handle)?;
         (query_set, target_set, Some(translater))
     } else {
-        let query_set = read_set(query_handle)?;
-        let target_set = read_set(target_handle)?;
+        let query_set = read_bed3_set_unnamed(query_handle)?;
+        let target_set = read_bed3_set_unnamed(target_handle)?;
         (query_set, target_set, None)
     };
     query_set.sort();

@@ -2,7 +2,7 @@ use anyhow::{bail, Result};
 use bedrs::{Container, Sample};
 
 use crate::{
-    io::{match_input, match_output, read_set_with, write_records_iter_with},
+    io::{match_input, match_output, read_bed3_set, write_records_iter_with},
     utils::build_rng,
 };
 
@@ -18,7 +18,7 @@ pub fn sample(
     let input_handle = match_input(input)?;
 
     // load interval set
-    let (set, translater) = read_set_with(input_handle, named)?;
+    let (set, translater) = read_bed3_set(input_handle, named)?;
 
     // build rng
     let mut rng = build_rng(seed);
