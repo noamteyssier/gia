@@ -91,10 +91,12 @@ where
     Ok(())
 }
 
-pub fn write_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
-    records: I,
-    writer: W,
-) -> Result<()> {
+pub fn write_records_iter<W, R, I>(records: I, writer: W) -> Result<()>
+where
+    W: Write,
+    R: Serialize,
+    I: Iterator<Item = R>,
+{
     let mut wtr = build_writer(writer);
     for record in records {
         wtr.serialize(record)?;

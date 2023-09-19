@@ -1,3 +1,4 @@
+use crate::types::InputFormat;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -256,6 +257,10 @@ pub enum Command {
         /// Genome file to set boundaries for random intervals
         #[clap(short, long, conflicts_with_all = &["max_chr_len", "n_chr"])]
         genome: Option<String>,
+
+        /// Set the output format
+        #[clap(short, long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Randomly sample a BED file

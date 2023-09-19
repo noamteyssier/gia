@@ -99,6 +99,7 @@ fn main() -> Result<()> {
             seed,
             output,
             genome,
+            format,
         } => random(
             n_intervals,
             l_intervals,
@@ -107,6 +108,7 @@ fn main() -> Result<()> {
             seed,
             output,
             genome,
+            format,
         )?,
         Command::Sample {
             input,

@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use clap::ValueEnum;
 use std::{
     io::{BufRead, BufReader, Read},
     str::from_utf8,
@@ -9,11 +10,10 @@ use std::{
 /// Will read the first line of the file and count the number of fields.
 ///
 /// Will *not* consume the first line of the file.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum InputFormat {
     #[default]
     Bed3,
-    Bed4,
     Bed6,
 }
 impl InputFormat {
@@ -28,7 +28,6 @@ impl InputFormat {
         let num_fields = line.split(|b| *b == b'\t').count();
         match num_fields {
             3 => Ok(Self::Bed3),
-            4 => Ok(Self::Bed4),
             6 => Ok(Self::Bed6),
             _ => bail!(
                 "Cannot predict input format from line: {}",
@@ -62,7 +61,7 @@ impl FieldFormat {
         let input_format = InputFormat::predict_from_bytes(line)?;
         let mut fields = line.split(|b| *b == b'\t');
         match input_format {
-            InputFormat::Bed6 | InputFormat::Bed4 => {
+            InputFormat::Bed6 => {
                 let chr = from_utf8(fields.nth(0).unwrap())?;
                 let name = from_utf8(fields.nth(2).unwrap())?;
                 if chr.parse::<usize>().is_ok() && name.parse::<usize>().is_ok() {
@@ -115,13 +114,6 @@ mod testing {
     }
 
     #[test]
-    fn input_format_bed4() {
-        let line = b"chr1\t1\t2\tname";
-        let input_format = InputFormat::predict_from_bytes(line).unwrap();
-        assert_eq!(input_format, InputFormat::Bed4);
-    }
-
-    #[test]
     fn input_format_bed6() {
         let line = b"chr1\t1\t2\tname\t0\t+";
         let input_format = InputFormat::predict_from_bytes(line).unwrap();
@@ -145,34 +137,6 @@ mod testing {
     #[test]
     fn field_format_string_based_bed3() {
         let line = b"chr1\t1\t2";
-        let field_format = FieldFormat::predict_from_bytes(line).unwrap();
-        assert_eq!(field_format, FieldFormat::StringBased);
-    }
-
-    #[test]
-    fn field_format_integer_based_bed4() {
-        let line = b"1\t1\t2\t1";
-        let field_format = FieldFormat::predict_from_bytes(line).unwrap();
-        assert_eq!(field_format, FieldFormat::IntegerBased);
-    }
-
-    #[test]
-    fn field_format_string_based_bed4_a() {
-        let line = b"chr1\t1\t2\tname";
-        let field_format = FieldFormat::predict_from_bytes(line).unwrap();
-        assert_eq!(field_format, FieldFormat::StringBased);
-    }
-
-    #[test]
-    fn field_format_string_based_bed4_b() {
-        let line = b"1\t1\t2\tname";
-        let field_format = FieldFormat::predict_from_bytes(line).unwrap();
-        assert_eq!(field_format, FieldFormat::StringBased);
-    }
-
-    #[test]
-    fn field_format_string_based_bed4_c() {
-        let line = b"chr1\t1\t2\t1";
         let field_format = FieldFormat::predict_from_bytes(line).unwrap();
         assert_eq!(field_format, FieldFormat::StringBased);
     }
