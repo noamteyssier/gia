@@ -22,6 +22,25 @@ pub fn read_bed3_set<R: Read>(
     }
 }
 
+pub fn read_paired_bed3_sets<R: Read>(
+    reader_1: R,
+    reader_2: R,
+    named: bool,
+) -> Result<(
+    GenomicIntervalSet<usize>,
+    GenomicIntervalSet<usize>,
+    Option<Translater>,
+)> {
+    if named {
+        let (query_set, target_set, translater) = read_paired_bed3_named(reader_1, reader_2)?;
+        Ok((query_set, target_set, Some(translater)))
+    } else {
+        let query_set = read_bed3_set_unnamed(reader_1)?;
+        let target_set = read_bed3_set_unnamed(reader_2)?;
+        Ok((query_set, target_set, None))
+    }
+}
+
 pub fn read_bed3_set_unnamed<R: Read>(reader: R) -> Result<GenomicIntervalSet<usize>> {
     let mut reader = build_reader(reader);
     let set = reader
