@@ -38,7 +38,9 @@ impl Translater {
     pub fn lex_sort(self) -> Retranslater {
         let mut idx_to_rank = HashMap::with_capacity(self.idx_to_name.len());
         let mut rank_to_name = HashMap::with_capacity(self.idx_to_name.len());
-        let mut ordering = self.idx_to_name.iter()
+        let mut ordering = self
+            .idx_to_name
+            .iter()
             .map(|(idx, name)| (name, idx))
             .collect::<Vec<_>>();
         ordering.sort_by(|a, b| compare(a.0, b.0));

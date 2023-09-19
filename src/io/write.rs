@@ -1,4 +1,4 @@
-use crate::types::{IntervalPair, StreamTranslater, Translater, Translate};
+use crate::types::{IntervalPair, StreamTranslater, Translate, Translater};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;

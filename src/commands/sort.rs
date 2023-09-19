@@ -1,4 +1,7 @@
-use crate::{io::{match_input, match_output, read_set_with, write_set_with}, types::{Translater, Retranslater}};
+use crate::{
+    io::{match_input, match_output, read_set_with, write_set_with},
+    types::{Retranslater, Translater},
+};
 use anyhow::Result;
 use bedrs::{Container, Coordinates, GenomicIntervalSet};
 
