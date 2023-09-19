@@ -5,13 +5,12 @@ use crate::{
         build_reader, match_input, match_output, read_set, read_two_named_sets,
         write_named_records_iter_dashmap, write_records_iter_with, NamedIter, UnnamedIter,
     },
-    types::Translater,
+    types::{StreamTranslater, Translater},
 };
 use anyhow::Result;
 use bedrs::{
     types::iterator::QueryMethod, Container, GenomicIntervalSet, IntersectIter, MergeIter,
 };
-use dashmap::DashMap;
 
 fn load_pairs(
     query_input: Option<String>,
@@ -117,15 +116,14 @@ pub fn intersect_stream(
     let method = assign_method(fraction_query, fraction_target, reciprocal, either);
 
     if named {
-        let translater = DashMap::new();
-        let idx_map = DashMap::new();
-        let query_iter = NamedIter::new(&mut query_csv, &translater, &idx_map);
-        let target_iter = NamedIter::new(&mut target_csv, &translater, &idx_map);
+        let translater = StreamTranslater::new();
+        let query_iter = NamedIter::new(&mut query_csv, &translater);
+        let target_iter = NamedIter::new(&mut target_csv, &translater);
         let merged_query_iter = MergeIter::new(query_iter);
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
-        write_named_records_iter_dashmap(intersect_iter, output_handle, &idx_map)?;
+        write_named_records_iter_dashmap(intersect_iter, output_handle, &translater)?;
     } else {
         let query_iter = UnnamedIter::new(&mut query_csv);
         let target_iter = UnnamedIter::new(&mut target_csv);

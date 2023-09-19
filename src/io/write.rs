@@ -1,8 +1,7 @@
-use crate::types::{IntervalPair, Translater};
+use crate::types::{IntervalPair, StreamTranslater, Translater};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;
-use dashmap::DashMap;
 use serde::Serialize;
 use std::io::Write;
 
@@ -193,11 +192,11 @@ pub fn write_named_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usi
 pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
     records: I,
     writer: W,
-    name_map: &DashMap<usize, String>,
+    translater: &StreamTranslater,
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
     for record in records {
-        let chr = name_map.get(record.chr()).unwrap();
+        let chr = translater.get_idx_to_name().get(record.chr()).unwrap();
         let named_interval = (chr, record.start(), record.end());
         wtr.serialize(named_interval)?;
     }

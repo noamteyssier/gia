@@ -1,7 +1,8 @@
+use crate::types::StreamTranslater;
+
 use super::NamedInterval;
 use bedrs::GenomicInterval;
 use csv::ByteRecord;
-use dashmap::DashMap;
 use std::io::Read;
 
 /// An iterator over a BED file that yields `GenomicInterval<usize>`s.
@@ -11,20 +12,14 @@ use std::io::Read;
 pub struct NamedIter<'a, 'b, R: Read> {
     reader: &'a mut csv::Reader<R>,
     byterecord: ByteRecord,
-    name_map: &'b DashMap<String, usize>,
-    idx_map: &'b DashMap<usize, String>,
+    translater: &'b StreamTranslater,
 }
 impl<'a, 'b, R: Read> NamedIter<'a, 'b, R> {
-    pub fn new(
-        reader: &'a mut csv::Reader<R>,
-        name_map: &'b DashMap<String, usize>,
-        idx_map: &'b DashMap<usize, String>,
-    ) -> Self {
+    pub fn new(reader: &'a mut csv::Reader<R>, translater: &'b StreamTranslater) -> Self {
         Self {
             reader,
             byterecord: ByteRecord::new(),
-            name_map,
-            idx_map,
+            translater,
         }
     }
 }
@@ -43,12 +38,8 @@ impl<'a, 'b, R: Read> Iterator for NamedIter<'a, 'b, R> {
             .byterecord
             .deserialize(None)
             .expect("Error parsing BED record");
-        if !self.name_map.contains_key(record.name) {
-            let idx = self.name_map.len();
-            self.name_map.insert(record.name.to_string(), idx);
-            self.idx_map.insert(idx, record.name.to_string());
-        }
-        let chr_idx = self.name_map.get(record.name).unwrap();
+        self.translater.add_name(record.name);
+        let chr_idx = self.translater.get_name_to_idx().get(record.name).unwrap();
         let iv = GenomicInterval::new(*chr_idx, record.start, record.end);
         Some(iv)
     }
