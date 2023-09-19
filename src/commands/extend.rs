@@ -41,7 +41,7 @@ pub fn extend(
     named: bool,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
-    let (mut iset, name_index) = read_set_with(input_handle, named)?;
+    let (mut iset, translater) = read_set_with(input_handle, named)?;
     let genome = if let Some(path) = genome_path {
         let genome_handle = match_input(Some(path))?;
         let genome = read_genome(genome_handle)?;
@@ -65,6 +65,6 @@ pub fn extend(
     });
 
     let output_handle = match_output(output)?;
-    write_records_iter_with(extend_iter, output_handle, name_index.as_ref())?;
+    write_records_iter_with(extend_iter, output_handle, translater.as_ref())?;
     Ok(())
 }

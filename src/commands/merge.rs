@@ -12,14 +12,14 @@ where
     R: Read,
     W: Write,
 {
-    let (mut set, name_index) = read_set_with(input_handle, named)?;
+    let (mut set, translater) = read_set_with(input_handle, named)?;
     if !sorted {
         set.sort();
     } else {
         set.set_sorted();
     }
     let merged = set.merge()?;
-    write_records_with(merged.records(), output_handle, name_index.as_ref())?;
+    write_records_with(merged.records(), output_handle, translater.as_ref())?;
     Ok(())
 }
 

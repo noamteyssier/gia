@@ -3,9 +3,9 @@ use crate::{
     commands::{run_find, OverlapMethod},
     io::{
         build_reader, match_input, match_output, read_set, read_two_named_sets,
-        write_named_records_iter_dashmap, write_records_iter_with, NameIndex, NamedIter,
+        write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
         UnnamedIter,
-    },
+    }, types::Translater,
 };
 use anyhow::Result;
 use bedrs::{
@@ -20,13 +20,13 @@ fn load_pairs(
 ) -> Result<(
     GenomicIntervalSet<usize>,
     GenomicIntervalSet<usize>,
-    Option<NameIndex>,
+    Option<Translater>,
 )> {
     let query_handle = match_input(query_input)?;
     let target_handle = match_input(target_input)?;
-    let (mut query_set, mut target_set, name_index) = if named {
-        let (query_set, target_set, name_index) = read_two_named_sets(query_handle, target_handle)?;
-        (query_set, target_set, Some(name_index))
+    let (mut query_set, mut target_set, translater) = if named {
+        let (query_set, target_set, translater) = read_two_named_sets(query_handle, target_handle)?;
+        (query_set, target_set, Some(translater))
     } else {
         let query_set = read_set(query_handle)?;
         let target_set = read_set(target_handle)?;
@@ -34,7 +34,7 @@ fn load_pairs(
     };
     query_set.sort();
     target_set.sort();
-    Ok((query_set, target_set, name_index))
+    Ok((query_set, target_set, translater))
 }
 
 pub fn intersect(
@@ -51,7 +51,7 @@ pub fn intersect(
     inverse: bool,
     named: bool,
 ) -> Result<()> {
-    let (query_set, target_set, name_index) = load_pairs(a, Some(b), named)?;
+    let (query_set, target_set, translater) = load_pairs(a, Some(b), named)?;
     let overlap_method =
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
     let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
@@ -63,7 +63,7 @@ pub fn intersect(
         intersections
     });
     let output_handle = match_output(output)?;
-    write_records_iter_with(ix_iter, output_handle, name_index.as_ref())?;
+    write_records_iter_with(ix_iter, output_handle, translater.as_ref())?;
     Ok(())
 }
 
@@ -117,10 +117,10 @@ pub fn intersect_stream(
     let method = assign_method(fraction_query, fraction_target, reciprocal, either);
 
     if named {
-        let name_index = DashMap::new();
+        let translater = DashMap::new();
         let idx_map = DashMap::new();
-        let query_iter = NamedIter::new(&mut query_csv, &name_index, &idx_map);
-        let target_iter = NamedIter::new(&mut target_csv, &name_index, &idx_map);
+        let query_iter = NamedIter::new(&mut query_csv, &translater, &idx_map);
+        let target_iter = NamedIter::new(&mut target_csv, &translater, &idx_map);
         let merged_query_iter = MergeIter::new(query_iter);
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =

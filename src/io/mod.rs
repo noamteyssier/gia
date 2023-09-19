@@ -13,8 +13,6 @@ pub use write::{
     write_named_records_iter_dashmap, write_pairs_iter, write_pairs_iter_with, write_records,
     write_records_iter, write_records_iter_with, write_records_with, write_set, write_set_with,
 };
-
-use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
@@ -43,5 +41,3 @@ pub struct UnnamedPair {
     pub start_b: Option<usize>,
     pub end_b: Option<usize>,
 }
-
-pub type NameIndex = HashMap<usize, String>;

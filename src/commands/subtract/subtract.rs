@@ -2,8 +2,7 @@ use crate::{
     commands::{run_find, OverlapMethod},
     io::{
         match_input, match_output, read_set, read_two_named_sets, write_records_iter_with,
-        NameIndex,
-    },
+    }, types::Translater,
 };
 use anyhow::Result;
 use bedrs::{
@@ -18,13 +17,13 @@ fn load_pairs(
 ) -> Result<(
     GenomicIntervalSet<usize>,
     GenomicIntervalSet<usize>,
-    Option<NameIndex>,
+    Option<Translater>,
 )> {
     let query_handle = match_input(query_input)?;
     let target_handle = match_input(target_input)?;
-    let (mut query_set, mut target_set, name_index) = if named {
-        let (query_set, target_set, name_index) = read_two_named_sets(query_handle, target_handle)?;
-        (query_set, target_set, Some(name_index))
+    let (mut query_set, mut target_set, translater) = if named {
+        let (query_set, target_set, translater) = read_two_named_sets(query_handle, target_handle)?;
+        (query_set, target_set, Some(translater))
     } else {
         let query_set = read_set(query_handle)?;
         let target_set = read_set(target_handle)?;
@@ -32,7 +31,7 @@ fn load_pairs(
     };
     query_set.sort();
     target_set.sort();
-    Ok((query_set, target_set, name_index))
+    Ok((query_set, target_set, translater))
 }
 
 fn queued_diff<It, I, C, T>(query: &I, overlaps: It) -> Box<dyn Iterator<Item = I>>
@@ -90,7 +89,7 @@ pub fn subtract(
     unmerged: bool,
     named: bool,
 ) -> Result<()> {
-    let (query_set, target_set, name_index) = load_pairs(query_path, Some(target_path), named)?;
+    let (query_set, target_set, translater) = load_pairs(query_path, Some(target_path), named)?;
     let overlap_method =
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
 
@@ -99,11 +98,11 @@ pub fn subtract(
 
     if unmerged {
         let sub_iter = iter_subtraction(&query_set, &bset, &overlap_method);
-        write_records_iter_with(sub_iter, output_handle, name_index.as_ref())?;
+        write_records_iter_with(sub_iter, output_handle, translater.as_ref())?;
     } else {
         let aset = query_set.merge()?;
         let sub_iter = iter_subtraction(&aset, &bset, &overlap_method);
-        write_records_iter_with(sub_iter, output_handle, name_index.as_ref())?;
+        write_records_iter_with(sub_iter, output_handle, translater.as_ref())?;
     }
 
     Ok(())

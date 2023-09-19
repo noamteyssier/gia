@@ -1,6 +1,4 @@
-use crate::types::IntervalPair;
-
-use super::NameIndex;
+use crate::types::{IntervalPair, Translater};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;
@@ -18,10 +16,10 @@ pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
 pub fn write_set_with<W: Write>(
     set: &GenomicIntervalSet<usize>,
     writer: W,
-    name_index: Option<&NameIndex>,
+    translater: Option<&Translater>,
 ) -> Result<()> {
-    if let Some(name_index) = name_index {
-        write_named_set(set, writer, name_index)?;
+    if let Some(translater) = translater {
+        write_named_set(set, writer, translater)?;
     } else {
         write_set(set, writer)?;
     }
@@ -38,10 +36,10 @@ pub fn write_set<W: Write>(set: &GenomicIntervalSet<usize>, writer: W) -> Result
 pub fn write_named_set<W: Write>(
     set: &GenomicIntervalSet<usize>,
     writer: W,
-    name_index: &NameIndex,
+    translater: &Translater,
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
-    write_internal_named(set.records(), &mut wtr, name_index)?;
+    write_internal_named(set.records(), &mut wtr, translater)?;
     wtr.flush()?;
     Ok(())
 }
@@ -49,10 +47,10 @@ pub fn write_named_set<W: Write>(
 pub fn write_records_with<W: Write>(
     records: &[GenomicInterval<usize>],
     writer: W,
-    name_index: Option<&NameIndex>,
+    translater: Option<&Translater>,
 ) -> Result<()> {
-    if let Some(name_index) = name_index {
-        write_named_records(records, writer, name_index)?;
+    if let Some(translater) = translater {
+        write_named_records(records, writer, translater)?;
     } else {
         write_records(records, writer)?;
     }
@@ -69,10 +67,10 @@ pub fn write_records<W: Write>(records: &[GenomicInterval<usize>], writer: W) ->
 pub fn write_named_records<W: Write>(
     records: &[GenomicInterval<usize>],
     writer: W,
-    name_index: &NameIndex,
+    translater: &Translater,
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
-    write_internal_named(records, &mut wtr, name_index)?;
+    write_internal_named(records, &mut wtr, translater)?;
     wtr.flush()?;
     Ok(())
 }
@@ -80,14 +78,14 @@ pub fn write_named_records<W: Write>(
 pub fn write_records_iter_with<W, I>(
     records: I,
     writer: W,
-    name_index: Option<&NameIndex>,
+    translater: Option<&Translater>,
 ) -> Result<()>
 where
     W: Write,
     I: Iterator<Item = GenomicInterval<usize>>,
 {
-    if let Some(name_index) = name_index {
-        write_named_records_iter(records, writer, name_index)?;
+    if let Some(translater) = translater {
+        write_named_records_iter(records, writer, translater)?;
     } else {
         write_records_iter(records, writer)?;
     }
@@ -109,15 +107,15 @@ pub fn write_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
 pub fn write_pairs_iter_with<W, I, It>(
     records: It,
     writer: W,
-    name_index: Option<&NameIndex>,
+    translater: Option<&Translater>,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize,
     W: Write,
     It: Iterator<Item = IntervalPair<I, usize, usize>>,
 {
-    if let Some(name_index) = name_index {
-        write_named_pairs_iter(records, writer, name_index)?;
+    if let Some(translater) = translater {
+        write_named_pairs_iter(records, writer, translater)?;
     } else {
         write_pairs_iter(records, writer)?;
     }
@@ -145,7 +143,11 @@ where
     Ok(())
 }
 
-pub fn write_named_pairs_iter<I, W, It>(records: It, writer: W, name_map: &NameIndex) -> Result<()>
+pub fn write_named_pairs_iter<I, W, It>(
+    records: It,
+    writer: W,
+    translater: &Translater,
+) -> Result<()>
 where
     I: IntervalBounds<usize, usize>,
     W: Write,
@@ -153,9 +155,9 @@ where
 {
     let mut wtr = build_writer(writer);
     for record in records {
-        let chr_a = name_map.get(record.iv_a.chr()).unwrap();
+        let chr_a = translater.get_name(*record.iv_a.chr()).unwrap();
         let chr_b = if let Some(ref iv_b) = record.iv_b {
-            Some(name_map.get(iv_b.chr()).unwrap())
+            Some(translater.get_name(*iv_b.chr()).unwrap())
         } else {
             None
         };
@@ -176,11 +178,11 @@ where
 pub fn write_named_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
     records: I,
     writer: W,
-    name_map: &NameIndex,
+    translater: &Translater,
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
     for record in records {
-        let chr = name_map.get(record.chr()).unwrap();
+        let chr = translater.get_name(*record.chr()).unwrap();
         let named_interval = (chr, record.start(), record.end());
         wtr.serialize(named_interval)?;
     }
@@ -213,10 +215,10 @@ fn write_internal<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer
 fn write_internal_named<W: Write>(
     records: &[GenomicInterval<usize>],
     wtr: &mut Writer<W>,
-    name_map: &NameIndex,
+    translater: &Translater,
 ) -> Result<()> {
     for interval in records.iter() {
-        let chr = name_map.get(interval.chr()).unwrap();
+        let chr = translater.get_name(*interval.chr()).unwrap();
         let named_interval = (chr, interval.start(), interval.end());
         wtr.serialize(named_interval)?;
     }
