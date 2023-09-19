@@ -1,8 +1,6 @@
 use crate::{
-    io::{
-        match_input, match_output, read_set, read_two_named_sets, write_pairs_iter_with, NameIndex,
-    },
-    types::IntervalPair,
+    io::{match_input, match_output, read_set, read_two_named_sets, write_pairs_iter_with},
+    types::{IntervalPair, Translater},
 };
 use anyhow::Result;
 use bedrs::{Closest, Container, GenomicInterval, GenomicIntervalSet};
@@ -15,13 +13,13 @@ fn load_pairs(
 ) -> Result<(
     GenomicIntervalSet<usize>,
     GenomicIntervalSet<usize>,
-    Option<NameIndex>,
+    Option<Translater>,
 )> {
     let query_handle = match_input(query_input)?;
     let target_handle = match_input(target_input)?;
-    let (mut query_set, mut target_set, name_index) = if named {
-        let (query_set, target_set, name_index) = read_two_named_sets(query_handle, target_handle)?;
-        (query_set, target_set, Some(name_index))
+    let (mut query_set, mut target_set, translater) = if named {
+        let (query_set, target_set, translater) = read_two_named_sets(query_handle, target_handle)?;
+        (query_set, target_set, Some(translater))
     } else {
         let query_set = read_set(query_handle)?;
         let target_set = read_set(target_handle)?;
@@ -34,7 +32,7 @@ fn load_pairs(
         query_set.set_sorted();
         target_set.set_sorted();
     }
-    Ok((query_set, target_set, name_index))
+    Ok((query_set, target_set, translater))
 }
 
 #[derive(Debug, PartialEq)]
@@ -85,11 +83,11 @@ pub fn closest(
     named: bool,
     sorted: bool,
 ) -> Result<()> {
-    let (a_set, b_set, name_index) = load_pairs(a, Some(b), named, sorted)?;
+    let (a_set, b_set, translater) = load_pairs(a, Some(b), named, sorted)?;
     let method = ClosestType::new(upstream, downstream);
     let pairs_iter = run_closest(&a_set, &b_set, method);
     let output_handle = match_output(output)?;
-    write_pairs_iter_with(pairs_iter, output_handle, name_index.as_ref())?;
+    write_pairs_iter_with(pairs_iter, output_handle, translater.as_ref())?;
     Ok(())
 }
 

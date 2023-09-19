@@ -1,4 +1,5 @@
-use super::{NameIndex, NamedInterval};
+use super::NamedInterval;
+use crate::types::Translater;
 use anyhow::{bail, Result};
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
@@ -20,7 +21,7 @@ pub fn build_reader<R: Read>(reader: R) -> csv::Reader<R> {
 pub fn read_set_with<R: Read>(
     reader: R,
     named: bool,
-) -> Result<(GenomicIntervalSet<usize>, Option<NameIndex>)> {
+) -> Result<(GenomicIntervalSet<usize>, Option<Translater>)> {
     if named {
         let (set, idx_map) = read_named_set(reader)?;
         Ok((set, Some(idx_map)))
@@ -69,11 +70,10 @@ where
 }
 
 /// Reads a single file into a GenomicIntervalSet and a NameIndex
-pub fn read_named_set<R: Read>(reader: R) -> Result<(GenomicIntervalSet<usize>, NameIndex)> {
-    let mut name_map = HashMap::new();
-    let mut idx_map = HashMap::new();
-    let set = convert_set(reader, &mut name_map, &mut idx_map)?;
-    Ok((set, idx_map))
+pub fn read_named_set<R: Read>(reader: R) -> Result<(GenomicIntervalSet<usize>, Translater)> {
+    let mut translater = Translater::new();
+    let set = convert_set(reader, &mut translater)?;
+    Ok((set, translater))
 }
 
 /// Reads two files into two GenomicIntervalSets and a NameIndex
@@ -83,13 +83,14 @@ pub fn read_two_named_sets<R: Read>(
 ) -> Result<(
     GenomicIntervalSet<usize>,
     GenomicIntervalSet<usize>,
-    NameIndex,
+    Translater,
 )> {
-    let mut name_map = HashMap::new();
-    let mut idx_map = HashMap::new();
-    let set_1 = convert_set(reader_1, &mut name_map, &mut idx_map)?;
-    let set_2 = convert_set(reader_2, &mut name_map, &mut idx_map)?;
-    Ok((set_1, set_2, idx_map))
+    let mut translater = Translater::new();
+    // let mut name_map = HashMap::new();
+    // let mut idx_map = HashMap::new();
+    let set_1 = convert_set(reader_1, &mut translater)?;
+    let set_2 = convert_set(reader_2, &mut translater)?;
+    Ok((set_1, set_2, translater))
 }
 
 /// Convert a CSV reader into a GenomicIntervalSet
@@ -99,21 +100,16 @@ pub fn read_two_named_sets<R: Read>(
 /// and keeping track of the same chromosome names and indices.
 fn convert_set<R: Read>(
     reader: R,
-    name_map: &mut HashMap<String, usize>,
-    idx_map: &mut HashMap<usize, String>,
+    translater: &mut Translater,
 ) -> Result<GenomicIntervalSet<usize>> {
     let mut reader = build_reader(reader);
     let mut raw_record = ByteRecord::new();
     let mut set = GenomicIntervalSet::empty();
     while reader.read_byte_record(&mut raw_record)? {
         let record: NamedInterval = raw_record.deserialize(None)?;
-        if !name_map.contains_key(record.name) {
-            let idx = name_map.len();
-            name_map.insert(record.name.to_string(), idx);
-            idx_map.insert(idx, record.name.to_string());
-        }
-        let chr_int = name_map.get(record.name).unwrap();
-        let interval = GenomicInterval::new(*chr_int, record.start, record.end);
+        translater.add_name(record.name);
+        let chr_int = translater.get_idx(record.name).unwrap();
+        let interval = GenomicInterval::new(chr_int, record.start, record.end);
         set.insert(interval);
     }
     Ok(set)

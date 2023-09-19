@@ -12,7 +12,7 @@ fn complement_inplace(input: Option<String>, output: Option<String>, named: bool
     let input_handle = match_input(input)?;
 
     // Read records into a set
-    let (mut iset, name_index) = read_set_with(input_handle, named)?;
+    let (mut iset, translater) = read_set_with(input_handle, named)?;
 
     // Sort the set
     iset.sort();
@@ -27,7 +27,7 @@ fn complement_inplace(input: Option<String>, output: Option<String>, named: bool
     let output_handle = match_output(output)?;
 
     // Write the records
-    write_records_iter_with(complement_iter, output_handle, name_index.as_ref())?;
+    write_records_iter_with(complement_iter, output_handle, translater.as_ref())?;
 
     Ok(())
 }

@@ -18,7 +18,7 @@ pub fn sample(
     let input_handle = match_input(input)?;
 
     // load interval set
-    let (set, name_index) = read_set_with(input_handle, named)?;
+    let (set, translater) = read_set_with(input_handle, named)?;
 
     // build rng
     let mut rng = build_rng(seed);
@@ -47,7 +47,7 @@ pub fn sample(
     let output_handle = match_output(output)?;
 
     // write intervals to output
-    write_records_iter_with(subset, output_handle, name_index.as_ref())?;
+    write_records_iter_with(subset, output_handle, translater.as_ref())?;
 
     Ok(())
 }
