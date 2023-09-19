@@ -1,7 +1,5 @@
 use crate::{
-    io::{
-        match_input, match_output, read_set, read_two_named_sets, write_pairs_iter_with,
-    },
+    io::{match_input, match_output, read_set, read_two_named_sets, write_pairs_iter_with},
     types::{IntervalPair, Translater},
 };
 use anyhow::Result;

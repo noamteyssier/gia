@@ -3,9 +3,9 @@ use crate::{
     commands::{run_find, OverlapMethod},
     io::{
         build_reader, match_input, match_output, read_set, read_two_named_sets,
-        write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
-        UnnamedIter,
-    }, types::Translater,
+        write_named_records_iter_dashmap, write_records_iter_with, NamedIter, UnnamedIter,
+    },
+    types::Translater,
 };
 use anyhow::Result;
 use bedrs::{

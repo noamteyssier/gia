@@ -1,8 +1,7 @@
 use crate::{
     commands::{run_find, OverlapMethod},
-    io::{
-        match_input, match_output, read_set, read_two_named_sets, write_records_iter_with,
-    }, types::Translater,
+    io::{match_input, match_output, read_set, read_two_named_sets, write_records_iter_with},
+    types::Translater,
 };
 use anyhow::Result;
 use bedrs::{
