@@ -1,3 +1,5 @@
+use std::io::BufRead;
+
 use super::iter::{run_function, OutputMethod};
 use crate::{
     commands::{run_find, OverlapMethod},
@@ -9,7 +11,8 @@ use crate::{
 };
 use anyhow::Result;
 use bedrs::{
-    types::iterator::QueryMethod, Container, GenomicIntervalSet, IntersectIter, MergeIter,
+    types::iterator::QueryMethod, Container, GenomicInterval, GenomicIntervalSet, IntersectIter,
+    MergeIter,
 };
 
 fn load_pairs(
@@ -118,7 +121,8 @@ pub fn intersect_stream(
 
     if named {
         let translater = StreamTranslater::new();
-        let query_iter = NamedIter::new(&mut query_csv, &translater);
+        let query_iter: NamedIter<'_, '_, Box<dyn BufRead>, GenomicInterval<usize>> =
+            NamedIter::new(&mut query_csv, &translater);
         let target_iter = NamedIter::new(&mut target_csv, &translater);
         let merged_query_iter = MergeIter::new(query_iter);
         let merged_target_iter = MergeIter::new(target_iter);
@@ -126,7 +130,8 @@ pub fn intersect_stream(
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
         write_named_records_iter_dashmap(intersect_iter, output_handle, &translater)?;
     } else {
-        let query_iter = UnnamedIter::new(&mut query_csv);
+        let query_iter: UnnamedIter<'_, Box<dyn BufRead>, GenomicInterval<usize>> =
+            UnnamedIter::new(&mut query_csv);
         let target_iter = UnnamedIter::new(&mut target_csv);
         let merged_query_iter = MergeIter::new(query_iter);
         let merged_target_iter = MergeIter::new(target_iter);
