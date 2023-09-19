@@ -23,6 +23,7 @@ mod testing {
             assert!(x >= 0);
             assert!(y <= 250_000_000);
             assert_eq!(y - x, 150);
+            assert_eq!(cols.len(), 3);
         }
         assert_eq!(num_intervals, 10000);
         Ok(())
@@ -62,6 +63,7 @@ mod testing {
             assert!(x >= 0);
             assert!(y <= max_chrom_len);
             assert_eq!(y - x, len_interval);
+            assert_eq!(cols.len(), 3);
         }
         assert_eq!(obs_intervals, num_intervals);
         Ok(())
@@ -93,6 +95,7 @@ mod testing {
                 assert!(y <= 5000);
             }
             assert_eq!(y - x, 150);
+            assert_eq!(cols.len(), 3);
         }
         assert_eq!(num_intervals, 10000);
         Ok(())
@@ -106,6 +109,19 @@ mod testing {
             let mut cmd = Command::cargo_bin("gia")?;
             let run_b = cmd.arg("random").arg("-s").arg(format!("{s}")).output()?;
             assert_eq!(run_a.stdout, run_b.stdout);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_random_bed6() -> Result<()> {
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd.arg("random").arg("-f").arg("bed6").output()?;
+        let string_out = String::from_utf8(output.stdout)?.trim().to_string();
+        let rows = string_out.split("\n");
+        for row in rows {
+            let cols = row.split("\t").collect::<Vec<&str>>();
+            assert_eq!(cols.len(), 6);
         }
         Ok(())
     }
