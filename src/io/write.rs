@@ -1,4 +1,4 @@
-use crate::types::{IntervalPair, StreamTranslater, Translater};
+use crate::types::{IntervalPair, StreamTranslater, Translate, Translater};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval, GenomicIntervalSet};
 use csv::Writer;
@@ -12,10 +12,10 @@ pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
         .from_writer(writer)
 }
 
-pub fn write_set_with<W: Write>(
+pub fn write_set_with<W: Write, T: Translate>(
     set: &GenomicIntervalSet<usize>,
     writer: W,
-    translater: Option<&Translater>,
+    translater: Option<&T>,
 ) -> Result<()> {
     if let Some(translater) = translater {
         write_named_set(set, writer, translater)?;
@@ -32,10 +32,10 @@ pub fn write_set<W: Write>(set: &GenomicIntervalSet<usize>, writer: W) -> Result
     Ok(())
 }
 
-pub fn write_named_set<W: Write>(
+pub fn write_named_set<W: Write, T: Translate>(
     set: &GenomicIntervalSet<usize>,
     writer: W,
-    translater: &Translater,
+    translater: &T,
 ) -> Result<()> {
     let mut wtr = build_writer(writer);
     write_internal_named(set.records(), &mut wtr, translater)?;
@@ -211,10 +211,10 @@ fn write_internal<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer
     Ok(())
 }
 
-fn write_internal_named<W: Write>(
+fn write_internal_named<W: Write, T: Translate>(
     records: &[GenomicInterval<usize>],
     wtr: &mut Writer<W>,
-    translater: &Translater,
+    translater: &T,
 ) -> Result<()> {
     for interval in records.iter() {
         let chr = translater.get_name(*interval.chr()).unwrap();
