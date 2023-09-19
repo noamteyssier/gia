@@ -22,8 +22,9 @@ fn main() -> Result<()> {
             upstream,
             downstream,
             named,
+            format,
             sorted,
-        } => closest(a, b, output, upstream, downstream, named, sorted)?,
+        } => closest(a, b, output, upstream, downstream, named, format, sorted)?,
         Command::Complement {
             input,
             output,

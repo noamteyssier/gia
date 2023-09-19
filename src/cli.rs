@@ -36,6 +36,10 @@ pub enum Command {
         #[clap(short = 'N', long)]
         named: bool,
 
+        /// Format of the input files
+        #[clap(short, long, default_value = "bed3")]
+        format: InputFormat,
+
         /// Specify that the input files are already sorted
         #[clap(short, long)]
         sorted: bool,

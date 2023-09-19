@@ -1,43 +1,16 @@
 use crate::{
     io::{
         match_input, match_output, read_bed3_set_unnamed, read_paired_bed3_named,
-        write_pairs_iter_with,
+        read_paired_bed3_sets, read_paired_bed6_sets, write_pairs_iter_with,
     },
-    types::{IntervalPair, Translater},
+    types::{InputFormat, IntervalPair, Translater},
+    utils::sort_pairs,
 };
 use anyhow::Result;
-use bedrs::{Closest, Container, GenomicInterval, GenomicIntervalSet};
-
-fn load_pairs(
-    query_input: Option<String>,
-    target_input: Option<String>,
-    named: bool,
-    sorted: bool,
-) -> Result<(
-    GenomicIntervalSet<usize>,
-    GenomicIntervalSet<usize>,
-    Option<Translater>,
-)> {
-    let query_handle = match_input(query_input)?;
-    let target_handle = match_input(target_input)?;
-    let (mut query_set, mut target_set, translater) = if named {
-        let (query_set, target_set, translater) =
-            read_paired_bed3_named(query_handle, target_handle)?;
-        (query_set, target_set, Some(translater))
-    } else {
-        let query_set = read_bed3_set_unnamed(query_handle)?;
-        let target_set = read_bed3_set_unnamed(target_handle)?;
-        (query_set, target_set, None)
-    };
-    if !sorted {
-        query_set.sort();
-        target_set.sort();
-    } else {
-        query_set.set_sorted();
-        target_set.set_sorted();
-    }
-    Ok((query_set, target_set, translater))
-}
+use bedrs::{
+    traits::{ChromBounds, IntervalBounds, ValueBounds},
+    Closest, Container, GenomicInterval, GenomicIntervalSet,
+};
 
 #[derive(Debug, PartialEq)]
 enum ClosestType {
@@ -59,11 +32,16 @@ impl ClosestType {
     }
 }
 
-fn run_closest<'a>(
-    a_set: &'a GenomicIntervalSet<usize>,
-    b_set: &'a GenomicIntervalSet<usize>,
+fn run_closest<'a, C, T, I>(
+    a_set: &'a impl Container<C, T, I>,
+    b_set: &'a impl Container<C, T, I>,
     method: ClosestType,
-) -> impl Iterator<Item = IntervalPair<GenomicInterval<usize>, usize, usize>> + 'a {
+) -> impl Iterator<Item = IntervalPair<I, C, T>> + 'a
+where
+    C: ChromBounds + 'a,
+    T: ValueBounds + 'a,
+    I: IntervalBounds<C, T> + 'a,
+{
     a_set
         .iter()
         .map(move |query| {
@@ -78,7 +56,25 @@ fn run_closest<'a>(
         .map(|(query, target)| IntervalPair::new(query.clone(), target.cloned()))
 }
 
-pub fn closest(
+fn load_pairs(
+    query_input: Option<String>,
+    target_input: Option<String>,
+    named: bool,
+    sorted: bool,
+) -> Result<(
+    GenomicIntervalSet<usize>,
+    GenomicIntervalSet<usize>,
+    Option<Translater>,
+)> {
+    let query_handle = match_input(query_input)?;
+    let target_handle = match_input(target_input)?;
+    let (mut query_set, mut target_set, translater) =
+        read_paired_bed3_sets(query_handle, target_handle, named)?;
+    sort_pairs(&mut query_set, &mut target_set, sorted);
+    Ok((query_set, target_set, translater))
+}
+
+pub fn closest_bed3(
     a: Option<String>,
     b: String,
     output: Option<String>,
@@ -87,12 +83,64 @@ pub fn closest(
     named: bool,
     sorted: bool,
 ) -> Result<()> {
-    let (a_set, b_set, translater) = load_pairs(a, Some(b), named, sorted)?;
+    // load pairs
+    let query_handle = match_input(a)?;
+    let target_handle = match_input(Some(b))?;
+    let (mut a_set, mut b_set, translater) =
+        read_paired_bed3_sets(query_handle, target_handle, named)?;
+    sort_pairs(&mut a_set, &mut b_set, sorted);
+
+    // run closest
     let method = ClosestType::new(upstream, downstream);
     let pairs_iter = run_closest(&a_set, &b_set, method);
+
+    // write output
     let output_handle = match_output(output)?;
     write_pairs_iter_with(pairs_iter, output_handle, translater.as_ref())?;
     Ok(())
+}
+
+pub fn closest_bed6(
+    a: Option<String>,
+    b: String,
+    output: Option<String>,
+    upstream: bool,
+    downstream: bool,
+    named: bool,
+    sorted: bool,
+) -> Result<()> {
+    // load pairs
+    let query_handle = match_input(a)?;
+    let target_handle = match_input(Some(b))?;
+    let (mut a_set, mut b_set, translater) =
+        read_paired_bed6_sets(query_handle, target_handle, named)?;
+    sort_pairs(&mut a_set, &mut b_set, sorted);
+
+    // run closest
+    let method = ClosestType::new(upstream, downstream);
+    let pairs_iter = run_closest(&a_set, &b_set, method);
+
+    // write output
+    let output_handle = match_output(output)?;
+    write_pairs_iter_with(pairs_iter, output_handle, translater.as_ref())?;
+    Ok(())
+}
+
+pub fn closest(
+    a: Option<String>,
+    b: String,
+    output: Option<String>,
+    upstream: bool,
+    downstream: bool,
+    named: bool,
+    format: InputFormat,
+    sorted: bool,
+) -> Result<()> {
+    if format == InputFormat::Bed3 {
+        closest_bed3(a, b, output, upstream, downstream, named, sorted)
+    } else {
+        closest_bed6(a, b, output, upstream, downstream, named, sorted)
+    }
 }
 
 #[cfg(test)]
