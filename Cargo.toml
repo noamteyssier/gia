@@ -2,7 +2,7 @@
 name = "gia"
 version = "0.1.16"
 edition = "2021"
-about = "A tool for set theoretic operations of genomic intervals"
+description = "A tool for set theoretic operations of genomic intervals"
 license = "MIT"
 repository = "https://github.com/noamteyssier/gia"
 categories = [ "science", "command-line-utilities" ]
