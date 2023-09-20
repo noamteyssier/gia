@@ -1,9 +1,7 @@
 use super::build_reader;
 use crate::{io::NamedInterval, types::Translater};
 use anyhow::{bail, Result};
-use bedrs::{
-    Container, GenomicInterval, GenomicIntervalSet,
-};
+use bedrs::{Container, GenomicInterval, GenomicIntervalSet};
 use csv::ByteRecord;
 use std::io::Read;
 

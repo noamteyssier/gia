@@ -1,6 +1,6 @@
-use std::io::Read;
-use bedrs::traits::{IntervalBounds, ChromBounds, ValueBounds};
+use bedrs::traits::{ChromBounds, IntervalBounds, ValueBounds};
 use serde::de::DeserializeOwned;
+use std::io::Read;
 
 pub fn iter_unnamed<'a, R, I, C, T>(
     reader: &'a mut csv::Reader<R>,
@@ -24,5 +24,3 @@ where
         });
     Box::new(record_iter)
 }
-
-
