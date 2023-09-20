@@ -31,6 +31,10 @@ gia --help
 
 You can install `cargo` by following the instructions [here](https://rustup.rs/)
 
+## Usage
+
+You can see more detailed usage for each subcommand on the [documentation site](https://noamteyssier.github.io/gia/).
+
 ## Issues and Contributions
 
 `gia` is a work-in-progress and under active development by [Noam Teyssier](https://noamteyssier.github.io/about/).
