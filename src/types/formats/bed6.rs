@@ -191,3 +191,44 @@ impl Coordinates<usize, usize> for NumericBed6 {
         }
     }
 }
+impl Coordinates<usize, usize> for &NumericBed6 {
+    fn chr(&self) -> &usize {
+        &self.chr
+    }
+
+    fn start(&self) -> usize {
+        self.start
+    }
+
+    fn end(&self) -> usize {
+        self.end
+    }
+
+    fn strand(&self) -> Option<Strand> {
+        Some(self.strand)
+    }
+
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    fn update_chr(&mut self, chr: &usize) {
+        unreachable!("Cannot update chr of immutable reference")
+    }
+
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    fn update_start(&mut self, start: &usize) {
+        unreachable!("Cannot update start of immutable reference")
+    }
+
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    fn update_end(&mut self, end: &usize) {
+        unreachable!("Cannot update end of immutable reference")
+    }
+
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    fn from(other: &Self) -> Self {
+        unimplemented!("Cannot create owned instance of a reference")
+    }
+}
