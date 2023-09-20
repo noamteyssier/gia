@@ -3,6 +3,10 @@ name = "gia"
 version = "0.1.16"
 edition = "2021"
 about = "A tool for set theoretic operations of genomic intervals"
+license = "MIT"
+repository = "https://github.com/noamteyssier/gia"
+categories = [ "science", "command-line-utilities" ]
+keywords = [ "genomics", "bioinformatics", "bed", "set", "interval" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
