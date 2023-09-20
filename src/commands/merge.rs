@@ -2,7 +2,7 @@ use std::io::{Read, Write};
 
 use crate::{
     io::{
-        build_reader, iter_bed3_unnamed, match_input, match_output, read_bed3_set, read_bed6_set,
+        build_reader, iter_unnamed, match_input, match_output, read_bed3_set, read_bed6_set,
         write_records_iter, write_records_iter_with,
     },
     types::InputFormat,
@@ -67,7 +67,7 @@ where
 {
     let mut csv_reader = build_reader(input_handle);
     let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> =
-        iter_bed3_unnamed(&mut csv_reader);
+        iter_unnamed(&mut csv_reader);
     let merged_iter = MergeIter::new(record_iter);
     write_records_iter(merged_iter, output_handle)?;
     Ok(())

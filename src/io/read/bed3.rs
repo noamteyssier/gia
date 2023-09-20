@@ -2,11 +2,9 @@ use super::build_reader;
 use crate::{io::NamedInterval, types::Translater};
 use anyhow::{bail, Result};
 use bedrs::{
-    traits::{ChromBounds, IntervalBounds, ValueBounds},
     Container, GenomicInterval, GenomicIntervalSet,
 };
 use csv::ByteRecord;
-use serde::de::DeserializeOwned;
 use std::io::Read;
 
 pub fn read_bed3_set<R: Read>(
@@ -85,29 +83,6 @@ fn convert_bed3_set<R: Read>(
         set.insert(interval);
     }
     Ok(set)
-}
-
-pub fn iter_bed3_unnamed<'a, R, I, C, T>(
-    reader: &'a mut csv::Reader<R>,
-) -> Box<dyn Iterator<Item = I> + 'a>
-where
-    R: Read,
-    I: IntervalBounds<C, T> + DeserializeOwned + 'a,
-    C: ChromBounds,
-    T: ValueBounds,
-{
-    let record_iter = reader
-        .deserialize()
-        .map(|record| {
-            let record: I = match record {
-                Ok(record) => record,
-                Err(e) => {
-                    panic!("Could not build bed record:\n\nIf your BED has non-integer chromosome names try rerunning with the `-N` flag:\n\nERROR: {}", e)
-                }
-            };
-            record
-        });
-    Box::new(record_iter)
 }
 
 /// Reads two files into two GenomicIntervalSets and a NameIndex

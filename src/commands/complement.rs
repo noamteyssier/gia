@@ -1,5 +1,5 @@
 use crate::io::{
-    build_reader, iter_bed3_unnamed, match_input, match_output, read_bed3_set, write_records_iter,
+    build_reader, iter_unnamed, match_input, match_output, read_bed3_set, write_records_iter,
     write_records_iter_with,
 };
 use anyhow::Result;
@@ -41,7 +41,7 @@ fn complement_stream(input: Option<String>, output: Option<String>) -> Result<()
 
     // Build the record iterator
     let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> =
-        iter_bed3_unnamed(&mut csv_reader);
+        iter_unnamed(&mut csv_reader);
 
     // Pipe the record iterator into the merge iterator
     let merged_iter = MergeIter::new(record_iter);
