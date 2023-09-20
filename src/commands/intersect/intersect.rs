@@ -137,7 +137,7 @@ pub fn intersect_stream(
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
-        write_records_iter_with(intersect_iter, output_handle, None)?;
+        write_records_iter_with(intersect_iter, output_handle, None::<&Translater>)?;
     }
     Ok(())
 }
