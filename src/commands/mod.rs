@@ -14,7 +14,7 @@ pub use closest::closest;
 pub use complement::complement;
 pub use extend::extend;
 pub use get_fasta::get_fasta;
-pub use intersect::{intersect, intersect_stream};
+pub use intersect::intersect;
 pub use merge::merge;
 pub use name_map::name_map;
 pub use overlaps::{run_find, OverlapMethod};

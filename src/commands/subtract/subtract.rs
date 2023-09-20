@@ -1,37 +1,19 @@
 use crate::{
     commands::{run_find, OverlapMethod},
-    io::{match_input, match_output, read_set, read_two_named_sets, write_records_iter_with},
-    types::Translater,
+    io::{
+        match_input, match_output, read_paired_bed3_sets, read_paired_bed6_sets,
+        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
+    },
+    types::{InputFormat, Translater},
+    utils::sort_pairs,
 };
 use anyhow::Result;
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    Container, GenomicIntervalSet, Merge, Subtract,
+    Container, Coordinates, Merge, Subtract,
 };
-
-fn load_pairs(
-    query_input: Option<String>,
-    target_input: Option<String>,
-    named: bool,
-) -> Result<(
-    GenomicIntervalSet<usize>,
-    GenomicIntervalSet<usize>,
-    Option<Translater>,
-)> {
-    let query_handle = match_input(query_input)?;
-    let target_handle = match_input(target_input)?;
-    let (mut query_set, mut target_set, translater) = if named {
-        let (query_set, target_set, translater) = read_two_named_sets(query_handle, target_handle)?;
-        (query_set, target_set, Some(translater))
-    } else {
-        let query_set = read_set(query_handle)?;
-        let target_set = read_set(target_handle)?;
-        (query_set, target_set, None)
-    };
-    query_set.sort();
-    target_set.sort();
-    Ok((query_set, target_set, translater))
-}
+use serde::Serialize;
+use std::io::Write;
 
 fn queued_diff<It, I, C, T>(query: &I, overlaps: It) -> Box<dyn Iterator<Item = I>>
 where
@@ -77,6 +59,96 @@ where
     Box::new(sub_iter)
 }
 
+fn run_subtract<'a, A, B, I, C, T, W>(
+    aset: &'a A,
+    bset: &'a B,
+    method: &'a OverlapMethod,
+    unmerged: bool,
+    output_handle: W,
+    translater: Option<&'a Translater>,
+) -> Result<()>
+where
+    A: Container<C, T, I> + 'a,
+    B: Container<C, T, I> + 'a,
+    I: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize,
+    C: ChromBounds,
+    T: ValueBounds,
+    W: Write,
+    WriteNamedIterImpl: WriteNamedIter<I>,
+{
+    if unmerged {
+        let sub_iter = iter_subtraction(aset, bset, method);
+        write_records_iter_with(sub_iter, output_handle, translater)?;
+    } else {
+        let aset = aset.merge()?;
+        let sub_iter = iter_subtraction(&aset, bset, method);
+        write_records_iter_with(sub_iter, output_handle, translater)?;
+    }
+    Ok(())
+}
+
+fn subtract_bed3<W: Write>(
+    query_path: Option<String>,
+    target_path: String,
+    output_handle: W,
+    overlap_method: OverlapMethod,
+    unmerged: bool,
+    named: bool,
+) -> Result<()> {
+    // load query and target sets
+    let query_handle = match_input(query_path)?;
+    let target_handle = match_input(Some(target_path))?;
+    let (mut query_set, mut target_set, translater) =
+        read_paired_bed3_sets(query_handle, target_handle, named)?;
+
+    // sort query and target sets
+    sort_pairs(&mut query_set, &mut target_set, false);
+
+    // merge target set
+    let bset = target_set.merge()?;
+
+    // run subtraction
+    run_subtract(
+        &query_set,
+        &bset,
+        &overlap_method,
+        unmerged,
+        output_handle,
+        translater.as_ref(),
+    )
+}
+
+fn subtract_bed6<W: Write>(
+    query_path: Option<String>,
+    target_path: String,
+    output_handle: W,
+    overlap_method: OverlapMethod,
+    unmerged: bool,
+    named: bool,
+) -> Result<()> {
+    // load query and target sets
+    let query_handle = match_input(query_path)?;
+    let target_handle = match_input(Some(target_path))?;
+    let (mut query_set, mut target_set, translater) =
+        read_paired_bed6_sets(query_handle, target_handle, named)?;
+
+    // sort query and target sets
+    sort_pairs(&mut query_set, &mut target_set, false);
+
+    // merge target set
+    let bset = target_set.merge()?;
+
+    // run subtraction
+    run_subtract(
+        &query_set,
+        &bset,
+        &overlap_method,
+        unmerged,
+        output_handle,
+        translater.as_ref(),
+    )
+}
+
 pub fn subtract(
     query_path: Option<String>,
     target_path: String,
@@ -87,22 +159,27 @@ pub fn subtract(
     either: bool,
     unmerged: bool,
     named: bool,
+    format: InputFormat,
 ) -> Result<()> {
-    let (query_set, target_set, translater) = load_pairs(query_path, Some(target_path), named)?;
     let overlap_method =
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
-
     let output_handle = match_output(output_path)?;
-    let bset = target_set.merge()?;
-
-    if unmerged {
-        let sub_iter = iter_subtraction(&query_set, &bset, &overlap_method);
-        write_records_iter_with(sub_iter, output_handle, translater.as_ref())?;
-    } else {
-        let aset = query_set.merge()?;
-        let sub_iter = iter_subtraction(&aset, &bset, &overlap_method);
-        write_records_iter_with(sub_iter, output_handle, translater.as_ref())?;
+    match format {
+        InputFormat::Bed3 => subtract_bed3(
+            query_path,
+            target_path,
+            output_handle,
+            overlap_method,
+            unmerged,
+            named,
+        ),
+        InputFormat::Bed6 => subtract_bed6(
+            query_path,
+            target_path,
+            output_handle,
+            overlap_method,
+            unmerged,
+            named,
+        ),
     }
-
-    Ok(())
 }

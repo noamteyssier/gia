@@ -5,14 +5,14 @@ mod write;
 pub use general::{match_input, match_output};
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{
-    build_reader, read_genome, read_iter, read_named_set, read_set, read_set_with,
-    read_two_named_sets,
+    build_reader, iter_unnamed, read_bed3_set, read_bed6_set, read_genome, read_paired_bed3_sets,
+    read_paired_bed6_sets,
 };
 use serde::{Deserialize, Serialize};
 pub use write::{
-    build_writer, write_named_pairs_iter, write_named_records_iter,
-    write_named_records_iter_dashmap, write_pairs_iter, write_pairs_iter_with, write_records,
-    write_records_iter, write_records_iter_with, write_records_with, write_set, write_set_with,
+    build_writer, write_named_pairs_iter, write_named_records_iter_dashmap, write_pairs_iter,
+    write_pairs_iter_with, write_records_iter, write_records_iter_with, WriteIter, WriteIterImpl,
+    WriteNamedIter, WriteNamedIterImpl,
 };
 
 #[derive(Deserialize, Serialize)]

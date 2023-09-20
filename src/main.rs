@@ -8,8 +8,8 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    closest, complement, extend, get_fasta, intersect, intersect_stream, merge, name_map, random,
-    sample, sort, subtract,
+    closest, complement, extend, get_fasta, intersect, merge, name_map, random, sample, sort,
+    subtract,
 };
 
 fn main() -> Result<()> {
@@ -22,8 +22,9 @@ fn main() -> Result<()> {
             upstream,
             downstream,
             named,
+            format,
             sorted,
-        } => closest(a, b, output, upstream, downstream, named, sorted)?,
+        } => closest(a, b, output, upstream, downstream, named, format, sorted)?,
         Command::Complement {
             input,
             output,
@@ -38,8 +39,14 @@ fn main() -> Result<()> {
             right,
             genome,
             named,
-        } => extend(input, output, both, left, right, genome, named)?,
-        Command::GetFasta { bed, fasta, output } => get_fasta(bed, &fasta, output)?,
+            format,
+        } => extend(input, output, both, left, right, genome, named, format)?,
+        Command::GetFasta {
+            bed,
+            fasta,
+            output,
+            format,
+        } => get_fasta(bed, &fasta, output, format)?,
         Command::Intersect {
             a,
             b,
@@ -54,42 +61,31 @@ fn main() -> Result<()> {
             inverse,
             named,
             stream,
-        } => {
-            if stream {
-                intersect_stream(
-                    a,
-                    b,
-                    output,
-                    fraction_query,
-                    fraction_target,
-                    reciprocal,
-                    either,
-                    named,
-                )?
-            } else {
-                intersect(
-                    a,
-                    b,
-                    output,
-                    fraction_query,
-                    fraction_target,
-                    reciprocal,
-                    either,
-                    with_query,
-                    with_target,
-                    unique,
-                    inverse,
-                    named,
-                )?
-            }
-        }
+            format,
+        } => intersect(
+            a,
+            b,
+            output,
+            fraction_query,
+            fraction_target,
+            reciprocal,
+            either,
+            with_query,
+            with_target,
+            unique,
+            inverse,
+            named,
+            stream,
+            format,
+        )?,
         Command::Merge {
             input,
             output,
             sorted,
             named,
             stream,
-        } => merge(input, output, sorted, named, stream)?,
+            format,
+        } => merge(input, output, sorted, named, stream, format)?,
         Command::NameMap { input, output, map } => name_map(input, output, map)?,
         Command::Random {
             n_intervals,
@@ -99,6 +95,7 @@ fn main() -> Result<()> {
             seed,
             output,
             genome,
+            format,
         } => random(
             n_intervals,
             l_intervals,
@@ -107,6 +104,7 @@ fn main() -> Result<()> {
             seed,
             output,
             genome,
+            format,
         )?,
         Command::Sample {
             input,
@@ -115,12 +113,14 @@ fn main() -> Result<()> {
             fraction,
             seed,
             named,
-        } => sample(input, output, number, fraction, seed, named)?,
+            format,
+        } => sample(input, output, number, fraction, seed, named, format)?,
         Command::Sort {
             input,
             output,
             named,
-        } => sort(input, output, named)?,
+            format,
+        } => sort(input, output, named, format)?,
         Command::Subtract {
             a,
             b,
@@ -131,6 +131,7 @@ fn main() -> Result<()> {
             either,
             unmerged,
             named,
+            format,
         } => {
             subtract(
                 a,
@@ -142,6 +143,7 @@ fn main() -> Result<()> {
                 either,
                 unmerged,
                 named,
+                format,
             )?;
         }
     }
