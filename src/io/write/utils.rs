@@ -1,7 +1,6 @@
 use crate::types::{IntervalPair, StreamTranslater, Translate, Translater};
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval, GenomicIntervalSet};
-use csv::Writer;
+use bedrs::{traits::IntervalBounds, Coordinates, GenomicInterval};
 use serde::Serialize;
 use std::io::Write;
 
@@ -10,57 +9,6 @@ pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
         .delimiter(b'\t')
         .has_headers(false)
         .from_writer(writer)
-}
-
-pub fn write_set_with<W: Write, T: Translate>(
-    set: &GenomicIntervalSet<usize>,
-    writer: W,
-    translater: Option<&T>,
-) -> Result<()> {
-    if let Some(translater) = translater {
-        write_named_set(set, writer, translater)?;
-    } else {
-        write_set(set, writer)?;
-    }
-    Ok(())
-}
-
-pub fn write_set<W: Write>(set: &GenomicIntervalSet<usize>, writer: W) -> Result<()> {
-    let mut wtr = build_writer(writer);
-    write_internal(set.records(), &mut wtr)?;
-    wtr.flush()?;
-    Ok(())
-}
-
-pub fn write_named_set<W: Write, T: Translate>(
-    set: &GenomicIntervalSet<usize>,
-    writer: W,
-    translater: &T,
-) -> Result<()> {
-    let mut wtr = build_writer(writer);
-    write_internal_named(set.records(), &mut wtr, translater)?;
-    wtr.flush()?;
-    Ok(())
-}
-
-fn write_internal<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer<W>) -> Result<()> {
-    for interval in records.iter() {
-        wtr.serialize(interval)?;
-    }
-    Ok(())
-}
-
-fn write_internal_named<W: Write, T: Translate>(
-    records: &[GenomicInterval<usize>],
-    wtr: &mut Writer<W>,
-    translater: &T,
-) -> Result<()> {
-    for interval in records.iter() {
-        let chr = translater.get_name(*interval.chr()).unwrap();
-        let named_interval = (chr, interval.start(), interval.end());
-        wtr.serialize(named_interval)?;
-    }
-    Ok(())
 }
 
 pub fn write_records_iter<W, R, I>(records: I, writer: W) -> Result<()>

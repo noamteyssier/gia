@@ -1,19 +1,20 @@
 use super::build_writer;
-use crate::types::{NumericBed6, Translate, Translater};
+use crate::types::{NumericBed6, Translate};
 use anyhow::Result;
 use bedrs::{Coordinates, GenomicInterval};
 use serde::Serialize;
 use std::{io::Write, marker::PhantomData};
 
-pub fn write_records_iter_with<W, I, Co>(
+pub fn write_records_iter_with<W, I, Co, Tr>(
     records: I,
     writer: W,
-    translater: Option<&Translater>,
+    translater: Option<&Tr>,
 ) -> Result<()>
 where
     W: Write,
     I: Iterator<Item = Co>,
     Co: Coordinates<usize, usize> + Serialize,
+    Tr: Translate,
     WriteNamedIterImpl: WriteNamedIter<Co>,
 {
     if let Some(translater) = translater {
@@ -56,20 +57,20 @@ where
     C: Coordinates<usize, usize>,
 {
     #[allow(unused_variables)]
-    fn write_named_iter<W: Write, It: Iterator<Item = C>>(
+    fn write_named_iter<W: Write, It: Iterator<Item = C>, Tr: Translate>(
         writer: W,
         iterator: It,
-        translater: &Translater,
+        translater: &Tr,
     ) -> Result<()> {
         unimplemented!()
     }
 }
 pub struct WriteNamedIterImpl;
 impl WriteNamedIter<GenomicInterval<usize>> for WriteNamedIterImpl {
-    fn write_named_iter<W: Write, It: Iterator<Item = GenomicInterval<usize>>>(
+    fn write_named_iter<W: Write, It: Iterator<Item = GenomicInterval<usize>>, Tr: Translate>(
         writer: W,
         iterator: It,
-        translater: &Translater,
+        translater: &Tr,
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
@@ -82,10 +83,14 @@ impl WriteNamedIter<GenomicInterval<usize>> for WriteNamedIterImpl {
     }
 }
 impl<'a> WriteNamedIter<&'a GenomicInterval<usize>> for WriteNamedIterImpl {
-    fn write_named_iter<W: Write, It: Iterator<Item = &'a GenomicInterval<usize>>>(
+    fn write_named_iter<
+        W: Write,
+        It: Iterator<Item = &'a GenomicInterval<usize>>,
+        Tr: Translate,
+    >(
         writer: W,
         iterator: It,
-        translater: &Translater,
+        translater: &Tr,
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
@@ -98,10 +103,10 @@ impl<'a> WriteNamedIter<&'a GenomicInterval<usize>> for WriteNamedIterImpl {
     }
 }
 impl WriteNamedIter<NumericBed6> for WriteNamedIterImpl {
-    fn write_named_iter<W: Write, It: Iterator<Item = NumericBed6>>(
+    fn write_named_iter<W: Write, It: Iterator<Item = NumericBed6>, Tr: Translate>(
         writer: W,
         iterator: It,
-        translater: &Translater,
+        translater: &Tr,
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
@@ -122,10 +127,10 @@ impl WriteNamedIter<NumericBed6> for WriteNamedIterImpl {
     }
 }
 impl<'a> WriteNamedIter<&'a NumericBed6> for WriteNamedIterImpl {
-    fn write_named_iter<W: Write, It: Iterator<Item = &'a NumericBed6>>(
+    fn write_named_iter<W: Write, It: Iterator<Item = &'a NumericBed6>, Tr: Translate>(
         writer: W,
         iterator: It,
-        translater: &Translater,
+        translater: &Tr,
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
