@@ -217,6 +217,10 @@ pub enum Command {
         /// Currently does not support non-integer chromosome names.
         #[clap(short = 'S', long, conflicts_with = "named")]
         stream: bool,
+
+        /// Set the format of the input bed
+        #[clap(short, long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Builds a two column map of chromosome names to integers

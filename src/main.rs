@@ -96,7 +96,8 @@ fn main() -> Result<()> {
             sorted,
             named,
             stream,
-        } => merge(input, output, sorted, named, stream)?,
+            format,
+        } => merge(input, output, sorted, named, stream, format)?,
         Command::NameMap { input, output, map } => name_map(input, output, map)?,
         Command::Random {
             n_intervals,
