@@ -304,6 +304,10 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Format of input file
+        #[clap(short = 'F', long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Sorts a BED file by chromosome, start, and end

@@ -125,7 +125,8 @@ fn main() -> Result<()> {
             fraction,
             seed,
             named,
-        } => sample(input, output, number, fraction, seed, named)?,
+            format,
+        } => sample(input, output, number, fraction, seed, named, format)?,
         Command::Sort {
             input,
             output,
