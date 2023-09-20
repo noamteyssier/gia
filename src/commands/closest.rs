@@ -1,15 +1,15 @@
 use crate::{
     io::{
-        match_input, match_output, read_bed3_set_unnamed, read_paired_bed3_named,
-        read_paired_bed3_sets, read_paired_bed6_sets, write_pairs_iter_with,
+        match_input, match_output, read_paired_bed3_sets, read_paired_bed6_sets,
+        write_pairs_iter_with,
     },
-    types::{InputFormat, IntervalPair, Translater},
+    types::{InputFormat, IntervalPair},
     utils::sort_pairs,
 };
 use anyhow::Result;
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    Closest, Container, GenomicInterval, GenomicIntervalSet,
+    Closest, Container,
 };
 
 #[derive(Debug, PartialEq)]
@@ -54,24 +54,6 @@ where
             (query, target)
         })
         .map(|(query, target)| IntervalPair::new(query.clone(), target.cloned()))
-}
-
-fn load_pairs(
-    query_input: Option<String>,
-    target_input: Option<String>,
-    named: bool,
-    sorted: bool,
-) -> Result<(
-    GenomicIntervalSet<usize>,
-    GenomicIntervalSet<usize>,
-    Option<Translater>,
-)> {
-    let query_handle = match_input(query_input)?;
-    let target_handle = match_input(target_input)?;
-    let (mut query_set, mut target_set, translater) =
-        read_paired_bed3_sets(query_handle, target_handle, named)?;
-    sort_pairs(&mut query_set, &mut target_set, sorted);
-    Ok((query_set, target_set, translater))
 }
 
 pub fn closest_bed3(
@@ -147,6 +129,8 @@ pub fn closest(
 mod testing {
 
     use super::*;
+    use crate::io::read_bed3_set_unnamed;
+    use bedrs::{GenomicInterval, GenomicIntervalSet};
 
     #[test]
     ///    x-----y      x-----y      x-------y
