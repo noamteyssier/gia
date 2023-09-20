@@ -103,6 +103,10 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Format of input file
+        #[clap(short, long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Extracts FASTA sequences using intervals from a BED file

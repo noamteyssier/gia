@@ -39,7 +39,8 @@ fn main() -> Result<()> {
             right,
             genome,
             named,
-        } => extend(input, output, both, left, right, genome, named)?,
+            format,
+        } => extend(input, output, both, left, right, genome, named, format)?,
         Command::GetFasta { bed, fasta, output } => get_fasta(bed, &fasta, output)?,
         Command::Intersect {
             a,
