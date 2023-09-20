@@ -13,7 +13,7 @@ mod testing {
     }
 
     #[test]
-    fn test_intersect() -> Result<()> {
+    fn test_intersect_bed3() -> Result<()> {
         let a = "tests/datasets/intersect/intersect_a.bed";
         let b = "tests/datasets/intersect/intersect_b.bed";
 
@@ -28,6 +28,45 @@ mod testing {
 
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
         assert_eq!(num_intervals, 11);
+
+        let num_fields = output
+            .stdout
+            .split(|&c| c == b'\n')
+            .next()
+            .unwrap()
+            .split(|&c| c == b'\t')
+            .count();
+        assert_eq!(num_fields, 3);
+        Ok(())
+    }
+
+    #[test]
+    fn test_intersect_bed6() -> Result<()> {
+        let a = "tests/datasets/intersect/intersect_a.bed6";
+        let b = "tests/datasets/intersect/intersect_b.bed6";
+
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("intersect")
+            .arg("-a")
+            .arg(a)
+            .arg("-b")
+            .arg(b)
+            .arg("--format")
+            .arg("bed6")
+            .output()?;
+
+        let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
+        assert_eq!(num_intervals, 11);
+
+        let num_fields = output
+            .stdout
+            .split(|&c| c == b'\n')
+            .next()
+            .unwrap()
+            .split(|&c| c == b'\t')
+            .count();
+        assert_eq!(num_fields, 6);
         Ok(())
     }
 
