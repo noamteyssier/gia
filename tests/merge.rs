@@ -12,10 +12,17 @@ mod testing {
             .join("")
     }
 
-    fn build_expected_str_bed6<T: Display, S: Display, F: Display, C: Display>(expected: &Vec<(S, T, T, S, F, C)>) -> String {
+    fn build_expected_str_bed6<T: Display, S: Display, F: Display, C: Display>(
+        expected: &Vec<(S, T, T, S, F, C)>,
+    ) -> String {
         expected
             .iter()
-            .map(|(chr, start, end, name, score, strand)| format!("{}\t{}\t{}\t{}\t{:.1}\t{}\n", chr, start, end, name, score, strand))
+            .map(|(chr, start, end, name, score, strand)| {
+                format!(
+                    "{}\t{}\t{}\t{}\t{:.1}\t{}\n",
+                    chr, start, end, name, score, strand
+                )
+            })
             .collect::<Vec<String>>()
             .join("")
     }
@@ -36,7 +43,8 @@ mod testing {
     fn test_merge_sorted_bed6() -> Result<()> {
         let input = "tests/datasets/merge/sorted.bed6";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge")
+        let output = cmd
+            .arg("merge")
             .arg("-i")
             .arg(input)
             .arg("-f")
@@ -44,8 +52,8 @@ mod testing {
             .output()?;
 
         let expected = vec![
-            (1, 10, 45, 0, 0.0, '+'), 
-            (1, 100, 300, 0, 0.0, '+'), 
+            (1, 10, 45, 0, 0.0, '+'),
+            (1, 100, 300, 0, 0.0, '+'),
             (2, 105, 301, 0, 0.0, '+'),
         ];
         let expected_str = build_expected_str_bed6(&expected);
@@ -81,7 +89,8 @@ mod testing {
     fn test_merge_unsorted_bed6() -> Result<()> {
         let input = "tests/datasets/merge/unsorted.bed6";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge")
+        let output = cmd
+            .arg("merge")
             .arg("-i")
             .arg(input)
             .arg("-f")
@@ -89,8 +98,8 @@ mod testing {
             .output()?;
 
         let expected = vec![
-            (1, 10, 45, 0, 0.0, '+'), 
-            (1, 100, 300, 0, 0.0, '+'), 
+            (1, 10, 45, 0, 0.0, '+'),
+            (1, 100, 300, 0, 0.0, '+'),
             (2, 105, 301, 0, 0.0, '+'),
         ];
         let expected_str = build_expected_str_bed6(&expected);
@@ -114,7 +123,8 @@ mod testing {
     fn test_merge_unsorted_named_bed6() -> Result<()> {
         let input = "tests/datasets/merge/unsorted_named.bed6";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge")
+        let output = cmd
+            .arg("merge")
             .arg("-N")
             .arg("-i")
             .arg(input)
@@ -123,8 +133,8 @@ mod testing {
             .output()?;
 
         let expected = vec![
-            ("chr1", 10, 45, "0", 0.0, '+'), 
-            ("chr1", 100, 300, "0", 0.0, '+'), 
+            ("chr1", 10, 45, "0", 0.0, '+'),
+            ("chr1", 100, 300, "0", 0.0, '+'),
             ("chr2", 105, 301, "0", 0.0, '+'),
         ];
         let expected_str = build_expected_str_bed6(&expected);
@@ -148,7 +158,8 @@ mod testing {
     fn test_merge_sorted_named_bed6() -> Result<()> {
         let input = "tests/datasets/merge/sorted_named.bed6";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge")
+        let output = cmd
+            .arg("merge")
             .arg("-N")
             .arg("-i")
             .arg(input)
@@ -157,8 +168,8 @@ mod testing {
             .output()?;
 
         let expected = vec![
-            ("chr1", 10, 45, "0", 0.0, '+'), 
-            ("chr1", 100, 300, "0", 0.0, '+'), 
+            ("chr1", 10, 45, "0", 0.0, '+'),
+            ("chr1", 100, 300, "0", 0.0, '+'),
             ("chr2", 105, 301, "0", 0.0, '+'),
         ];
         let expected_str = build_expected_str_bed6(&expected);
