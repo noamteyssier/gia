@@ -131,6 +131,7 @@ fn main() -> Result<()> {
             either,
             unmerged,
             named,
+            format,
         } => {
             subtract(
                 a,
@@ -142,6 +143,7 @@ fn main() -> Result<()> {
                 either,
                 unmerged,
                 named,
+                format,
             )?;
         }
     }
