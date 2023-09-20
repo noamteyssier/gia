@@ -47,7 +47,7 @@ mod testing {
             .arg("merge")
             .arg("-i")
             .arg(input)
-            .arg("-f")
+            .arg("--format")
             .arg("bed6")
             .output()?;
 
@@ -93,7 +93,7 @@ mod testing {
             .arg("merge")
             .arg("-i")
             .arg(input)
-            .arg("-f")
+            .arg("--format")
             .arg("bed6")
             .output()?;
 
@@ -128,7 +128,7 @@ mod testing {
             .arg("-N")
             .arg("-i")
             .arg(input)
-            .arg("-f")
+            .arg("--format")
             .arg("bed6")
             .output()?;
 
@@ -163,7 +163,7 @@ mod testing {
             .arg("-N")
             .arg("-i")
             .arg(input)
-            .arg("-f")
+            .arg("--format")
             .arg("bed6")
             .output()?;
 

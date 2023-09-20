@@ -1,6 +1,6 @@
 [package]
 name = "gia"
-version = "0.1.15"
+version = "0.1.16"
 edition = "2021"
 about = "A tool for set theoretic operations of genomic intervals"
 

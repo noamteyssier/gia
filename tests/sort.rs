@@ -62,7 +62,7 @@ mod testing {
             .arg("sort")
             .arg("-i")
             .arg(input)
-            .arg("-f")
+            .arg("--format")
             .arg("bed6")
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
@@ -96,7 +96,7 @@ mod testing {
             .arg("sort")
             .arg("-i")
             .arg(input)
-            .arg("-f")
+            .arg("--format")
             .arg("bed6")
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;

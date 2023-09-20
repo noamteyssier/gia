@@ -37,7 +37,7 @@ pub enum Command {
         named: bool,
 
         /// Format of the input files
-        #[clap(short, long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
 
         /// Specify that the input files are already sorted
@@ -105,7 +105,7 @@ pub enum Command {
         named: bool,
 
         /// Format of input file
-        #[clap(short, long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -124,7 +124,7 @@ pub enum Command {
         output: Option<String>,
 
         /// Format of input file
-        #[clap(short = 'F', long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -191,7 +191,7 @@ pub enum Command {
         stream: bool,
 
         /// Input formats
-        #[clap(short = 'I', long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -223,7 +223,7 @@ pub enum Command {
         stream: bool,
 
         /// Set the format of the input bed
-        #[clap(short, long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -279,7 +279,7 @@ pub enum Command {
         genome: Option<String>,
 
         /// Set the output format
-        #[clap(short, long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -310,7 +310,7 @@ pub enum Command {
         named: bool,
 
         /// Format of input file
-        #[clap(short = 'F', long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -337,7 +337,7 @@ pub enum Command {
         named: bool,
 
         /// Input file format
-        #[clap(short, long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 
@@ -391,7 +391,7 @@ pub enum Command {
         named: bool,
 
         /// Input file formats
-        #[clap(short = 'I', long, default_value = "bed3")]
+        #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
     },
 }

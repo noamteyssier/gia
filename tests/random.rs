@@ -116,7 +116,7 @@ mod testing {
     #[test]
     fn test_random_bed6() -> Result<()> {
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("random").arg("-f").arg("bed6").output()?;
+        let output = cmd.arg("random").arg("--format").arg("bed6").output()?;
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
         let rows = string_out.split("\n");
         for row in rows {
