@@ -1,5 +1,9 @@
 # gia: Genome Interval Arithmetic
 
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+![actions status](https://github.com/noamteyssier/gia/workflows/CI/badge.svg)
+[![Crates.io](https://img.shields.io/crates/d/gia?color=green&label=crates.io)](https://crates.io/crates/gia)
+
 ## Summary
 
 `gia` is a free and open-source command-line tool for highly efficient
