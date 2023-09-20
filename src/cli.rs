@@ -122,6 +122,10 @@ pub enum Command {
         /// Output FASTA file to write to (default=stdout)
         #[clap(short, long)]
         output: Option<String>,
+
+        /// Format of input file
+        #[clap(short = 'F', long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Intersects two BED files
