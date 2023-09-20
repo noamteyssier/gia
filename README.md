@@ -1,6 +1,4 @@
-# gia
-
-gia: Genomic Interval Arithmetic
+# gia: Genome Interval Arithmetic
 
 ## Summary
 
