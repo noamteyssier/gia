@@ -17,6 +17,7 @@ pub enum InputFormat {
     Bed6,
 }
 impl InputFormat {
+    #[allow(dead_code)]
     pub fn predict<R: Read>(reader: &mut BufReader<R>) -> Result<Self> {
         reader.fill_buf()?;
         let internal = reader.buffer();
@@ -50,6 +51,7 @@ pub enum FieldFormat {
     StringBased,
 }
 impl FieldFormat {
+    #[allow(dead_code)]
     pub fn predict<R: Read>(reader: &mut BufReader<R>) -> Result<Self> {
         reader.fill_buf()?;
         let internal = reader.buffer();

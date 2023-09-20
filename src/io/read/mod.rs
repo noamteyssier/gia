@@ -14,7 +14,7 @@ pub use bed6::{
     read_paired_bed6_sets,
 };
 pub use genome::read_genome;
-pub use utils::{build_reader, read_format_set_with};
+pub use utils::build_reader;
 
 #[allow(dead_code)]
 pub enum SetFormat {

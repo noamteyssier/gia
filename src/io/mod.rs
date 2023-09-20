@@ -6,8 +6,8 @@ pub use general::{match_input, match_output};
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{
     build_reader, iter_bed3_unnamed, read_bed3_set, read_bed3_set_named, read_bed3_set_unnamed,
-    read_bed6_set, read_bed6_set_named, read_bed6_set_unnamed, read_format_set_with, read_genome,
-    read_paired_bed3_named, read_paired_bed3_sets, read_paired_bed6_named, read_paired_bed6_sets,
+    read_bed6_set, read_bed6_set_named, read_bed6_set_unnamed, read_genome, read_paired_bed3_named,
+    read_paired_bed3_sets, read_paired_bed6_named, read_paired_bed6_sets,
 };
 use serde::{Deserialize, Serialize};
 pub use write::{
