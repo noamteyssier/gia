@@ -33,7 +33,7 @@ pub fn read_paired_bed6_sets<R: Read>(
     }
 }
 
-pub fn read_bed6_set_unnamed<R: Read>(reader: R) -> Result<NumericBed6Set> {
+fn read_bed6_set_unnamed<R: Read>(reader: R) -> Result<NumericBed6Set> {
     let mut reader = build_reader(reader);
     let set = reader
         .deserialize()
@@ -51,7 +51,7 @@ pub fn read_bed6_set_unnamed<R: Read>(reader: R) -> Result<NumericBed6Set> {
 }
 
 /// Reads a single file into a GenomicIntervalSet and a Translater
-pub fn read_bed6_set_named<R: Read>(reader: R) -> Result<(NumericBed6Set, Translater)> {
+fn read_bed6_set_named<R: Read>(reader: R) -> Result<(NumericBed6Set, Translater)> {
     let mut translater = Translater::new();
     let set = convert_bed6_set(reader, &mut translater)?;
     Ok((set, translater))
@@ -86,7 +86,7 @@ fn convert_bed6_set<R: Read>(reader: R, translater: &mut Translater) -> Result<N
 }
 
 /// Reads two files into two NumericBed6Set and a Translater
-pub fn read_paired_bed6_named<R: Read>(
+fn read_paired_bed6_named<R: Read>(
     reader_1: R,
     reader_2: R,
 ) -> Result<(NumericBed6Set, NumericBed6Set, Translater)> {
