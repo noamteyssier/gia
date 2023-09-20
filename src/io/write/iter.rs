@@ -81,8 +81,48 @@ impl WriteNamedIter<GenomicInterval<usize>> for WriteNamedIterImpl {
         Ok(())
     }
 }
+impl<'a> WriteNamedIter<&'a GenomicInterval<usize>> for WriteNamedIterImpl {
+    fn write_named_iter<W: Write, It: Iterator<Item = &'a GenomicInterval<usize>>>(
+        writer: W,
+        iterator: It,
+        translater: &Translater,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_name(*interval.chr()).unwrap();
+            let named_interval = (chr, interval.start(), interval.end());
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
+}
 impl WriteNamedIter<NumericBed6> for WriteNamedIterImpl {
     fn write_named_iter<W: Write, It: Iterator<Item = NumericBed6>>(
+        writer: W,
+        iterator: It,
+        translater: &Translater,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_name(*interval.chr()).unwrap();
+            let name = translater.get_name(interval.name()).unwrap();
+            let named_interval = (
+                chr,
+                interval.start(),
+                interval.end(),
+                name,
+                interval.score,
+                interval.strand(),
+            );
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
+}
+impl<'a> WriteNamedIter<&'a NumericBed6> for WriteNamedIterImpl {
+    fn write_named_iter<W: Write, It: Iterator<Item = &'a NumericBed6>>(
         writer: W,
         iterator: It,
         translater: &Translater,

@@ -63,37 +63,6 @@ fn write_internal_named<W: Write, T: Translate>(
     Ok(())
 }
 
-pub fn write_records_with<W: Write>(
-    records: &[GenomicInterval<usize>],
-    writer: W,
-    translater: Option<&Translater>,
-) -> Result<()> {
-    if let Some(translater) = translater {
-        write_named_records(records, writer, translater)?;
-    } else {
-        write_records(records, writer)?;
-    }
-    Ok(())
-}
-
-pub fn write_records<W: Write>(records: &[GenomicInterval<usize>], writer: W) -> Result<()> {
-    let mut wtr = build_writer(writer);
-    write_internal(records, &mut wtr)?;
-    wtr.flush()?;
-    Ok(())
-}
-
-pub fn write_named_records<W: Write>(
-    records: &[GenomicInterval<usize>],
-    writer: W,
-    translater: &Translater,
-) -> Result<()> {
-    let mut wtr = build_writer(writer);
-    write_internal_named(records, &mut wtr, translater)?;
-    wtr.flush()?;
-    Ok(())
-}
-
 pub fn write_records_iter<W, R, I>(records: I, writer: W) -> Result<()>
 where
     W: Write,
