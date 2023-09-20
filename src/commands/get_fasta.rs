@@ -59,7 +59,7 @@ fn get_fasta_bed6(bed: Option<String>, fasta: &str, output: Option<String>) -> R
             Ok(buffer) => {
                 write!(
                     output,
-                    ">{}:{}-{}_{}_{}_{}\n",
+                    ">{}:{}-{}::{}::{}::{}\n",
                     record.chr, record.start, record.end, record.name, record.score, record.strand,
                 )?;
                 for subseq in buffer.split_str("\n") {
