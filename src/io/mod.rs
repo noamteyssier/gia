@@ -11,9 +11,10 @@ pub use read::{
 };
 use serde::{Deserialize, Serialize};
 pub use write::{
-    build_writer, write_named_pairs_iter, write_named_records_iter,
-    write_named_records_iter_dashmap, write_pairs_iter, write_pairs_iter_with, write_records,
-    write_records_iter, write_records_iter_with, write_records_with, write_set, write_set_with,
+    build_writer, write_named_pairs_iter, write_named_records, write_named_records_iter_dashmap,
+    write_named_set, write_pairs_iter, write_pairs_iter_with, write_records, write_records_iter,
+    write_records_iter_with, write_records_with, write_set, write_set_with, WriteIter,
+    WriteIterImpl, WriteNamedIter, WriteNamedIterImpl,
 };
 
 #[derive(Deserialize, Serialize)]

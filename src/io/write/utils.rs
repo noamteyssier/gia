@@ -43,6 +43,26 @@ pub fn write_named_set<W: Write, T: Translate>(
     Ok(())
 }
 
+fn write_internal<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer<W>) -> Result<()> {
+    for interval in records.iter() {
+        wtr.serialize(interval)?;
+    }
+    Ok(())
+}
+
+fn write_internal_named<W: Write, T: Translate>(
+    records: &[GenomicInterval<usize>],
+    wtr: &mut Writer<W>,
+    translater: &T,
+) -> Result<()> {
+    for interval in records.iter() {
+        let chr = translater.get_name(*interval.chr()).unwrap();
+        let named_interval = (chr, interval.start(), interval.end());
+        wtr.serialize(named_interval)?;
+    }
+    Ok(())
+}
+
 pub fn write_records_with<W: Write>(
     records: &[GenomicInterval<usize>],
     writer: W,
@@ -71,23 +91,6 @@ pub fn write_named_records<W: Write>(
     let mut wtr = build_writer(writer);
     write_internal_named(records, &mut wtr, translater)?;
     wtr.flush()?;
-    Ok(())
-}
-
-pub fn write_records_iter_with<W, I>(
-    records: I,
-    writer: W,
-    translater: Option<&Translater>,
-) -> Result<()>
-where
-    W: Write,
-    I: Iterator<Item = GenomicInterval<usize>>,
-{
-    if let Some(translater) = translater {
-        write_named_records_iter(records, writer, translater)?;
-    } else {
-        write_records_iter(records, writer)?;
-    }
     Ok(())
 }
 
@@ -176,21 +179,6 @@ where
     Ok(())
 }
 
-pub fn write_named_records_iter<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
-    records: I,
-    writer: W,
-    translater: &Translater,
-) -> Result<()> {
-    let mut wtr = build_writer(writer);
-    for record in records {
-        let chr = translater.get_name(*record.chr()).unwrap();
-        let named_interval = (chr, record.start(), record.end());
-        wtr.serialize(named_interval)?;
-    }
-    wtr.flush()?;
-    Ok(())
-}
-
 pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
     records: I,
     writer: W,
@@ -203,25 +191,5 @@ pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = GenomicInte
         wtr.serialize(named_interval)?;
     }
     wtr.flush()?;
-    Ok(())
-}
-
-fn write_internal<W: Write>(records: &[GenomicInterval<usize>], wtr: &mut Writer<W>) -> Result<()> {
-    for interval in records.iter() {
-        wtr.serialize(interval)?;
-    }
-    Ok(())
-}
-
-fn write_internal_named<W: Write, T: Translate>(
-    records: &[GenomicInterval<usize>],
-    wtr: &mut Writer<W>,
-    translater: &T,
-) -> Result<()> {
-    for interval in records.iter() {
-        let chr = translater.get_name(*interval.chr()).unwrap();
-        let named_interval = (chr, interval.start(), interval.end());
-        wtr.serialize(named_interval)?;
-    }
     Ok(())
 }
