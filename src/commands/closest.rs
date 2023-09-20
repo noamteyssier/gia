@@ -128,8 +128,9 @@ pub fn closest(
 #[cfg(test)]
 mod testing {
 
+    use crate::io::read_bed3_set;
+
     use super::*;
-    use crate::io::read_bed3_set_unnamed;
     use bedrs::{GenomicInterval, GenomicIntervalSet};
 
     #[test]
@@ -141,7 +142,7 @@ mod testing {
     ///                         i-j
     fn closest() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
-        let set = read_bed3_set_unnamed(interval_text.as_bytes()).unwrap();
+        let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
         let query_set = GenomicIntervalSet::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
@@ -165,7 +166,7 @@ mod testing {
     ///                         i-j
     fn closest_upstream() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
-        let set = read_bed3_set_unnamed(interval_text.as_bytes()).unwrap();
+        let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
         let query_set = GenomicIntervalSet::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
@@ -189,7 +190,7 @@ mod testing {
     /// None
     fn closest_downstream() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
-        let set = read_bed3_set_unnamed(interval_text.as_bytes()).unwrap();
+        let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
         let query_set = GenomicIntervalSet::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
