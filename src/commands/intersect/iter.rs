@@ -1,4 +1,4 @@
-use bedrs::{GenomicInterval, Intersect};
+use bedrs::{traits::IntervalBounds, Intersect};
 
 /// Describes the method used to aggregate and return overlapping intervals.
 #[derive(Debug, Copy, Clone)]
@@ -38,13 +38,14 @@ impl OutputMethod {
     }
 }
 
-pub fn run_function<'a, It>(
-    iv: &'a GenomicInterval<usize>,
+pub fn run_function<'a, It, I>(
+    iv: &'a I,
     overlapping: It,
     method: OutputMethod,
-) -> Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>
+) -> Box<dyn Iterator<Item = I> + 'a>
 where
-    It: Iterator<Item = GenomicInterval<usize>> + 'a,
+    It: Iterator<Item = I> + 'a,
+    I: IntervalBounds<usize, usize> + Copy,
 {
     match method {
         OutputMethod::Intersection => Box::new(iter_intersections(iv, overlapping)),
@@ -55,12 +56,10 @@ where
     }
 }
 
-fn iter_intersections<'a, It>(
-    iv: &'a GenomicInterval<usize>,
-    overlapping: It,
-) -> impl Iterator<Item = GenomicInterval<usize>> + 'a
+fn iter_intersections<'a, It, I>(iv: &'a I, overlapping: It) -> impl Iterator<Item = I> + 'a
 where
-    It: Iterator<Item = GenomicInterval<usize>> + 'a,
+    It: Iterator<Item = I> + 'a,
+    I: IntervalBounds<usize, usize>,
 {
     overlapping.map(|ov| match ov.intersect(iv) {
         Some(ix) => ix,
@@ -70,13 +69,14 @@ where
     })
 }
 
-fn iter_query<'a, It>(
-    iv: &'a GenomicInterval<usize>,
+fn iter_query<'a, It, I>(
+    iv: &'a I,
     overlapping: It,
     unique: bool,
-) -> Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>
+) -> Box<dyn Iterator<Item = I> + 'a>
 where
-    It: Iterator<Item = GenomicInterval<usize>> + 'a,
+    It: Iterator<Item = I> + 'a,
+    I: IntervalBounds<usize, usize> + Copy,
 {
     let iter = overlapping.map(|_| *iv);
     if unique {
@@ -87,19 +87,18 @@ where
     }
 }
 
-fn iter_targets<It>(overlapping: It) -> impl Iterator<Item = GenomicInterval<usize>>
+fn iter_targets<It, I>(overlapping: It) -> impl Iterator<Item = I>
 where
-    It: Iterator<Item = GenomicInterval<usize>>,
+    It: Iterator<Item = I>,
+    I: IntervalBounds<usize, usize>,
 {
     overlapping
 }
 
-fn iter_inverse<'a, It>(
-    iv: &'a GenomicInterval<usize>,
-    overlapping: It,
-) -> Box<dyn Iterator<Item = GenomicInterval<usize>> + 'a>
+fn iter_inverse<'a, It, I>(iv: &'a I, overlapping: It) -> Box<dyn Iterator<Item = I> + 'a>
 where
-    It: Iterator<Item = GenomicInterval<usize>> + 'a,
+    It: Iterator<Item = I> + 'a,
+    I: IntervalBounds<usize, usize> + Copy,
 {
     let mut overlapping = overlapping.peekable();
     if overlapping.next().is_none() {

@@ -189,6 +189,10 @@ pub enum Command {
         /// (only works if both files are sorted)
         #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
         stream: bool,
+
+        /// Input formats
+        #[clap(short = 'I', long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Merges intervals of a BED file with overlapping regions

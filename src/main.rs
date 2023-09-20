@@ -8,8 +8,8 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    closest, complement, extend, get_fasta, intersect, intersect_stream, merge, name_map, random,
-    sample, sort, subtract,
+    closest, complement, extend, get_fasta, intersect, merge, name_map, random, sample, sort,
+    subtract,
 };
 
 fn main() -> Result<()> {
@@ -61,35 +61,23 @@ fn main() -> Result<()> {
             inverse,
             named,
             stream,
-        } => {
-            if stream {
-                intersect_stream(
-                    a,
-                    b,
-                    output,
-                    fraction_query,
-                    fraction_target,
-                    reciprocal,
-                    either,
-                    named,
-                )?
-            } else {
-                intersect(
-                    a,
-                    b,
-                    output,
-                    fraction_query,
-                    fraction_target,
-                    reciprocal,
-                    either,
-                    with_query,
-                    with_target,
-                    unique,
-                    inverse,
-                    named,
-                )?
-            }
-        }
+            format,
+        } => intersect(
+            a,
+            b,
+            output,
+            fraction_query,
+            fraction_target,
+            reciprocal,
+            either,
+            with_query,
+            with_target,
+            unique,
+            inverse,
+            named,
+            stream,
+            format,
+        )?,
         Command::Merge {
             input,
             output,
