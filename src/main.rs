@@ -131,7 +131,8 @@ fn main() -> Result<()> {
             input,
             output,
             named,
-        } => sort(input, output, named)?,
+            format,
+        } => sort(input, output, named, format)?,
         Command::Subtract {
             a,
             b,

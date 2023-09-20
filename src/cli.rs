@@ -331,6 +331,10 @@ pub enum Command {
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
         named: bool,
+
+        /// Input file format
+        #[clap(short, long, default_value = "bed3")]
+        format: InputFormat,
     },
 
     /// Subtracts two BED files
