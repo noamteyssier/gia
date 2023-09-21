@@ -1,9 +1,10 @@
 [package]
 name = "gia"
-version = "0.1.17"
+version = "0.1.18"
 edition = "2021"
 description = "A tool for set theoretic operations of genomic intervals"
 license = "MIT"
+homepage = "https://noamteyssier.github.io/gia"
 repository = "https://github.com/noamteyssier/gia"
 categories = [ "science", "command-line-utilities" ]
 keywords = [ "genomics", "bioinformatics", "bed", "set", "interval" ]
