@@ -146,9 +146,11 @@ impl NumericBed6 {
             strand,
         }
     }
-    #[allow(dead_code)]
     pub fn name(&self) -> usize {
         self.name
+    }
+    pub fn update_name(&mut self, name: &usize) {
+        self.name = *name;
     }
 }
 impl Coordinates<usize, usize> for NumericBed6 {
