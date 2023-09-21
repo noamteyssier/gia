@@ -3,36 +3,22 @@ use crate::{
         match_input, match_output, read_bed3_set, read_bed6_set, write_records_iter_with,
         WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, Retranslater, Translater},
+    types::{InputFormat, Reorder, Retranslater, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Container};
 use serde::Serialize;
-
-pub fn reorder_chroms<I>(
-    set: &mut impl Container<usize, usize, I>,
-    translater: Translater,
-) -> Retranslater
-where
-    I: IntervalBounds<usize, usize>,
-{
-    let retranslate = translater.lex_sort();
-    set.apply_mut(|iv| {
-        let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
-        iv.update_chr(&new_chr);
-    });
-    retranslate
-}
 
 fn sort_set<I>(
     set: &mut impl Container<usize, usize, I>,
     translater: Option<Translater>,
 ) -> Option<Retranslater>
 where
-    I: IntervalBounds<usize, usize>,
+    I: IntervalBounds<usize, usize> + Reorder<I>,
 {
     let translater = if let Some(translater) = translater {
-        Some(reorder_chroms(set, translater))
+        let retranslater = I::reorder_translater(set, translater);
+        Some(retranslater)
     } else {
         None
     };
@@ -46,7 +32,7 @@ fn sort_and_write<I>(
     translater: Option<Translater>,
 ) -> Result<()>
 where
-    I: IntervalBounds<usize, usize> + Serialize,
+    I: IntervalBounds<usize, usize> + Serialize + Reorder<I>,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     let translater = sort_set(&mut set, translater);
