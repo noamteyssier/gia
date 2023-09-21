@@ -1,3 +1,5 @@
+use super::NumericBed6;
+use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval};
 use dashmap::DashMap;
 use hashbrown::HashMap;
 use human_sort::compare;
@@ -106,5 +108,43 @@ impl StreamTranslater {
     }
     pub fn get_idx_to_name(&self) -> &DashMap<usize, String> {
         &self.idx_to_name
+    }
+}
+
+pub trait Reorder<C>
+where
+    C: IntervalBounds<usize, usize>,
+{
+    fn reorder_translater(
+        set: &mut impl Container<usize, usize, C>,
+        translater: Translater,
+    ) -> Retranslater;
+}
+impl Reorder<GenomicInterval<usize>> for GenomicInterval<usize> {
+    fn reorder_translater(
+        set: &mut impl Container<usize, usize, Self>,
+        translater: Translater,
+    ) -> Retranslater {
+        let retranslate = translater.lex_sort();
+        set.apply_mut(|iv| {
+            let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
+            iv.update_chr(&new_chr);
+        });
+        retranslate
+    }
+}
+impl Reorder<NumericBed6> for NumericBed6 {
+    fn reorder_translater(
+        set: &mut impl Container<usize, usize, Self>,
+        translater: Translater,
+    ) -> Retranslater {
+        let retranslate = translater.lex_sort();
+        set.apply_mut(|iv| {
+            let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
+            let new_name = retranslate.get_rank(iv.name()).unwrap();
+            iv.update_chr(&new_chr);
+            iv.update_name(&new_name);
+        });
+        retranslate
     }
 }
