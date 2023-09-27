@@ -1,22 +1,23 @@
 use crate::{
     io::{match_input, match_output, write_records_iter_with},
-    types::{Genome, InputFormat, NumericBed6},
+    types::{Genome, InputFormat, NumericBed6, Translater},
     utils::build_rng,
 };
 use anyhow::Result;
 use bedrs::{GenomicInterval, Strand};
 use rand::Rng;
 
-fn build_chr_size(
+fn build_chr_size<'a>(
     n_chr: usize,
     max_chr_len: usize,
     genome: Option<String>,
     named: bool,
-) -> Result<Genome> {
+    translater: &'a mut Translater,
+) -> Result<Genome<'a>> {
     if let Some(path) = genome {
         let handle = match_input(Some(path))?;
         if named {
-            Genome::from_reader_named(handle)
+            Genome::from_reader_named(handle, translater)
         } else {
             Genome::from_reader_unnamed(handle)
         }
@@ -37,14 +38,15 @@ pub fn random_bed3(
 ) -> Result<()> {
     let mut rng_intervals = build_rng(seed);
     let mut rng_chr = build_rng(seed);
-    let genome = build_chr_size(n_chr, max_chr_len, genome, named)?;
+    let mut translater = Translater::new();
+    let genome = build_chr_size(n_chr, max_chr_len, genome, named, &mut translater)?;
 
     let interval_gen = (0..n_intervals)
         // draw a random chromosome
         .map(|_| genome.sample_chr(&mut rng_chr))
         // draw a random end position in the chromosome
         .map(|c| {
-            let y = rng_intervals.gen_range(l_intervals..=genome.chr_size(c));
+            let y = rng_intervals.gen_range(l_intervals..=genome.chr_size_unchecked(c));
             (c, y)
         })
         // calculate the start position
@@ -74,14 +76,15 @@ pub fn random_bed6(
     let mut rng_intervals = build_rng(seed);
     let mut rng_chr = build_rng(seed);
     let mut rng_strand = build_rng(seed);
-    let genome_sizes = build_chr_size(n_chr, max_chr_len, genome, named)?;
+    let mut translater = Translater::new();
+    let genome_sizes = build_chr_size(n_chr, max_chr_len, genome, named, &mut translater)?;
 
     let interval_gen = (0..n_intervals)
         // draw a random chromosome
         .map(|_| genome_sizes.sample_chr(&mut rng_chr))
         // draw a random end position in the chromosome
         .map(|c| {
-            let y = rng_intervals.gen_range(l_intervals..=genome_sizes.chr_size(c));
+            let y = rng_intervals.gen_range(l_intervals..=genome_sizes.chr_size_unchecked(c));
             (c, y)
         })
         // draw a random strand
