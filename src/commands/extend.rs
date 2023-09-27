@@ -41,6 +41,8 @@ fn extend_set<I>(
     right: Option<usize>,
     genome: Option<Genome>,
     translater: Option<&Translater>,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Copy,
@@ -60,7 +62,7 @@ where
         }
         *iv
     });
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_records_iter_with(extend_iter, output_handle, translater)?;
     Ok(())
 }
@@ -73,6 +75,8 @@ fn extend_bed3(
     right: Option<usize>,
     genome_path: Option<String>,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
     let (mut iset, translater) = read_bed3_set(input_handle, named)?;
@@ -91,6 +95,8 @@ fn extend_bed3(
         right,
         genome,
         translater.as_ref(),
+        compression_threads,
+        compression_level,
     )?;
     Ok(())
 }
@@ -103,6 +109,8 @@ fn extend_bed6(
     right: Option<usize>,
     genome_path: Option<String>,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
     let (mut iset, translater) = read_bed6_set(input_handle, named)?;
@@ -121,6 +129,8 @@ fn extend_bed6(
         right,
         genome,
         translater.as_ref(),
+        compression_threads,
+        compression_level,
     )?;
     Ok(())
 }
@@ -134,9 +144,31 @@ pub fn extend(
     genome_path: Option<String>,
     named: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     match format {
-        InputFormat::Bed3 => extend_bed3(input, output, both, left, right, genome_path, named),
-        InputFormat::Bed6 => extend_bed6(input, output, both, left, right, genome_path, named),
+        InputFormat::Bed3 => extend_bed3(
+            input,
+            output,
+            both,
+            left,
+            right,
+            genome_path,
+            named,
+            compression_threads,
+            compression_level,
+        ),
+        InputFormat::Bed6 => extend_bed6(
+            input,
+            output,
+            both,
+            left,
+            right,
+            genome_path,
+            named,
+            compression_threads,
+            compression_level,
+        ),
     }
 }

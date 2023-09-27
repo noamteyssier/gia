@@ -35,6 +35,8 @@ pub fn random_bed3(
     output: Option<String>,
     genome: Option<String>,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let mut rng_intervals = build_rng(seed);
     let mut rng_chr = build_rng(seed);
@@ -57,7 +59,7 @@ pub fn random_bed3(
         // build the interval
         .map(|(c, x, y)| GenomicInterval::new(c, x, y));
 
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_records_iter_with(interval_gen, output_handle, genome.translater())?;
 
     Ok(())
@@ -72,6 +74,8 @@ pub fn random_bed6(
     output: Option<String>,
     genome: Option<String>,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let mut rng_intervals = build_rng(seed);
     let mut rng_chr = build_rng(seed);
@@ -100,7 +104,7 @@ pub fn random_bed6(
         // build the interval
         .map(|(c, x, y, s)| NumericBed6::new(c, x, y, 0, 0.0, s));
 
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_records_iter_with(interval_gen, output_handle, genome_sizes.translater())?;
 
     Ok(())
@@ -116,6 +120,8 @@ pub fn random(
     genome: Option<String>,
     named: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     match format {
         InputFormat::Bed3 => random_bed3(
@@ -127,6 +133,8 @@ pub fn random(
             output,
             genome,
             named,
+            compression_threads,
+            compression_level,
         ),
         InputFormat::Bed6 => random_bed6(
             n_intervals,
@@ -137,6 +145,8 @@ pub fn random(
             output,
             genome,
             named,
+            compression_threads,
+            compression_level,
         ),
     }
 }
