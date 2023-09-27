@@ -278,6 +278,10 @@ pub enum Command {
         #[clap(short, long, conflicts_with_all = &["max_chr_len", "n_chr"])]
         genome: Option<String>,
 
+        /// Allow for non-integer chromosome names in genome file + output
+        #[clap(short = 'N', long)]
+        named: bool,
+
         /// Set the output format
         #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,

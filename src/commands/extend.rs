@@ -1,13 +1,12 @@
 use crate::{
     io::{
-        match_input, match_output, read_bed3_set, read_bed6_set, read_genome,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
+        match_input, match_output, read_bed3_set, read_bed6_set, write_records_iter_with,
+        WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, Translater},
+    types::{Genome, InputFormat, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Container, Coordinates};
-use hashbrown::HashMap;
 use serde::Serialize;
 
 fn extend_left(iv: &mut impl Coordinates<usize, usize>, val: usize) {
@@ -18,13 +17,9 @@ fn extend_left(iv: &mut impl Coordinates<usize, usize>, val: usize) {
     }
 }
 
-fn extend_right(
-    iv: &mut impl Coordinates<usize, usize>,
-    val: usize,
-    genome: Option<&HashMap<usize, usize>>,
-) {
+fn extend_right(iv: &mut impl Coordinates<usize, usize>, val: usize, genome: Option<&Genome>) {
     if let Some(ref genome) = genome {
-        if let Some(end) = genome.get(iv.chr()) {
+        if let Some(end) = genome.chr_size(*iv.chr()) {
             if iv.end() + val > *end {
                 iv.update_end(end);
             } else {
@@ -44,7 +39,7 @@ fn extend_set<I>(
     both: Option<usize>,
     left: Option<usize>,
     right: Option<usize>,
-    genome: Option<HashMap<usize, usize>>,
+    genome: Option<Genome>,
     translater: Option<&Translater>,
 ) -> Result<()>
 where
@@ -83,7 +78,7 @@ fn extend_bed3(
     let (mut iset, translater) = read_bed3_set(input_handle, named)?;
     let genome = if let Some(path) = genome_path {
         let genome_handle = match_input(Some(path))?;
-        let genome = read_genome(genome_handle)?;
+        let genome = Genome::from_reader_immutable(genome_handle, translater.as_ref(), false)?;
         Some(genome)
     } else {
         None
@@ -113,7 +108,7 @@ fn extend_bed6(
     let (mut iset, translater) = read_bed6_set(input_handle, named)?;
     let genome = if let Some(path) = genome_path {
         let genome_handle = match_input(Some(path))?;
-        let genome = read_genome(genome_handle)?;
+        let genome = Genome::from_reader_immutable(genome_handle, translater.as_ref(), false)?;
         Some(genome)
     } else {
         None
