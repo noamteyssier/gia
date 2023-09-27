@@ -120,3 +120,44 @@ impl<'a> Genome<'a> {
         *self.map.get(&chr).unwrap()
     }
 }
+
+#[cfg(test)]
+mod testing {
+
+    use super::*;
+    use crate::types::Translate;
+
+    const GENOME_UNNAMED: &[u8] = b"1\t1000\n2\t2000\n3\t3000\n";
+    const GENOME_NAMED: &[u8] = b"chr1\t1000\nchr2\t2000\nchr3\t3000\n";
+
+    #[test]
+    fn test_genome_unnamed() {
+        let genome = Genome::from_reader_unnamed(GENOME_UNNAMED).unwrap();
+        assert_eq!(genome.chr_size_unchecked(1), 1000);
+        assert_eq!(genome.chr_size_unchecked(2), 2000);
+        assert_eq!(genome.chr_size_unchecked(3), 3000);
+        assert!(genome.translater().is_none());
+    }
+
+    #[test]
+    fn test_genome_named() {
+        let mut translater = Translater::new();
+        let genome = Genome::from_reader_named(GENOME_NAMED, &mut translater).unwrap();
+        assert_eq!(genome.chr_size_unchecked(0), 1000);
+        assert_eq!(genome.chr_size_unchecked(1), 2000);
+        assert_eq!(genome.chr_size_unchecked(2), 3000);
+        assert!(genome.translater().is_some());
+        let translater = genome.translater().unwrap();
+        assert_eq!(translater.get_name(0).unwrap(), "chr1");
+        assert_eq!(translater.get_name(1).unwrap(), "chr2");
+        assert_eq!(translater.get_name(2).unwrap(), "chr3");
+    }
+
+    #[test]
+    fn test_sampling() {
+        let mut rng = rand::thread_rng();
+        let genome = Genome::from_reader_unnamed(GENOME_UNNAMED).unwrap();
+        let chr = genome.sample_chr(&mut rng);
+        assert!(chr >= 1 && chr <= 3);
+    }
+}
