@@ -8,8 +8,6 @@ use std::{
     fs::File,
     io::{BufRead, BufReader, BufWriter, Write},
 };
-const COMPRESSION_THREADS: usize = 4;
-const COMPRESSION_LEVEL: u32 = 6;
 
 fn compression_aware_read_buffer(file: File) -> Result<Box<dyn BufRead>> {
     let buffer = BufReader::new(file);
@@ -32,14 +30,18 @@ pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
     }
 }
 
-fn compression_aware_write_buffer(filename: String) -> Result<Box<dyn Write>> {
+fn compression_aware_write_buffer(
+    filename: String,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<Box<dyn Write>> {
     let file = File::create(filename.clone())?;
     let buffer = BufWriter::new(file);
     let ext = Path::new(&filename).extension();
     if ext == Some(OsStr::new("gz")) || ext == Some(OsStr::new("bgz")) {
         let writer = ZBuilder::<Bgzf, _>::new()
-            .num_threads(COMPRESSION_THREADS)
-            .compression_level(Compression::new(COMPRESSION_LEVEL))
+            .num_threads(compression_threads)
+            .compression_level(Compression::new(compression_level))
             .from_writer(buffer);
         Ok(Box::new(writer))
     } else {
@@ -47,9 +49,15 @@ fn compression_aware_write_buffer(filename: String) -> Result<Box<dyn Write>> {
     }
 }
 
-pub fn match_output(output: Option<String>) -> Result<Box<dyn Write>> {
+pub fn match_output(
+    output: Option<String>,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<Box<dyn Write>> {
     match output {
-        Some(filename) => compression_aware_write_buffer(filename),
+        Some(filename) => {
+            compression_aware_write_buffer(filename, compression_threads, compression_level)
+        }
         None => {
             let stdout = std::io::stdout();
             let buffer = BufWriter::new(stdout);
