@@ -7,7 +7,13 @@ use bedrs::{
     types::iterator::ComplementIter, Complement, Container, GenomicInterval, Merge, MergeIter,
 };
 
-fn complement_inplace(input: Option<String>, output: Option<String>, named: bool) -> Result<()> {
+fn complement_inplace(
+    input: Option<String>,
+    output: Option<String>,
+    named: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     // Build input handle
     let input_handle = match_input(input)?;
 
@@ -24,7 +30,7 @@ fn complement_inplace(input: Option<String>, output: Option<String>, named: bool
     let complement_iter = merged.complement()?;
 
     // Match the output handle
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
 
     // Write the records
     write_records_iter_with(complement_iter, output_handle, translater.as_ref())?;
@@ -32,7 +38,12 @@ fn complement_inplace(input: Option<String>, output: Option<String>, named: bool
     Ok(())
 }
 
-fn complement_stream(input: Option<String>, output: Option<String>) -> Result<()> {
+fn complement_stream(
+    input: Option<String>,
+    output: Option<String>,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     // Build input handle
     let input_handle = match_input(input)?;
 
@@ -50,7 +61,7 @@ fn complement_stream(input: Option<String>, output: Option<String>) -> Result<()
     let comp_iter = ComplementIter::new(merged_iter);
 
     // Match the output handle
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
 
     // Write the records
     write_records_iter(comp_iter, output_handle)?;
@@ -62,10 +73,12 @@ pub fn complement(
     output: Option<String>,
     named: bool,
     stream: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     if stream {
-        complement_stream(input, output)
+        complement_stream(input, output, compression_threads, compression_level)
     } else {
-        complement_inplace(input, output, named)
+        complement_inplace(input, output, named, compression_threads, compression_level)
     }
 }

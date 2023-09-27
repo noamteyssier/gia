@@ -80,9 +80,11 @@ pub fn merge(
     named: bool,
     stream: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let input_handle = match_input(input)?;
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     if stream {
         merge_streamed(input_handle, output_handle)
     } else {

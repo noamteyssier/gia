@@ -30,27 +30,53 @@ fn sort_and_write<I>(
     mut set: impl Container<usize, usize, I>,
     output: Option<String>,
     translater: Option<Translater>,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Reorder<I>,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     let translater = sort_set(&mut set, translater);
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_records_iter_with(set.into_iter(), output_handle, translater.as_ref())?;
     Ok(())
 }
 
-fn sort_bed3(input: Option<String>, output: Option<String>, named: bool) -> Result<()> {
+fn sort_bed3(
+    input: Option<String>,
+    output: Option<String>,
+    named: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     let input_handle = match_input(input)?;
     let (set, translater) = read_bed3_set(input_handle, named)?;
-    sort_and_write(set, output, translater)
+    sort_and_write(
+        set,
+        output,
+        translater,
+        compression_threads,
+        compression_level,
+    )
 }
 
-fn sort_bed6(input: Option<String>, output: Option<String>, named: bool) -> Result<()> {
+fn sort_bed6(
+    input: Option<String>,
+    output: Option<String>,
+    named: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     let input_handle = match_input(input)?;
     let (set, translater) = read_bed6_set(input_handle, named)?;
-    sort_and_write(set, output, translater)
+    sort_and_write(
+        set,
+        output,
+        translater,
+        compression_threads,
+        compression_level,
+    )
 }
 
 pub fn sort(
@@ -58,9 +84,15 @@ pub fn sort(
     output: Option<String>,
     named: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     match format {
-        InputFormat::Bed3 => sort_bed3(input, output, named),
-        InputFormat::Bed6 => sort_bed6(input, output, named),
+        InputFormat::Bed3 => {
+            sort_bed3(input, output, named, compression_threads, compression_level)
+        }
+        InputFormat::Bed6 => {
+            sort_bed6(input, output, named, compression_threads, compression_level)
+        }
     }
 }

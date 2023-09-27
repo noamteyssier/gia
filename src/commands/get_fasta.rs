@@ -13,14 +13,20 @@ fn build_fasta_index(fasta: &str) -> Result<FastaIndex> {
     FastaIndex::from_filepath(&index_path)
 }
 
-fn get_fasta_bed3(bed: Option<String>, fasta: &str, output: Option<String>) -> Result<()> {
+fn get_fasta_bed3(
+    bed: Option<String>,
+    fasta: &str,
+    output: Option<String>,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     let handle = match_input(bed)?;
     let fasta_index = build_fasta_index(fasta)?;
     let fasta = IndexedFasta::new(fasta_index, fasta)?;
 
     let mut csv_reader = build_reader(handle);
     let mut byterecord = ByteRecord::new();
-    let mut output = match_output(output)?;
+    let mut output = match_output(output, compression_threads, compression_level)?;
 
     while csv_reader.read_byte_record(&mut byterecord)? {
         let record: NamedInterval<&str, usize> = byterecord.deserialize(None)?;
@@ -44,14 +50,20 @@ fn get_fasta_bed3(bed: Option<String>, fasta: &str, output: Option<String>) -> R
     Ok(())
 }
 
-fn get_fasta_bed6(bed: Option<String>, fasta: &str, output: Option<String>) -> Result<()> {
+fn get_fasta_bed6(
+    bed: Option<String>,
+    fasta: &str,
+    output: Option<String>,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     let handle = match_input(bed)?;
     let fasta_index = build_fasta_index(fasta)?;
     let fasta = IndexedFasta::new(fasta_index, fasta)?;
 
     let mut csv_reader = build_reader(handle);
     let mut byterecord = ByteRecord::new();
-    let mut output = match_output(output)?;
+    let mut output = match_output(output, compression_threads, compression_level)?;
 
     while csv_reader.read_byte_record(&mut byterecord)? {
         let record: Bed6 = byterecord.deserialize(None)?;
@@ -78,9 +90,15 @@ pub fn get_fasta(
     fasta: &str,
     output: Option<String>,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     match format {
-        InputFormat::Bed3 => get_fasta_bed3(bed, fasta, output),
-        InputFormat::Bed6 => get_fasta_bed6(bed, fasta, output),
+        InputFormat::Bed3 => {
+            get_fasta_bed3(bed, fasta, output, compression_threads, compression_level)
+        }
+        InputFormat::Bed6 => {
+            get_fasta_bed6(bed, fasta, output, compression_threads, compression_level)
+        }
     }
 }

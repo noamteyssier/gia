@@ -18,6 +18,8 @@ fn sample_from_set<I>(
     seed: Option<usize>,
     translater: Option<&Translater>,
     output: Option<String>,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Copy,
@@ -47,7 +49,7 @@ where
     let subset = set.sample_iter_rng(num, &mut rng)?.copied();
 
     // build output handle
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
 
     // write intervals to output
     write_records_iter_with(subset, output_handle, translater)?;
@@ -63,6 +65,8 @@ pub fn sample(
     seed: Option<usize>,
     named: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     // read input
     let input_handle = match_input(input)?;
@@ -71,11 +75,29 @@ pub fn sample(
     match format {
         InputFormat::Bed3 => {
             let (set, translater) = read_bed3_set(input_handle, named)?;
-            sample_from_set(&set, number, fraction, seed, translater.as_ref(), output)
+            sample_from_set(
+                &set,
+                number,
+                fraction,
+                seed,
+                translater.as_ref(),
+                output,
+                compression_threads,
+                compression_level,
+            )
         }
         InputFormat::Bed6 => {
             let (set, translater) = read_bed6_set(input_handle, named)?;
-            sample_from_set(&set, number, fraction, seed, translater.as_ref(), output)
+            sample_from_set(
+                &set,
+                number,
+                fraction,
+                seed,
+                translater.as_ref(),
+                output,
+                compression_threads,
+                compression_level,
+            )
         }
     }
 }

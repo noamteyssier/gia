@@ -10,7 +10,13 @@ pub struct NamedInterval {
     end: u64,
 }
 
-pub fn name_map(input: Option<String>, output: Option<String>, map: Option<String>) -> Result<()> {
+pub fn name_map(
+    input: Option<String>,
+    output: Option<String>,
+    map: Option<String>,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
     let map_name = match map {
         Some(map_name) => map_name,
         None => "name_map.tsv".to_string(),
@@ -22,8 +28,8 @@ pub fn name_map(input: Option<String>, output: Option<String>, map: Option<Strin
         .comment(Some(b'#'))
         .from_reader(input_handle);
 
-    let bed_output_handle = match_output(output)?;
-    let map_output_handle = match_output(Some(map_name))?;
+    let bed_output_handle = match_output(output, compression_threads, compression_level)?;
+    let map_output_handle = match_output(Some(map_name), compression_threads, compression_level)?;
     let mut bed_writer = csv::WriterBuilder::new()
         .delimiter(b'\t')
         .has_headers(false)

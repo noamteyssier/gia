@@ -23,6 +23,8 @@ fn run_intersect_set<I>(
     output_method: OutputMethod,
     output: Option<String>,
     translater: Option<&Translater>,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
@@ -33,7 +35,7 @@ where
         let intersections = run_function(iv, overlaps, output_method);
         intersections
     });
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_records_iter_with(ix_iter, output_handle, translater)?;
     Ok(())
 }
@@ -45,6 +47,8 @@ fn intersect_bed3(
     overlap_method: OverlapMethod,
     output_method: OutputMethod,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let handle_a = match_input(a)?;
     let handle_b = match_input(Some(b))?;
@@ -56,6 +60,8 @@ fn intersect_bed3(
         output_method,
         output,
         translater.as_ref(),
+        compression_threads,
+        compression_level,
     )
 }
 
@@ -66,6 +72,8 @@ fn intersect_bed6(
     overlap_method: OverlapMethod,
     output_method: OutputMethod,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let handle_a = match_input(a)?;
     let handle_b = match_input(Some(b))?;
@@ -77,6 +85,8 @@ fn intersect_bed6(
         output_method,
         output,
         translater.as_ref(),
+        compression_threads,
+        compression_level,
     )
 }
 
@@ -94,13 +104,33 @@ pub fn intersect_set(
     inverse: bool,
     named: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let overlap_method =
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
     let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
     match format {
-        InputFormat::Bed3 => intersect_bed3(a, b, output, overlap_method, output_method, named),
-        InputFormat::Bed6 => intersect_bed6(a, b, output, overlap_method, output_method, named),
+        InputFormat::Bed3 => intersect_bed3(
+            a,
+            b,
+            output,
+            overlap_method,
+            output_method,
+            named,
+            compression_threads,
+            compression_level,
+        ),
+        InputFormat::Bed6 => intersect_bed6(
+            a,
+            b,
+            output,
+            overlap_method,
+            output_method,
+            named,
+            compression_threads,
+            compression_level,
+        ),
     }
 }
 
@@ -119,6 +149,8 @@ pub fn intersect(
     named: bool,
     stream: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     if stream {
         intersect_stream(
@@ -130,6 +162,8 @@ pub fn intersect(
             reciprocal,
             either,
             named,
+            compression_threads,
+            compression_level,
         )
     } else {
         intersect_set(
@@ -146,6 +180,8 @@ pub fn intersect(
             inverse,
             named,
             format,
+            compression_threads,
+            compression_level,
         )
     }
 }
@@ -191,12 +227,14 @@ fn intersect_stream(
     reciprocal: bool,
     either: bool,
     named: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let query_handle = match_input(a)?;
     let target_handle = match_input(Some(b))?;
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     let method = assign_method(fraction_query, fraction_target, reciprocal, either);
 
     if named {

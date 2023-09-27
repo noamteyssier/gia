@@ -160,10 +160,12 @@ pub fn subtract(
     unmerged: bool,
     named: bool,
     format: InputFormat,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     let overlap_method =
         OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
-    let output_handle = match_output(output_path)?;
+    let output_handle = match_output(output_path, compression_threads, compression_level)?;
     match format {
         InputFormat::Bed3 => subtract_bed3(
             query_path,

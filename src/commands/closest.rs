@@ -64,6 +64,8 @@ pub fn closest_bed3(
     downstream: bool,
     named: bool,
     sorted: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     // load pairs
     let query_handle = match_input(a)?;
@@ -77,7 +79,7 @@ pub fn closest_bed3(
     let pairs_iter = run_closest(&a_set, &b_set, method);
 
     // write output
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_pairs_iter_with(pairs_iter, output_handle, translater.as_ref())?;
     Ok(())
 }
@@ -90,6 +92,8 @@ pub fn closest_bed6(
     downstream: bool,
     named: bool,
     sorted: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     // load pairs
     let query_handle = match_input(a)?;
@@ -103,7 +107,7 @@ pub fn closest_bed6(
     let pairs_iter = run_closest(&a_set, &b_set, method);
 
     // write output
-    let output_handle = match_output(output)?;
+    let output_handle = match_output(output, compression_threads, compression_level)?;
     write_pairs_iter_with(pairs_iter, output_handle, translater.as_ref())?;
     Ok(())
 }
@@ -117,11 +121,33 @@ pub fn closest(
     named: bool,
     format: InputFormat,
     sorted: bool,
+    compression_threads: usize,
+    compression_level: u32,
 ) -> Result<()> {
     if format == InputFormat::Bed3 {
-        closest_bed3(a, b, output, upstream, downstream, named, sorted)
+        closest_bed3(
+            a,
+            b,
+            output,
+            upstream,
+            downstream,
+            named,
+            sorted,
+            compression_threads,
+            compression_level,
+        )
     } else {
-        closest_bed6(a, b, output, upstream, downstream, named, sorted)
+        closest_bed6(
+            a,
+            b,
+            output,
+            upstream,
+            downstream,
+            named,
+            sorted,
+            compression_threads,
+            compression_level,
+        )
     }
 }
 
