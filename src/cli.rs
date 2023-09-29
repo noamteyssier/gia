@@ -352,6 +352,10 @@ pub enum Command {
         /// Input file format
         #[clap(short = 'T', long, default_value = "bed3")]
         format: InputFormat,
+
+        /// Number of threads to use for sorting (default=1)
+        #[clap(short = 't', long, default_value = "1")]
+        threads: usize,
     },
 
     /// Subtracts two BED files
