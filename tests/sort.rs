@@ -30,6 +30,36 @@ mod testing {
     }
 
     #[test]
+    fn test_par_sort_bed3() -> Result<()> {
+        let input = "tests/datasets/sort/unsorted.bed";
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("sort")
+            .arg("-i")
+            .arg(input)
+            .arg("-t")
+            .arg("0")
+            .output()?;
+        let output_str = String::from_utf8(output.stdout)?;
+        let rows = output_str
+            .split("\n")
+            .filter(|row| !row.is_empty())
+            .collect::<Vec<&str>>();
+
+        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        for row in rows {
+            let fields = row
+                .split("\t")
+                .map(|field| field.parse::<u32>().unwrap())
+                .collect::<Vec<u32>>();
+            let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
+            assert!(interval.gt(&last_interval) || interval == last_interval);
+            last_interval = interval;
+        }
+        Ok(())
+    }
+
+    #[test]
     fn test_lex_sort_bed3() -> Result<()> {
         let input = "tests/datasets/sort/unsorted_named.bed";
         let mut cmd = Command::cargo_bin("gia")?;
@@ -62,6 +92,42 @@ mod testing {
             .arg("sort")
             .arg("-i")
             .arg(input)
+            .arg("--format")
+            .arg("bed6")
+            .output()?;
+        let output_str = String::from_utf8(output.stdout)?;
+        let rows = output_str
+            .split("\n")
+            .filter(|row| !row.is_empty())
+            .collect::<Vec<&str>>();
+
+        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        for row in rows {
+            let fields = row.split("\t").collect::<Vec<&str>>();
+            assert_eq!(fields.len(), 6);
+            let numeric_fields = fields
+                .iter()
+                .take(3)
+                .map(|field| field.parse::<u32>().unwrap())
+                .collect::<Vec<u32>>();
+            let interval =
+                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval == last_interval);
+            last_interval = interval;
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_par_sort_bed6() -> Result<()> {
+        let input = "tests/datasets/sort/unsorted.bed6";
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("sort")
+            .arg("-i")
+            .arg(input)
+            .arg("-t")
+            .arg("0")
             .arg("--format")
             .arg("bed6")
             .output()?;

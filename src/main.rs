@@ -187,11 +187,13 @@ fn main() -> Result<()> {
             output,
             named,
             format,
+            threads,
         } => sort(
             input,
             output,
             named,
             format,
+            threads,
             cli.compression_threads,
             cli.compression_level,
         )?,
