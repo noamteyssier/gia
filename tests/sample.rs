@@ -22,6 +22,44 @@ mod testing {
     }
 
     #[test]
+    fn test_sample_int_bed6() -> Result<()> {
+        let input = "tests/datasets/sample/sample.bed6";
+        let num_samples = 10;
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("sample")
+            .arg("-i")
+            .arg(input)
+            .arg("-n")
+            .arg(num_samples.to_string())
+            .arg("--format")
+            .arg("bed6")
+            .output()?;
+        let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
+        assert_eq!(num_intervals, num_samples);
+        Ok(())
+    }
+
+    #[test]
+    fn test_sample_int_bed12() -> Result<()> {
+        let input = "tests/datasets/sample/sample.bed12";
+        let num_samples = 10;
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("sample")
+            .arg("-i")
+            .arg(input)
+            .arg("-n")
+            .arg(num_samples.to_string())
+            .arg("--format")
+            .arg("bed12")
+            .output()?;
+        let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
+        assert_eq!(num_intervals, num_samples);
+        Ok(())
+    }
+
+    #[test]
     fn test_sample_float() -> Result<()> {
         let input = "tests/datasets/sample/sample.bed";
         let frac_samples = 0.1;
