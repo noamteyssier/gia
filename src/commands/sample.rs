@@ -4,8 +4,8 @@ use serde::Serialize;
 
 use crate::{
     io::{
-        match_input, match_output, read_bed3_set, read_bed6_set, write_records_iter_with,
-        WriteNamedIter, WriteNamedIterImpl,
+        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
+        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, Translater},
     utils::build_rng,
@@ -88,6 +88,19 @@ pub fn sample(
         }
         InputFormat::Bed6 => {
             let (set, translater) = read_bed6_set(input_handle, named)?;
+            sample_from_set(
+                &set,
+                number,
+                fraction,
+                seed,
+                translater.as_ref(),
+                output,
+                compression_threads,
+                compression_level,
+            )
+        }
+        InputFormat::Bed12 => {
+            let (set, translater) = read_bed12_set(input_handle, named)?;
             sample_from_set(
                 &set,
                 number,

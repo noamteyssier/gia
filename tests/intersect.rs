@@ -71,6 +71,36 @@ mod testing {
     }
 
     #[test]
+    fn test_intersect_bed12() -> Result<()> {
+        let a = "tests/datasets/intersect/intersect_a.bed12";
+        let b = "tests/datasets/intersect/intersect_b.bed12";
+
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("intersect")
+            .arg("-a")
+            .arg(a)
+            .arg("-b")
+            .arg(b)
+            .arg("--format")
+            .arg("bed12")
+            .output()?;
+
+        let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
+        assert_eq!(num_intervals, 11);
+
+        let num_fields = output
+            .stdout
+            .split(|&c| c == b'\n')
+            .next()
+            .unwrap()
+            .split(|&c| c == b'\t')
+            .count();
+        assert_eq!(num_fields, 12);
+        Ok(())
+    }
+
+    #[test]
     fn test_intersect_fractional_query() -> Result<()> {
         let a = "tests/datasets/intersect/intersect_a.bed";
         let b = "tests/datasets/intersect/intersect_b.bed";

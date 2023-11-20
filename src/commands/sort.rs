@@ -1,7 +1,7 @@
 use crate::{
     io::{
-        match_input, match_output, read_bed3_set, read_bed6_set, write_records_iter_with,
-        WriteNamedIter, WriteNamedIterImpl,
+        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
+        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, Reorder, Retranslater, Translater},
 };
@@ -90,6 +90,26 @@ fn sort_bed6(
     )
 }
 
+fn sort_bed12(
+    input: Option<String>,
+    output: Option<String>,
+    named: bool,
+    parallel: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
+    let input_handle = match_input(input)?;
+    let (set, translater) = read_bed12_set(input_handle, named)?;
+    sort_and_write(
+        set,
+        output,
+        translater,
+        parallel,
+        compression_threads,
+        compression_level,
+    )
+}
+
 fn initialize_thread_pool(threads: usize) -> Result<bool> {
     if threads > 1 {
         ThreadPoolBuilder::new()
@@ -125,6 +145,14 @@ pub fn sort(
             compression_level,
         ),
         InputFormat::Bed6 => sort_bed6(
+            input,
+            output,
+            named,
+            parallel,
+            compression_threads,
+            compression_level,
+        ),
+        InputFormat::Bed12 => sort_bed12(
             input,
             output,
             named,

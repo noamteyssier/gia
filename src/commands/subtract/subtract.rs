@@ -1,8 +1,8 @@
 use crate::{
     commands::{run_find, OverlapMethod},
     io::{
-        match_input, match_output, read_paired_bed3_sets, read_paired_bed6_sets,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
+        match_input, match_output, read_paired_bed12_sets, read_paired_bed3_sets,
+        read_paired_bed6_sets, write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, Translater},
     utils::sort_pairs,
@@ -149,6 +149,37 @@ fn subtract_bed6<W: Write>(
     )
 }
 
+fn subtract_bed12<W: Write>(
+    query_path: Option<String>,
+    target_path: String,
+    output_handle: W,
+    overlap_method: OverlapMethod,
+    unmerged: bool,
+    named: bool,
+) -> Result<()> {
+    // load query and target sets
+    let query_handle = match_input(query_path)?;
+    let target_handle = match_input(Some(target_path))?;
+    let (mut query_set, mut target_set, translater) =
+        read_paired_bed12_sets(query_handle, target_handle, named)?;
+
+    // sort query and target sets
+    sort_pairs(&mut query_set, &mut target_set, false);
+
+    // merge target set
+    let bset = target_set.merge()?;
+
+    // run subtraction
+    run_subtract(
+        &query_set,
+        &bset,
+        &overlap_method,
+        unmerged,
+        output_handle,
+        translater.as_ref(),
+    )
+}
+
 pub fn subtract(
     query_path: Option<String>,
     target_path: String,
@@ -176,6 +207,14 @@ pub fn subtract(
             named,
         ),
         InputFormat::Bed6 => subtract_bed6(
+            query_path,
+            target_path,
+            output_handle,
+            overlap_method,
+            unmerged,
+            named,
+        ),
+        InputFormat::Bed12 => subtract_bed12(
             query_path,
             target_path,
             output_handle,

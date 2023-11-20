@@ -125,4 +125,17 @@ mod testing {
         }
         Ok(())
     }
+
+    #[test]
+    fn test_random_bed12() -> Result<()> {
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd.arg("random").arg("--format").arg("bed12").output()?;
+        let string_out = String::from_utf8(output.stdout)?.trim().to_string();
+        let rows = string_out.split("\n");
+        for row in rows {
+            let cols = row.split("\t").collect::<Vec<&str>>();
+            assert_eq!(cols.len(), 12);
+        }
+        Ok(())
+    }
 }

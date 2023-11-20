@@ -15,6 +15,7 @@ pub enum InputFormat {
     #[default]
     Bed3,
     Bed6,
+    Bed12,
 }
 impl InputFormat {
     #[allow(dead_code)]
@@ -30,6 +31,7 @@ impl InputFormat {
         match num_fields {
             3 => Ok(Self::Bed3),
             6 => Ok(Self::Bed6),
+            12 => Ok(Self::Bed12),
             _ => bail!(
                 "Cannot predict input format from line: {}",
                 std::str::from_utf8(line)?
@@ -63,6 +65,15 @@ impl FieldFormat {
         let input_format = InputFormat::predict_from_bytes(line)?;
         let mut fields = line.split(|b| *b == b'\t');
         match input_format {
+            InputFormat::Bed12 => {
+                let chr = from_utf8(fields.nth(0).unwrap())?;
+                let name = from_utf8(fields.nth(3).unwrap())?;
+                if chr.parse::<usize>().is_ok() && name.parse::<usize>().is_ok() {
+                    Ok(Self::IntegerBased)
+                } else {
+                    Ok(Self::StringBased)
+                }
+            }
             InputFormat::Bed6 => {
                 let chr = from_utf8(fields.nth(0).unwrap())?;
                 let name = from_utf8(fields.nth(2).unwrap())?;
