@@ -2,9 +2,9 @@ use super::iter::{run_function, OutputMethod};
 use crate::{
     commands::{run_find, OverlapMethod},
     io::{
-        build_reader, match_input, match_output, read_paired_bed3_sets, read_paired_bed6_sets,
-        write_named_records_iter_dashmap, write_records_iter_with, NamedIter, UnnamedIter,
-        WriteNamedIter, WriteNamedIterImpl,
+        build_reader, match_input, match_output, read_paired_bed12_sets, read_paired_bed3_sets,
+        read_paired_bed6_sets, write_named_records_iter_dashmap, write_records_iter_with,
+        NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, StreamTranslater, Translater},
 };
@@ -90,6 +90,31 @@ fn intersect_bed6(
     )
 }
 
+fn intersect_bed12(
+    a: Option<String>,
+    b: String,
+    output: Option<String>,
+    overlap_method: OverlapMethod,
+    output_method: OutputMethod,
+    named: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
+    let handle_a = match_input(a)?;
+    let handle_b = match_input(Some(b))?;
+    let (query_set, target_set, translater) = read_paired_bed12_sets(handle_a, handle_b, named)?;
+    run_intersect_set(
+        &query_set,
+        &target_set,
+        overlap_method,
+        output_method,
+        output,
+        translater.as_ref(),
+        compression_threads,
+        compression_level,
+    )
+}
+
 pub fn intersect_set(
     a: Option<String>,
     b: String,
@@ -122,6 +147,16 @@ pub fn intersect_set(
             compression_level,
         ),
         InputFormat::Bed6 => intersect_bed6(
+            a,
+            b,
+            output,
+            overlap_method,
+            output_method,
+            named,
+            compression_threads,
+            compression_level,
+        ),
+        InputFormat::Bed12 => intersect_bed12(
             a,
             b,
             output,

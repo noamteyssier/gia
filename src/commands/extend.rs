@@ -1,7 +1,7 @@
 use crate::{
     io::{
-        match_input, match_output, read_bed3_set, read_bed6_set, write_records_iter_with,
-        WriteNamedIter, WriteNamedIterImpl,
+        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
+        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{Genome, InputFormat, Translater},
 };
@@ -135,6 +135,40 @@ fn extend_bed6(
     Ok(())
 }
 
+fn extend_bed12(
+    input: Option<String>,
+    output: Option<String>,
+    both: Option<usize>,
+    left: Option<usize>,
+    right: Option<usize>,
+    genome_path: Option<String>,
+    named: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
+    let input_handle = match_input(input)?;
+    let (mut iset, translater) = read_bed12_set(input_handle, named)?;
+    let genome = if let Some(path) = genome_path {
+        let genome_handle = match_input(Some(path))?;
+        let genome = Genome::from_reader_immutable(genome_handle, translater.as_ref(), false)?;
+        Some(genome)
+    } else {
+        None
+    };
+    extend_set(
+        output,
+        &mut iset,
+        both,
+        left,
+        right,
+        genome,
+        translater.as_ref(),
+        compression_threads,
+        compression_level,
+    )?;
+    Ok(())
+}
+
 pub fn extend(
     input: Option<String>,
     output: Option<String>,
@@ -160,6 +194,17 @@ pub fn extend(
             compression_level,
         ),
         InputFormat::Bed6 => extend_bed6(
+            input,
+            output,
+            both,
+            left,
+            right,
+            genome_path,
+            named,
+            compression_threads,
+            compression_level,
+        ),
+        InputFormat::Bed12 => extend_bed12(
             input,
             output,
             both,

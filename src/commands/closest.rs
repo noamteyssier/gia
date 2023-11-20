@@ -1,7 +1,7 @@
 use crate::{
     io::{
-        match_input, match_output, read_paired_bed3_sets, read_paired_bed6_sets,
-        write_pairs_iter_with,
+        match_input, match_output, read_paired_bed12_sets, read_paired_bed3_sets,
+        read_paired_bed6_sets, write_pairs_iter_with,
     },
     types::{InputFormat, IntervalPair},
     utils::sort_pairs,
@@ -112,6 +112,34 @@ pub fn closest_bed6(
     Ok(())
 }
 
+pub fn closest_bed12(
+    a: Option<String>,
+    b: String,
+    output: Option<String>,
+    upstream: bool,
+    downstream: bool,
+    named: bool,
+    sorted: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
+    // load pairs
+    let query_handle = match_input(a)?;
+    let target_handle = match_input(Some(b))?;
+    let (mut a_set, mut b_set, translater) =
+        read_paired_bed12_sets(query_handle, target_handle, named)?;
+    sort_pairs(&mut a_set, &mut b_set, sorted);
+
+    // run closest
+    let method = ClosestType::new(upstream, downstream);
+    let pairs_iter = run_closest(&a_set, &b_set, method);
+
+    // write output
+    let output_handle = match_output(output, compression_threads, compression_level)?;
+    write_pairs_iter_with(pairs_iter, output_handle, translater.as_ref())?;
+    Ok(())
+}
+
 pub fn closest(
     a: Option<String>,
     b: String,
@@ -124,8 +152,8 @@ pub fn closest(
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
-    if format == InputFormat::Bed3 {
-        closest_bed3(
+    match format {
+        InputFormat::Bed3 => closest_bed3(
             a,
             b,
             output,
@@ -135,9 +163,8 @@ pub fn closest(
             sorted,
             compression_threads,
             compression_level,
-        )
-    } else {
-        closest_bed6(
+        ),
+        InputFormat::Bed6 => closest_bed6(
             a,
             b,
             output,
@@ -147,7 +174,18 @@ pub fn closest(
             sorted,
             compression_threads,
             compression_level,
-        )
+        ),
+        InputFormat::Bed12 => closest_bed12(
+            a,
+            b,
+            output,
+            upstream,
+            downstream,
+            named,
+            sorted,
+            compression_threads,
+            compression_level,
+        ),
     }
 }
 

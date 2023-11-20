@@ -2,8 +2,8 @@ use std::io::{Read, Write};
 
 use crate::{
     io::{
-        build_reader, iter_unnamed, match_input, match_output, read_bed3_set, read_bed6_set,
-        write_records_iter, write_records_iter_with,
+        build_reader, iter_unnamed, match_input, match_output, read_bed12_set, read_bed3_set,
+        read_bed6_set, write_records_iter, write_records_iter_with,
     },
     types::InputFormat,
 };
@@ -60,6 +60,31 @@ where
     Ok(())
 }
 
+fn merge_in_memory_bed12<R, W>(
+    input_handle: R,
+    output_handle: W,
+    sorted: bool,
+    named: bool,
+) -> Result<()>
+where
+    R: Read,
+    W: Write,
+{
+    let (mut set, translater) = read_bed12_set(input_handle, named)?;
+    if !sorted {
+        set.sort();
+    } else {
+        set.set_sorted();
+    }
+    let merged = set.merge()?;
+    write_records_iter_with(
+        merged.records().into_iter(),
+        output_handle,
+        translater.as_ref(),
+    )?;
+    Ok(())
+}
+
 fn merge_streamed<R, W>(input_handle: R, output_handle: W) -> Result<()>
 where
     R: Read,
@@ -91,6 +116,7 @@ pub fn merge(
         match format {
             InputFormat::Bed3 => merge_in_memory_bed3(input_handle, output_handle, sorted, named),
             InputFormat::Bed6 => merge_in_memory_bed6(input_handle, output_handle, sorted, named),
+            InputFormat::Bed12 => merge_in_memory_bed12(input_handle, output_handle, sorted, named),
         }
     }
 }
