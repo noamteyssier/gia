@@ -1,0 +1,773 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>gia</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><a href="installation.html">Installation</a></li><li class="chapter-item expanded affix "><a href="background.html">Background</a></li><li class="chapter-item expanded affix "><a href="purpose.html">Purpose</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Tools</li><li class="chapter-item expanded "><a href="tools/closest.html"><strong aria-hidden="true">1.</strong> Closest</a></li><li class="chapter-item expanded "><a href="tools/complement.html"><strong aria-hidden="true">2.</strong> Complement</a></li><li class="chapter-item expanded "><a href="tools/extend.html"><strong aria-hidden="true">3.</strong> Extend</a></li><li class="chapter-item expanded "><a href="tools/get_fasta.html"><strong aria-hidden="true">4.</strong> Get Fasta</a></li><li class="chapter-item expanded "><a href="tools/intersect.html"><strong aria-hidden="true">5.</strong> Intersect</a></li><li class="chapter-item expanded "><a href="tools/merge.html"><strong aria-hidden="true">6.</strong> Merge</a></li><li class="chapter-item expanded "><a href="tools/random.html"><strong aria-hidden="true">7.</strong> Random</a></li><li class="chapter-item expanded "><a href="tools/sample.html"><strong aria-hidden="true">8.</strong> Sample</a></li><li class="chapter-item expanded "><a href="tools/sort.html"><strong aria-hidden="true">9.</strong> Sort</a></li><li class="chapter-item expanded "><a href="tools/subtract.html"><strong aria-hidden="true">10.</strong> Subtract</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">gia</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<h2 id="gia-genome-interval-arithmetic"><a class="header" href="#gia-genome-interval-arithmetic">GIA: Genome Interval Arithmetic</a></h2>
+<p><code>gia</code> is a free and open-source command-line tool for highly efficient
+and scalable set operations on genomic interval data.</p>
+<p>It is inspired by the open source command-line tools <a href="https://bedtools.readthedocs.io/en/latest/"><code>bedtools</code></a>
+and <a href="https://bedops.readthedocs.io/en/latest/"><code>bedops</code></a> and aims to be a drop-in
+replacement to both.</p>
+<p><code>gia</code> is written in <a href="https://www.rust-lang.org/">rust</a> and distributed via <a href="https://rustup.rs/"><code>cargo</code></a>.
+It is a command-line tool built on top of <a href="https://crates.io/crates/bedrs"><code>bedrs</code></a>,
+a separate and abstracted genomic interval library.</p>
+<h2 id="issues-and-contributions"><a class="header" href="#issues-and-contributions">Issues and Contributions</a></h2>
+<p><code>gia</code> is a work-in-progress and under active development by <a href="https://noamteyssier.github.io/about/">Noam Teyssier</a>.</p>
+<p>If you are interested in building more functionality or want to
+get involved please don't hesitate to reach out!</p>
+<p><strong>Please address all issues to future contributors.</strong></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<p><code>gia</code> is distributed using the rust package manager <code>cargo</code>.</p>
+<pre><code class="language-bash">cargo install gia
+</code></pre>
+<p>You can validate the installation by checking <code>gia</code>'s help menu:</p>
+<pre><code class="language-bash">gia --help
+</code></pre>
+<h2 id="installing-cargo"><a class="header" href="#installing-cargo">Installing <code>cargo</code></a></h2>
+<p>You can install <code>cargo</code> by following the instructions <a href="https://rustup.rs/">here</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
+<h2 id="set-theory-on-the-genome"><a class="header" href="#set-theory-on-the-genome">Set Theory on the Genome</a></h2>
+<h3 id="genomic-intervals"><a class="header" href="#genomic-intervals">Genomic Intervals</a></h3>
+<p>The core piece of genome interval arithmetic is the <code>interval</code> object:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>GenomicInterval {
+    Chromosome,
+    Start,
+    End,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>This is an abstract object with <em>at minimum</em> 3 attributes defining its <strong>chromosome</strong>,
+<strong>start</strong>, and <strong>end</strong> positions on the genome.</p>
+<h3 id="genomic-interval-sets"><a class="header" href="#genomic-interval-sets">Genomic Interval Sets</a></h3>
+<p>A collection of genomic intervals can be considered a <a href="https://en.wikipedia.org/wiki/Set_(mathematics)">set</a>
+which in brief is a collection of objects that match particular properties.</p>
+<p>There is a branch of mathematics known as <a href="https://en.wikipedia.org/wiki/Set_theory">set theory</a>
+which describe a range of operations, such as the
+<a href="https://en.wikipedia.org/wiki/Union_(set_theory)">union</a>,
+<a href="https://en.wikipedia.org/wiki/Intersection_(set_theory)">intersection</a>,
+<a href="https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement">difference</a>,
+<a href="https://en.wikipedia.org/wiki/Complement_(set_theory)">complement</a>,
+etc of those sets.</p>
+<p>Some examples of these are shown below:</p>
+<h4 id="intersection"><a class="header" href="#intersection">Intersection</a></h4>
+<p>This generates all the intervals that are at the <a href="https://en.wikipedia.org/wiki/Intersection_(set_theory)">intersection</a>
+of two interval sets.</p>
+<pre><code class="language-text">(a)   x---------y    x-----------y
+(b)     i--j  i--------j    i--------j
+========================================
+        i--j  i-y    x-j    i----y
+</code></pre>
+<h4 id="difference"><a class="header" href="#difference">Difference</a></h4>
+<p>This generates all the intervals in <code>a</code> which are <strong>not covered</strong> by <code>b</code>.
+This calculates the <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement">difference / relative complement</a>
+of a set.</p>
+<pre><code class="language-text">(a)  x----------y   x------------y
+(b)     i--j  i--------j    i--------j
+========================================
+     x--i  j--i        j----i    
+</code></pre>
+<h4 id="complement"><a class="header" href="#complement">Complement</a></h4>
+<p>This generates all the intervals in <code>a</code> which are not covered by its span (<code>s</code>).
+This is the <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)">absolute complement</a>
+of the set.</p>
+<pre><code class="language-text">(s)  s----------------------------s
+========================================
+(a)  x-----y   x------y    x------y
+========================================
+           y---x      y----x    
+</code></pre>
+<h3 id="genomic-interval-arithmetic"><a class="header" href="#genomic-interval-arithmetic">Genomic Interval Arithmetic</a></h3>
+<p>Genomic interval arithmetic revolves around performing set theoretical operations
+in the context of genomic regions, and is useful for a wide range of purposes
+in bioinformatics analyses.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="purpose---ie-why-gia"><a class="header" href="#purpose---ie-why-gia">Purpose - i.e. why gia?</a></h1>
+<p><code>gia</code> was developed to split the difference between <a href="https://bedtools.readthedocs.io/en/latest/"><code>bedtools</code></a>
+and <a href="https://bedops.readthedocs.io/en/latest/"><code>bedops</code></a> and be a tool that can
+match both philosophies without sacrificing either efficiency or convenience.</p>
+<p>That being said, the author of <code>gia</code> was greatly inspired by both tools and has
+used them extensively for years.</p>
+<p><code>gia</code> would not exist if not for the work of their authors and maintainers as well
+as their meticulous documentation.</p>
+<h2 id="philosophies"><a class="header" href="#philosophies">Philosophies</a></h2>
+<h3 id="bedtools---utility-over-efficiency"><a class="header" href="#bedtools---utility-over-efficiency"><code>bedtools</code> - utility over efficiency</a></h3>
+<p><a href="https://bedtools.readthedocs.io/en/latest/"><code>bedtools</code></a> is the original
+genome interval toolkit and is the go-to for many people.</p>
+<p>It prioritizes convenience and utility over computational efficiency, and
+does that very well.</p>
+<p>One of the major design choices for most of the tools in the toolkit is that
+the genome interval sets are loaded into memory completely before processing
+occurs.</p>
+<p>This incurs a huge memory and computational overhead once genome interval sets
+get larger and larger - which is increasingly the case for large high throughput
+genomic datasets.</p>
+<h3 id="bedops---efficiency-over-utility"><a class="header" href="#bedops---efficiency-over-utility"><code>bedops</code> - efficiency over utility</a></h3>
+<p><a href="https://bedops.readthedocs.io/en/latest/"><code>bedops</code></a> came later from <code>bedtools</code>
+and was built for computational efficiency.</p>
+<p>Most of the methods within focus around pre-sorted data, and the computational
+and memory efficiency comes from the fact that everything is built around <a href="https://en.wikipedia.org/wiki/Stream_(computing)">streams</a>
+(i.e. intervals are assumed sorted and only kept in memory for the abosolute minimum
+amount of time required for the operation.)</p>
+<p>This leads to highly efficient streaming operations with a constant memory overhead,
+but provides some inconveniences, as all inputs must be presorted, and some functional
+limitations, as most of the set operations implicitly merge intervals on input.</p>
+<h3 id="gia---both-in-a-single-tool"><a class="header" href="#gia---both-in-a-single-tool"><code>gia</code> - both in a single tool</a></h3>
+<p><code>gia</code> was built with the idea that both philosophies are useful for different
+purposes and that the same operations and underlying implementations can be
+shared.</p>
+<p>By default, all tools are built with an <strong>inplace</strong> memory load, which allows
+for the complete set of functionality available in <code>bedtools</code> with no expectation
+that the dataset is <em>a priori</em> sorted or merged, but where relevant an argument
+may be passed to allow for <strong>streaming</strong> operations, which perform highly performant
+memory constant operations on pre-sorted inputs such as in <code>bedops</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-closest-"><a class="header" href="#-gia-closest-"><code>[ gia closest ]</code></a></h1>
+<h2 id="background-1"><a class="header" href="#background-1">Background</a></h2>
+<p>Similar to <a href="tools/./intersect.html">intersect</a>, <code>closest</code> searches for the closest
+feature in <code>B</code> for each feature in <code>A</code>.</p>
+<p>The <code>closest</code> feature is not necessarily non-overlapping and under certain
+search constraints may not exist.</p>
+<blockquote>
+<p><strong>Note:</strong> Chromosomal Distance</p>
+<p>There is no notion of interchromosomal distance, so if an interval is
+alone on an interval in <code>A</code>, then there will be no closest interval
+in <code>B</code>.</p>
+</blockquote>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia closest --help
+</code></pre>
+<h3 id="default-behavior"><a class="header" href="#default-behavior">Default Behavior</a></h3>
+<pre><code class="language-text">(a)           x----------y
+(b)   i-----j                 i-------j
+=========================================
+      i-----j
+</code></pre>
+<p>By default <code>closest</code> will return the single closest, potentially overlapping, feature in <code>B</code>
+for each interval in <code>A</code>.</p>
+<p>Ties will be given to the left-most interval with the closest start coordinate to the query.</p>
+<pre><code class="language-bash">gia closest -a &lt;input.bed&gt; -b &lt;input.bed&gt;
+</code></pre>
+<h3 id="closest-upstream"><a class="header" href="#closest-upstream">Closest Upstream</a></h3>
+<pre><code class="language-text">(a)               x----------y
+(b)   i-----j                 i-------j
+=========================================
+      i-----j
+</code></pre>
+<p>You can explicitly exclude all downstream intervals from the search, regardless
+of their distance, with the upstream flag.</p>
+<pre><code class="language-bash">gia closest -a &lt;input.bed&gt; -b &lt;input.bed&gt; -u
+</code></pre>
+<h3 id="closest-downstream"><a class="header" href="#closest-downstream">Closest Downstream</a></h3>
+<pre><code class="language-text">(a)          x----------y
+(b)   i-----j                 i-------j
+=========================================
+                              i-------j
+</code></pre>
+<p>You can explicitly exclude all upstream intervals from the search, regardless
+of their distance, with the downstream flag.</p>
+<pre><code class="language-bash">gia closest -a &lt;input.bed&gt; -b &lt;input.bed&gt; -d
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-complement-"><a class="header" href="#-gia-complement-"><code>[ gia complement ]</code></a></h1>
+<h2 id="background-2"><a class="header" href="#background-2">Background</a></h2>
+<p>Similar to <a href="tools/./subtract.html">subtract</a>, <code>complement</code> generates all the intervals
+that are <strong>not covered</strong> by the input set. </p>
+<p>This is equivalent to subtracting the interval set from its <em>span</em>, which is
+an interval defined by the min and max interval of the set by chromosome.</p>
+<h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia complement --help
+</code></pre>
+<h3 id="default-behavior-1"><a class="header" href="#default-behavior-1">Default Behavior</a></h3>
+<pre><code class="language-text">(span)        s---------------------------------s
+==========================================================
+(input)       x------y     x-----y    x---------y
+==========================================================
+(complement)         y-----x     y----x
+</code></pre>
+<p>By default <code>complement</code> will return all intervals that are uncovered by the
+span of the incoming interval set.</p>
+<p>The span of the interval set is calculated by chromosome.</p>
+<pre><code class="language-bash">gia complement -i &lt;input.bed&gt;
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> Internal vs Complete Complement</p>
+<p>The internal complement of a set necessarily excludes the the chromosomal
+start to the span start and the span end to the chromosomal end. </p>
+<p>All other potential intervals are included.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-extend-"><a class="header" href="#-gia-extend-"><code>[ gia extend ]</code></a></h1>
+<h2 id="background-3"><a class="header" href="#background-3">Background</a></h2>
+<p>This subcommand is used to grow intervals from either of their terminals.
+It can be used to either grow both sides, just the left, or just the right.
+An optional <code>-g</code> flag can be given if the chromosome length is known, which will
+be used to truncate growths to not overextend the chromosome length.</p>
+<h2 id="usage-2"><a class="header" href="#usage-2">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia extend --help
+</code></pre>
+<h3 id="extend-left"><a class="header" href="#extend-left">Extend Left</a></h3>
+<pre><code class="language-text">(input)          x---------y    x------y
+==============================================
+(output)   x---------------y
+                         x-------------y
+</code></pre>
+<p>This grows the intervals to the left but truncates to zero to avoid negatives.</p>
+<pre><code class="language-bash">gia extend -i &lt;input.bed&gt; -l 20
+</code></pre>
+<h3 id="extend-right"><a class="header" href="#extend-right">Extend Right</a></h3>
+<pre><code class="language-text">(input)          x---------y    x------y
+==============================================
+(output)         x---------------y
+                                x-------------y
+</code></pre>
+<p>This grows the intervals to the right but truncates to chromosome max
+if a <code>.genome</code> file is provided.</p>
+<pre><code class="language-bash">gia extend -i &lt;input.bed&gt; -r 20
+</code></pre>
+<h3 id="extend-both-equal"><a class="header" href="#extend-both-equal">Extend Both (Equal)</a></h3>
+<pre><code class="language-text">(input)          x---------y    x------y
+==============================================
+(output)    x-------------------y
+                            x---------------y
+</code></pre>
+<p>This grows the intervals to the left and right by an equal amount.
+This will truncate to zero if a potential negative is encountered
+and will truncate to the chromozome max if a <code>.genome</code> file is provided.</p>
+<pre><code class="language-bash">gia extend -i &lt;input.bed&gt; -b 20
+</code></pre>
+<h3 id="extend-both-unequal"><a class="header" href="#extend-both-unequal">Extend Both (Unequal)</a></h3>
+<pre><code class="language-text">(input)          x---------y    x------y
+==============================================
+(output)    x---------------y
+                            x-----------y
+</code></pre>
+<p>This grows the intervals to the left and right by an unequal amount.
+The growth to the left is controlled by the <code>-l</code> flag and the growth
+to the right is controlled by the <code>-r</code> flag separately.</p>
+<p>This will truncate to zero if a potential negative is encountered
+and will truncate to the chromozome max if a <code>.genome</code> file is provided.</p>
+<pre><code class="language-bash">gia extend -i &lt;input.bed&gt; -l 20 -r 5
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-get-fasta-"><a class="header" href="#-gia-get-fasta-"><code>[ gia get-fasta ]</code></a></h1>
+<h2 id="background-4"><a class="header" href="#background-4">Background</a></h2>
+<p>This subcommand is used to extract sequences from intervals provided in an input BED file
+from an indexed fasta.</p>
+<p>The fasta is assumed indexed using <code>samtools faidx</code> and assumes the index is <code>&lt;/path/to.fasta&gt;.fai</code>.</p>
+<h2 id="usage-3"><a class="header" href="#usage-3">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia get-fasta --help
+</code></pre>
+<h3 id="extract-sequences"><a class="header" href="#extract-sequences">Extract Sequences</a></h3>
+<p>If the chromosome names are integers we can extract the sequences using the following command:</p>
+<pre><code class="language-bash">gia get-fasta -b &lt;input.bed&gt; -f &lt;input.fa&gt;
+</code></pre>
+<h4 id="input-integer-bed"><a class="header" href="#input-integer-bed">Input Integer BED</a></h4>
+<pre><code class="language-bed">1	20	30
+2	30	40
+</code></pre>
+<h4 id="input-integer-fasta"><a class="header" href="#input-integer-fasta">Input Integer Fasta</a></h4>
+<pre><code class="language-fasta">&gt;1
+ACCCCTATCTATCACACTTCAGCGACTA
+CGACTACGACCATCGACGATCAGCATCA
+GCATCGACTACGACGATCAGCGACTACG
+AGCTACGACGAGCG
+&gt;2
+GGTAGTTAGTAGAGTTAGACTACGATCG
+ATCGATCGATCGAGCGGCGCGCATCGAT
+CGTAGCCGCGGCGTACGTAGCGCAGCAG
+TCGTAGCTACGTAG
+</code></pre>
+<h4 id="output-integer-fasta"><a class="header" href="#output-integer-fasta">Output Integer Fasta</a></h4>
+<pre><code class="language-fasta">&gt;1:20-30
+AGCGACTACG
+&gt;2:30-40
+CGATCGATCG
+</code></pre>
+<h3 id="extract-sequences-with-non-integer-named-bed-and-chromosome-names"><a class="header" href="#extract-sequences-with-non-integer-named-bed-and-chromosome-names">Extract Sequences with non-integer named bed and chromosome names</a></h3>
+<p>If the chromosome names are non-integers, <code>gia</code> can handle the conversion
+and no extra flags are required.</p>
+<pre><code class="language-bash">gia get-fasta -b &lt;input.bed&gt; -f &lt;input.fa&gt;
+</code></pre>
+<h4 id="input-non-integer-bed"><a class="header" href="#input-non-integer-bed">Input Non-Integer BED</a></h4>
+<pre><code class="language-bed">chr1	20	30
+chr2	30	40
+</code></pre>
+<h4 id="input-non-integer-fasta"><a class="header" href="#input-non-integer-fasta">Input Non-Integer Fasta</a></h4>
+<pre><code class="language-fasta">&gt;chr1
+ACCCCTATCTATCACACTTCAGCGACTA
+CGACTACGACCATCGACGATCAGCATCA
+GCATCGACTACGACGATCAGCGACTACG
+AGCTACGACGAGCG
+&gt;chr2
+GGTAGTTAGTAGAGTTAGACTACGATCG
+ATCGATCGATCGAGCGGCGCGCATCGAT
+CGTAGCCGCGGCGTACGTAGCGCAGCAG
+TCGTAGCTACGTAG
+</code></pre>
+<h4 id="output-non-integer-fasta"><a class="header" href="#output-non-integer-fasta">Output Non-Integer Fasta</a></h4>
+<pre><code class="language-fasta">&gt;chr1:20-30
+AGCGACTACG
+&gt;chr2:30-40
+CGATCGATCG
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-intersect-"><a class="header" href="#-gia-intersect-"><code>[ gia intersect ]</code></a></h1>
+<h2 id="background-5"><a class="header" href="#background-5">Background</a></h2>
+<p>This subcommand calculates the genomic regions found at the intersection
+of the first input (query) and the second input (target).</p>
+<pre><code class="language-text">(query)     x-------------y        x----------y   x------y
+(target)        i------j        i------j        i-----------j
+=================================================================
+                i------j           x---j          x------y
+</code></pre>
+<h2 id="usage-4"><a class="header" href="#usage-4">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia intersect --help
+</code></pre>
+<h3 id="default-behavior-2"><a class="header" href="#default-behavior-2">Default Behavior</a></h3>
+<p>By default the intervals in the query and target are not assumed sorted or merged
+and intersections are performed inplace.</p>
+<pre><code class="language-bash">gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt;
+</code></pre>
+<h3 id="streamed-intervals"><a class="header" href="#streamed-intervals">Streamed Intervals</a></h3>
+<p>If the intervals in the query and target are presorted then we can operate on them
+as a stream - which keeps the memory usage constant and leads to speedups at very
+high number of intervals.</p>
+<pre><code class="language-bash">gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -S
+</code></pre>
+<h3 id="fractional-overlaps"><a class="header" href="#fractional-overlaps">Fractional Overlaps</a></h3>
+<p>We can also define conditional operations on fractional overlaps
+of the query, target, or both.</p>
+<p>This means that the intersection will only be done on query-target pairs which
+meet the fractional overlap predicate provided.</p>
+<h4 id="on-query"><a class="header" href="#on-query">On Query</a></h4>
+<pre><code class="language-text">              x-------------y   x---------------y
+              i---------j       i--j
+======================================================
+(-f 0.5)
+(ix)          x---------j
+</code></pre>
+<p>We can supply a minimum overlap requirement on the query with the <code>-f</code> flag.</p>
+<p>This will only apply intersection operations on query-target pairs in which the
+target overlaps the query by the amount required in the <code>-f</code> argument.</p>
+<p>In the example case, only the first query-target pair was operated upon since
+the second did not overlap the query by 50%.</p>
+<pre><code class="language-bash">gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5
+</code></pre>
+<h4 id="on-target"><a class="header" href="#on-target">On Target</a></h4>
+<pre><code class="language-text">        x-------------y   x---------------y
+              i---------j               i----------j
+======================================================
+(-F 0.5)
+(ix)          i-------y
+</code></pre>
+<p>We can supply a minimum overlap requirement on the target with the <code>-F</code> flag.</p>
+<p>This will only apply intersection operations on query-target pairs in which the
+query overlaps the target by the amount required in the <code>-F</code> argument.</p>
+<p>In the example case, only the first query-target pair was operated upon since
+the second did not overlap the target by 50%.</p>
+<pre><code class="language-bash">gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -F 0.5
+</code></pre>
+<h4 id="reciprocal"><a class="header" href="#reciprocal">Reciprocal</a></h4>
+<p>We can introduce a reciprocal argument (<code>-r</code>) which requires the <code>-f</code> flag
+and requires that both query and target meet the same requirements of the flag.</p>
+<pre><code class="language-bash">gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5 -r
+</code></pre>
+<h4 id="either"><a class="header" href="#either">Either</a></h4>
+<p>We can introduce the either flag (<code>-e</code>) which is used with <strong>both</strong> the <code>-f</code> and <code>-F</code> flags.
+This will require that <strong>either</strong> condition is met and include those subtraction operations.</p>
+<pre><code class="language-bash">gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5 -F 0.3 -e
+</code></pre>
+<h3 id="reporting-query-target-or-inverse"><a class="header" href="#reporting-query-target-or-inverse">Reporting Query, Target, or Inverse</a></h3>
+<p>In the cases where we're interested in specifically what intervals are overlapping
+and not necessarily their specific intersections we can report either the query or
+target interval for each potential intersection event.</p>
+<pre><code class="language-bash"># Reports all query intervals that intersect the target intervals
+gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -q
+
+# Reports all query intervals that intersect the target intervals (only once)
+gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -q -u
+
+# Reports all target intervals that intersect the query intervals
+gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -t
+</code></pre>
+<p>We can also report all query intervals that <strong>do not intersect</strong> the target intervals.</p>
+<p>This is an homage to <code>grep -v</code></p>
+<pre><code class="language-bash"># Reports all query intervals that do not intersect the target intervals
+gia intersect -a &lt;query.bed&gt; -b &lt;target.bed&gt; -v
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-merge-"><a class="header" href="#-gia-merge-"><code>[ gia merge ]</code></a></h1>
+<h2 id="background-6"><a class="header" href="#background-6">Background</a></h2>
+<p>This subcommand will merge all <strong>overlapping</strong> and <strong>bordering</strong> intervals
+within the input set.</p>
+<p>It can accept either a presorted input (which can be streamed) or an unsorted
+input which will first be sorted in-place before merging.</p>
+<h2 id="usage-5"><a class="header" href="#usage-5">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia merge --help
+</code></pre>
+<h3 id="default-behavior-inplace"><a class="header" href="#default-behavior-inplace">Default Behavior (Inplace)</a></h3>
+<pre><code class="language-text">(e)                    q----r
+(b)      k----l
+(a)    i----j
+(c)           l----m
+(d)                  o----p
+===============================
+(1)    i-----------m
+(2)                  o------r
+</code></pre>
+<p>This will merge all overlapping and bordering intervals into their sub-spans.</p>
+<p>It <strong>does not assume presorted input</strong> and will sort the input inplace on load.</p>
+<pre><code class="language-bash">gia merge -i &lt;input.bed&gt;
+</code></pre>
+<h3 id="streamable-input"><a class="header" href="#streamable-input">Streamable Input</a></h3>
+<pre><code class="language-text">(a)    i----j
+(b)      k----l
+(c)           l----m
+(d)                  o----p
+(e)                    q----r
+===============================
+(1)    i-----------m
+(2)                  o------r
+</code></pre>
+<p>This will merge all overlapping and bordering intervals into their sub-spans.</p>
+<p>This <strong>assumes presorted input</strong> and will have undefined behavior is input is not-sorted.</p>
+<pre><code class="language-bash">gia merge -i &lt;input.bed&gt; -S
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-random-"><a class="header" href="#-gia-random-"><code>[ gia random ]</code></a></h1>
+<h2 id="background-7"><a class="header" href="#background-7">Background</a></h2>
+<p>This subcommand will generate a random set of intervals.</p>
+<h2 id="usage-6"><a class="header" href="#usage-6">Usage</a></h2>
+<p>See full arguments and options using: </p>
+<pre><code class="language-bash">gia random --help
+</code></pre>
+<h3 id="parameterization"><a class="header" href="#parameterization">Parameterization</a></h3>
+<p>This generates intervals given:</p>
+<ul>
+<li>Number of Intervals</li>
+<li>Length of Intervals</li>
+<li>Number of Chromosomes</li>
+<li>Max Chromosome Length</li>
+</ul>
+<p>The intervals are drawn randomly from a random chromosome and are each
+equally sized to the length provided.</p>
+<p>An optional <code>*.genome</code> file can be given to provide multiple and potentially
+differently sized chromosome lengths.</p>
+<pre><code class="language-bash"># will randomly generate intervals given default params
+gia random
+
+# sets the number of chromosomes to 10
+gia random -c 10
+
+# generates 100 random intervals
+gia random -n 100
+
+# generates 100 random intervals each with a length of 500
+gia random -n 100 -l 500
+
+# generates 100 random intervals with a length of 500 using a prior genome
+gia random -n 100 -l 500 -g &lt;my.genome&gt;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-sample-"><a class="header" href="#-gia-sample-"><code>[ gia sample ]</code></a></h1>
+<h2 id="background-8"><a class="header" href="#background-8">Background</a></h2>
+<p>This subcommand will randomly sample intervals from an input file.</p>
+<blockquote>
+<p><strong>Note:</strong> The output of this command is <strong>not guaranteed</strong> to be sorted.</p>
+</blockquote>
+<h2 id="usage-7"><a class="header" href="#usage-7">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia sample --help
+</code></pre>
+<h3 id="sample-a-fixed-number-of-intervals"><a class="header" href="#sample-a-fixed-number-of-intervals">Sample a fixed number of intervals</a></h3>
+<p>You can sample a fixed number of intervals from the dataset using the <code>-n</code> flag</p>
+<pre><code class="language-bash"># samples 100 intervals from the dataset
+gia sample -i &lt;input.bed&gt; -n 100
+</code></pre>
+<h3 id="sample-a-fractional-number-of-intervals"><a class="header" href="#sample-a-fractional-number-of-intervals">Sample a fractional number of intervals</a></h3>
+<p>You can sample a fractional number of intervals from the total size of the dataset
+using the <code>-f</code> flag.</p>
+<pre><code class="language-bash"># samples 0.1 (10%) of the intervals
+gia sample -i &lt;input.bed&gt; -f 0.1
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-sort-"><a class="header" href="#-gia-sort-"><code>[ gia sort ]</code></a></h1>
+<h2 id="background-9"><a class="header" href="#background-9">Background</a></h2>
+<p>This subcommand will sort intervals from an input file.</p>
+<blockquote>
+<p><strong>Note:</strong> Chromosome Ordering</p>
+<p>If named chromosomes are provided they will be sorted by
+the <strong>order in which they appear in the input file</strong>.
+In the future this will likely be lexicographically ordered.</p>
+</blockquote>
+<h2 id="usage-8"><a class="header" href="#usage-8">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia sort --help
+</code></pre>
+<h3 id="sort-an-input-bed"><a class="header" href="#sort-an-input-bed">Sort an input BED</a></h3>
+<p>You can sort an input file with the following command:</p>
+<pre><code class="language-bash">gia sort -i &lt;input.bed&gt;
+</code></pre>
+<h3 id="sort-a-named-input-bed"><a class="header" href="#sort-a-named-input-bed">Sort a named input BED</a></h3>
+<p>If the chromosome names are non-integers you can run the following command:</p>
+<pre><code class="language-bash">gia sort -i &lt;input.bed&gt; -N
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-gia-subtract-"><a class="header" href="#-gia-subtract-"><code>[ gia subtract ]</code></a></h1>
+<h2 id="background-10"><a class="header" href="#background-10">Background</a></h2>
+<p>This subcommand calculates the genomic regions found within the
+first input (query) while excluding regions in the second (target).</p>
+<pre><code class="language-text">(query)     x-------------y        x----------y   x------y
+(target)        i------j        i------j        i-----------j
+=================================================================
+            x---i      j--y     i--x   j------y i-x      y--j
+</code></pre>
+<h2 id="usage-9"><a class="header" href="#usage-9">Usage</a></h2>
+<p>See full arguments and options using:</p>
+<pre><code class="language-bash">gia subtract --help
+</code></pre>
+<h3 id="default-behavior-merging"><a class="header" href="#default-behavior-merging">Default Behavior (Merging)</a></h3>
+<p>By default the intervals in the query and target are merged before
+subtraction to calculate the difference across the subspans.</p>
+<pre><code class="language-text">(query)            x-------y
+                       x-------y
+                          x----------y
+                   
+(target)               i----j
+                            i------j
+=============================================
+(merged_q)        x------------------y
+(merged_t)             i-----------j
+=============================================
+(subtraction)     x----i           j-y
+</code></pre>
+<pre><code class="language-bash">gia subtract -a &lt;query.bed&gt; -b &lt;target.bed&gt;
+</code></pre>
+<h3 id="unmerged-subtraction"><a class="header" href="#unmerged-subtraction">Unmerged Subtraction</a></h3>
+<p>If you would like to keep the intervals separate on merging then
+you can supply the <code>-u</code> flag to keep the intervals separate.</p>
+<pre><code class="language-text">(query)            x---------y
+                       x-------y
+                          x----------y
+                   
+(target)               i---j
+                           i-------j
+=============================================
+(subtraction)     x----i
+                           j-y
+                                   j-y
+</code></pre>
+<p>This is useful in cases where the intervals are separate classes
+and it doesn't make sense biologically to merge their interval spans.</p>
+<pre><code class="language-bash">gia subtract -a &lt;query.bed&gt; -b &lt;target.bed&gt; -u
+</code></pre>
+<h3 id="fractional-overlap"><a class="header" href="#fractional-overlap">Fractional Overlap</a></h3>
+<p>We can also define conditional subtraction operations on fractional overlaps
+of the query, target, or both.</p>
+<p>This means that the subtraction will only be done on query-target pairs which
+meet the fractional overlap predicate provided.</p>
+<h4 id="on-query-1"><a class="header" href="#on-query-1">On Query</a></h4>
+<pre><code class="language-text">(query)       x------------------------y    x------y
+(target)                 i--j                  i---j
+======================================================
+(-f 0.5)
+(sub)         x------------------------y    x--i
+
+</code></pre>
+<p>We can supply a minimum overlap requirement on the query with the <code>-f</code> flag.</p>
+<p>This will only apply subtraction operations on query-target pairs in which the
+target overlaps the query by the amount required in the <code>-f</code> argument.</p>
+<p>In the example case, only the second query-target pair was operated upon since
+the first did not overlap the query by 50%.</p>
+<pre><code class="language-bash">gia subtract -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5
+</code></pre>
+<h4 id="on-target-1"><a class="header" href="#on-target-1">On Target</a></h4>
+<pre><code class="language-text">(query)       x------------------------y    x------y
+(target)                 i--j                  i--------------j
+======================================================
+(-F 0.5)
+(sub)         x----------i  j----------y    x------y
+
+</code></pre>
+<p>We can supply a minimum overlap requirement on the target with the <code>-F</code> flag.</p>
+<p>This will only apply subtraction operations on query-target pairs in which the
+query overlaps the target by the amount required in the <code>-F</code> argument.</p>
+<p>In the example case, only the first query-target pair was operated upon since
+the second did not overlap the target by 50%.</p>
+<pre><code class="language-bash">gia subtract -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5
+</code></pre>
+<h4 id="reciprocal-1"><a class="header" href="#reciprocal-1">Reciprocal</a></h4>
+<p>We can introduce a reciprocal argument (<code>-r</code>) which requires the <code>-f</code> flag
+and requires that both query and target meet the same requirements of the flag.</p>
+<pre><code class="language-bash">gia subtract -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5 -r
+</code></pre>
+<h4 id="either-1"><a class="header" href="#either-1">Either</a></h4>
+<p>We can introduce the either flag (<code>-e</code>) which is used with <strong>both</strong> the <code>-f</code> and <code>-F</code> flags.
+This will require that <strong>either</strong> condition is met and include those subtraction operations.</p>
+<pre><code class="language-bash">gia subtract -a &lt;query.bed&gt; -b &lt;target.bed&gt; -f 0.5 -F 0.3 -e
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+    </body>
+</html>
