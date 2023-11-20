@@ -25,11 +25,33 @@ where
     Ok(())
 }
 
+pub fn write_3col_iter_with<W, I, Co, Tr>(
+    records: I,
+    writer: W,
+    translater: Option<&Tr>,
+) -> Result<()>
+where
+    W: Write,
+    I: Iterator<Item = Co>,
+    Co: Coordinates<usize, usize> + Serialize,
+    Tr: Translate,
+    WriteNamedIterImpl: WriteNamedIter<Co>,
+{
+    if let Some(translater) = translater {
+        // WriteNamedIterImpl::write_named_iter(writer, records, translater)?;
+        WriteNamedIterImpl::write_named_3col_iter(writer, records, translater)?;
+    } else {
+        WriteIterImpl::<Co>::write_3col_iter(writer, records)?;
+    }
+    Ok(())
+}
+
 pub trait WriteIter<C>
 where
     C: Coordinates<usize, usize>,
 {
     fn write_iter<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()>;
+    fn write_3col_iter<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()>;
 }
 
 pub struct WriteIterImpl<C>
@@ -50,6 +72,16 @@ where
         wtr.flush()?;
         Ok(())
     }
+
+    fn write_3col_iter<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let named_interval = (interval.chr(), interval.start(), interval.end());
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
 }
 
 pub trait WriteNamedIter<C>
@@ -63,6 +95,21 @@ where
         translater: &Tr,
     ) -> Result<()> {
         unimplemented!()
+    }
+    #[allow(unused_variables)]
+    fn write_named_3col_iter<W: Write, It: Iterator<Item = C>, Tr: Translate>(
+        writer: W,
+        iterator: It,
+        translater: &Tr,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_name(*interval.chr()).unwrap();
+            let named_interval = (chr, interval.start(), interval.end());
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
     }
 }
 pub struct WriteNamedIterImpl;

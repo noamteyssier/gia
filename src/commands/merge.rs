@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use crate::{
     io::{
         build_reader, iter_unnamed, match_input, match_output, read_bed12_set, read_bed3_set,
-        read_bed6_set, write_records_iter, write_records_iter_with,
+        read_bed6_set, write_3col_iter_with, write_records_iter,
     },
     types::InputFormat,
 };
@@ -27,7 +27,7 @@ where
         set.set_sorted();
     }
     let merged = set.merge()?;
-    write_records_iter_with(
+    write_3col_iter_with(
         merged.records().into_iter(),
         output_handle,
         translater.as_ref(),
@@ -52,7 +52,7 @@ where
         set.set_sorted();
     }
     let merged = set.merge()?;
-    write_records_iter_with(
+    write_3col_iter_with(
         merged.records().into_iter(),
         output_handle,
         translater.as_ref(),
@@ -77,7 +77,7 @@ where
         set.set_sorted();
     }
     let merged = set.merge()?;
-    write_records_iter_with(
+    write_3col_iter_with(
         merged.records().into_iter(),
         output_handle,
         translater.as_ref(),
