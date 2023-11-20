@@ -38,7 +38,6 @@ where
     WriteNamedIterImpl: WriteNamedIter<Co>,
 {
     if let Some(translater) = translater {
-        // WriteNamedIterImpl::write_named_iter(writer, records, translater)?;
         WriteNamedIterImpl::write_named_3col_iter(writer, records, translater)?;
     } else {
         WriteIterImpl::<Co>::write_3col_iter(writer, records)?;
