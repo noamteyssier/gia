@@ -1,6 +1,6 @@
 [package]
 name = "gia"
-version = "0.1.22"
+version = "0.2.1"
 edition = "2021"
 description = "A tool for set theoretic operations of genomic intervals"
 license = "MIT"
