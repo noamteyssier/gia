@@ -218,10 +218,6 @@ pub enum Command {
         #[clap(short, long)]
         sorted: bool,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
         /// Stream the input file instead of loading it into memory
         ///
         /// Note that this requires the input file to be sorted
@@ -231,9 +227,13 @@ pub enum Command {
         #[clap(short = 'S', long, conflicts_with = "named")]
         stream: bool,
 
-        /// Set the format of the input bed
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        /// Input file format
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        field_format: Option<FieldFormat>,
     },
 
     /// Builds a two column map of chromosome names to integers
