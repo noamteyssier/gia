@@ -1,7 +1,7 @@
 mod formats;
 mod genome;
 use bedrs::{Bed12, Bed3, Bed6, IntervalContainer};
-pub use formats::{FieldFormat, InputFormat};
+pub use formats::InputFormat;
 pub use genome::Genome;
 
 pub type NumericBed3 = Bed3<usize, usize>;
