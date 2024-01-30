@@ -29,6 +29,7 @@ serde = { version = "1.0.183", features = ["derive"] }
 niffler = {version = "2.5.0", default-features = false, features = ["gz"]}
 gzp = { version="0.11.3", features=["deflate_rust"], default-features = false }
 rayon = "1.8.0"
+flate2 = "1.0.28"
 
 [dev-dependencies]
 assert_cmd = "2.0.11"
