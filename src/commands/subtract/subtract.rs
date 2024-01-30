@@ -10,7 +10,7 @@ use crate::{
 use anyhow::Result;
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    Container, Coordinates, Merge, Subtract,
+    Coordinates, IntervalContainer, Subtract,
 };
 use serde::Serialize;
 use std::io::Write;
@@ -40,14 +40,12 @@ where
     }
 }
 
-fn iter_subtraction<'a, A, B, I, C, T>(
-    aset: &'a A,
-    bset: &'a B,
+fn iter_subtraction<'a, I, C, T>(
+    aset: &'a IntervalContainer<I, C, T>,
+    bset: &'a IntervalContainer<I, C, T>,
     method: &'a OverlapMethod,
 ) -> Box<dyn Iterator<Item = I> + 'a>
 where
-    A: Container<C, T, I> + 'a,
-    B: Container<C, T, I> + 'a,
     I: IntervalBounds<C, T> + Copy + 'static,
     C: ChromBounds,
     T: ValueBounds,
@@ -59,17 +57,15 @@ where
     Box::new(sub_iter)
 }
 
-fn run_subtract<'a, A, B, I, C, T, W>(
-    aset: &'a A,
-    bset: &'a B,
+fn run_subtract<'a, I, C, T, W>(
+    aset: &'a IntervalContainer<I, C, T>,
+    bset: &'a IntervalContainer<I, C, T>,
     method: &'a OverlapMethod,
     unmerged: bool,
     output_handle: W,
     translater: Option<&'a Translater>,
 ) -> Result<()>
 where
-    A: Container<C, T, I> + 'a,
-    B: Container<C, T, I> + 'a,
     I: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize,
     C: ChromBounds,
     T: ValueBounds,

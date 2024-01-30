@@ -1,9 +1,11 @@
 use super::build_reader;
-use crate::types::{Bed12, NumericBed12, NumericBed12Set, Translater};
+use crate::types::{Bed12, NumericBed12, Translater};
 use anyhow::{bail, Result};
-use bedrs::Container;
+use bedrs::IntervalContainer;
 use csv::ByteRecord;
 use std::io::Read;
+
+type NumericBed12Set = IntervalContainer<NumericBed12, usize, usize>;
 
 pub fn read_bed12_set<R: Read>(
     reader: R,
@@ -46,7 +48,7 @@ fn read_bed12_set_unnamed<R: Read>(reader: R) -> Result<NumericBed12Set> {
             };
             Ok(record)
         })
-        .collect::<Result<NumericBed12Set>>()?;
+        .collect::<Result<IntervalContainer<NumericBed12, usize, usize>>>()?;
     Ok(set)
 }
 

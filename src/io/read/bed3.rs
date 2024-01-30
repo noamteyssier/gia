@@ -1,14 +1,17 @@
 use super::build_reader;
 use crate::{io::NamedInterval, types::Translater};
 use anyhow::{bail, Result};
-use bedrs::{Container, GenomicInterval, GenomicIntervalSet};
+use bedrs::{GenomicInterval, IntervalContainer};
 use csv::ByteRecord;
 use std::io::Read;
 
 pub fn read_bed3_set<R: Read>(
     reader: R,
     named: bool,
-) -> Result<(GenomicIntervalSet<usize>, Option<Translater>)> {
+) -> Result<(
+    IntervalContainer<GenomicInterval<usize>, usize, usize>,
+    Option<Translater>,
+)> {
     if named {
         let (set, idx_map) = read_bed3_set_named(reader)?;
         Ok((set, Some(idx_map)))
@@ -23,8 +26,8 @@ pub fn read_paired_bed3_sets<R: Read>(
     reader_2: R,
     named: bool,
 ) -> Result<(
-    GenomicIntervalSet<usize>,
-    GenomicIntervalSet<usize>,
+    IntervalContainer<GenomicInterval<usize>, usize, usize>,
+    IntervalContainer<GenomicInterval<usize>, usize, usize>,
     Option<Translater>,
 )> {
     if named {
@@ -37,7 +40,9 @@ pub fn read_paired_bed3_sets<R: Read>(
     }
 }
 
-fn read_bed3_set_unnamed<R: Read>(reader: R) -> Result<GenomicIntervalSet<usize>> {
+fn read_bed3_set_unnamed<R: Read>(
+    reader: R,
+) -> Result<IntervalContainer<GenomicInterval<usize>, usize, usize>> {
     let mut reader = build_reader(reader);
     let set = reader
         .deserialize()
@@ -50,12 +55,17 @@ fn read_bed3_set_unnamed<R: Read>(reader: R) -> Result<GenomicIntervalSet<usize>
             };
             Ok(record)
         })
-        .collect::<Result<GenomicIntervalSet<usize>>>()?;
+        .collect::<Result<IntervalContainer<GenomicInterval<usize>, usize, usize>>>()?;
     Ok(set)
 }
 
 /// Reads a single file into a GenomicIntervalSet and a Translater
-fn read_bed3_set_named<R: Read>(reader: R) -> Result<(GenomicIntervalSet<usize>, Translater)> {
+fn read_bed3_set_named<R: Read>(
+    reader: R,
+) -> Result<(
+    IntervalContainer<GenomicInterval<usize>, usize, usize>,
+    Translater,
+)> {
     let mut translater = Translater::new();
     let set = convert_bed3_set(reader, &mut translater)?;
     Ok((set, translater))
@@ -69,10 +79,10 @@ fn read_bed3_set_named<R: Read>(reader: R) -> Result<(GenomicIntervalSet<usize>,
 fn convert_bed3_set<R: Read>(
     reader: R,
     translater: &mut Translater,
-) -> Result<GenomicIntervalSet<usize>> {
+) -> Result<IntervalContainer<GenomicInterval<usize>, usize, usize>> {
     let mut reader = build_reader(reader);
     let mut raw_record = ByteRecord::new();
-    let mut set = GenomicIntervalSet::empty();
+    let mut set = IntervalContainer::empty();
     while reader.read_byte_record(&mut raw_record)? {
         let record: NamedInterval = raw_record.deserialize(None)?;
         translater.add_name(record.name);
@@ -88,8 +98,8 @@ fn read_paired_bed3_named<R: Read>(
     reader_1: R,
     reader_2: R,
 ) -> Result<(
-    GenomicIntervalSet<usize>,
-    GenomicIntervalSet<usize>,
+    IntervalContainer<GenomicInterval<usize>, usize, usize>,
+    IntervalContainer<GenomicInterval<usize>, usize, usize>,
     Translater,
 )> {
     let mut translater = Translater::new();

@@ -1,5 +1,5 @@
 use super::{NumericBed12, NumericBed6};
-use bedrs::{traits::IntervalBounds, Container, Coordinates, GenomicInterval};
+use bedrs::{traits::IntervalBounds, Coordinates, GenomicInterval, IntervalContainer};
 use dashmap::DashMap;
 use hashbrown::HashMap;
 use human_sort::compare;
@@ -116,13 +116,14 @@ where
     C: IntervalBounds<usize, usize>,
 {
     fn reorder_translater(
-        set: &mut impl Container<usize, usize, C>,
+        set: &mut IntervalContainer<C, usize, usize>,
         translater: Translater,
     ) -> Retranslater;
 }
 impl Reorder<GenomicInterval<usize>> for GenomicInterval<usize> {
     fn reorder_translater(
-        set: &mut impl Container<usize, usize, Self>,
+        // set: &mut impl Container<usize, usize, Self>,
+        set: &mut IntervalContainer<Self, usize, usize>,
         translater: Translater,
     ) -> Retranslater {
         let retranslate = translater.lex_sort();
@@ -135,7 +136,7 @@ impl Reorder<GenomicInterval<usize>> for GenomicInterval<usize> {
 }
 impl Reorder<NumericBed6> for NumericBed6 {
     fn reorder_translater(
-        set: &mut impl Container<usize, usize, Self>,
+        set: &mut IntervalContainer<Self, usize, usize>,
         translater: Translater,
     ) -> Retranslater {
         let retranslate = translater.lex_sort();
@@ -150,7 +151,7 @@ impl Reorder<NumericBed6> for NumericBed6 {
 }
 impl Reorder<NumericBed12> for NumericBed12 {
     fn reorder_translater(
-        set: &mut impl Container<usize, usize, Self>,
+        set: &mut IntervalContainer<Self, usize, usize>,
         translater: Translater,
     ) -> Retranslater {
         let retranslate = translater.lex_sort();

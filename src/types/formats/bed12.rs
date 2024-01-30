@@ -1,5 +1,4 @@
-use anyhow::{bail, Result};
-use bedrs::{Container, Coordinates, Strand};
+use bedrs::{Coordinates, Strand};
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 
@@ -64,67 +63,67 @@ impl FromIterator<NumericBed12> for NumericBed12Set {
         }
     }
 }
-impl Container<usize, usize, NumericBed12> for NumericBed12Set {
-    fn new(records: Vec<NumericBed12>) -> Self {
-        let max_len = records.iter().map(|iv| iv.len()).max();
-        Self {
-            records,
-            max_len,
-            is_sorted: false,
-        }
-    }
+// impl Container<usize, usize, NumericBed12> for NumericBed12Set {
+//     fn new(records: Vec<NumericBed12>) -> Self {
+//         let max_len = records.iter().map(|iv| iv.len()).max();
+//         Self {
+//             records,
+//             max_len,
+//             is_sorted: false,
+//         }
+//     }
 
-    fn records(&self) -> &Vec<NumericBed12> {
-        &self.records
-    }
-    fn records_mut(&mut self) -> &mut Vec<NumericBed12> {
-        &mut self.records
-    }
-    fn records_owned(self) -> Vec<NumericBed12> {
-        self.records
-    }
-    fn is_sorted(&self) -> bool {
-        self.is_sorted
-    }
-    fn sorted_mut(&mut self) -> &mut bool {
-        &mut self.is_sorted
-    }
-    fn max_len(&self) -> Option<usize> {
-        self.max_len
-    }
-    fn max_len_mut(&mut self) -> &mut Option<usize> {
-        &mut self.max_len
-    }
-    fn span(&self) -> Result<NumericBed12> {
-        if self.is_empty() {
-            bail!("Cannot get span of empty interval set")
-        } else if !self.is_sorted() {
-            bail!("Cannot get span of unsorted interval set")
-        } else {
-            let first = self.records().first().unwrap();
-            let last = self.records().last().unwrap();
-            if first.chr() != last.chr() {
-                bail!("Cannot get span of interval set spanning multiple chromosomes")
-            } else {
-                let iv = NumericBed12::new(
-                    *first.chr(),
-                    first.start(),
-                    last.end(),
-                    0,
-                    0.0,
-                    Strand::Unknown,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                );
-                Ok(iv)
-            }
-        }
-    }
-}
+//     fn records(&self) -> &Vec<NumericBed12> {
+//         &self.records
+//     }
+//     fn records_mut(&mut self) -> &mut Vec<NumericBed12> {
+//         &mut self.records
+//     }
+//     fn records_owned(self) -> Vec<NumericBed12> {
+//         self.records
+//     }
+//     fn is_sorted(&self) -> bool {
+//         self.is_sorted
+//     }
+//     fn sorted_mut(&mut self) -> &mut bool {
+//         &mut self.is_sorted
+//     }
+//     fn max_len(&self) -> Option<usize> {
+//         self.max_len
+//     }
+//     fn max_len_mut(&mut self) -> &mut Option<usize> {
+//         &mut self.max_len
+//     }
+//     fn span(&self) -> Result<NumericBed12> {
+//         if self.is_empty() {
+//             bail!("Cannot get span of empty interval set")
+//         } else if !self.is_sorted() {
+//             bail!("Cannot get span of unsorted interval set")
+//         } else {
+//             let first = self.records().first().unwrap();
+//             let last = self.records().last().unwrap();
+//             if first.chr() != last.chr() {
+//                 bail!("Cannot get span of interval set spanning multiple chromosomes")
+//             } else {
+//                 let iv = NumericBed12::new(
+//                     *first.chr(),
+//                     first.start(),
+//                     last.end(),
+//                     0,
+//                     0.0,
+//                     Strand::Unknown,
+//                     0,
+//                     0,
+//                     0,
+//                     0,
+//                     0,
+//                     0,
+//                 );
+//                 Ok(iv)
+//             }
+//         }
+//     }
+// }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct NumericBed12 {
@@ -233,20 +232,37 @@ impl Coordinates<usize, usize> for NumericBed12 {
         self.end = *end;
     }
 
-    fn from(other: &Self) -> Self {
+    fn empty() -> Self {
         Self {
-            chr: other.chr,
-            start: other.start,
-            end: other.end,
-            name: other.name,
-            score: other.score,
-            strand: other.strand,
-            thick_start: other.thick_start,
-            thick_end: other.thick_end,
-            item_rgb: other.item_rgb,
-            block_count: other.block_count,
-            block_sizes: other.block_sizes,
-            block_starts: other.block_starts,
+            chr: 0,
+            start: 0,
+            end: 0,
+            name: 0,
+            score: 0.0,
+            strand: Strand::Unknown,
+            thick_start: 0,
+            thick_end: 0,
+            item_rgb: 0,
+            block_count: 0,
+            block_sizes: 0,
+            block_starts: 0,
+        }
+    }
+
+    fn from<Iv: Coordinates<usize, usize>>(other: &Iv) -> Self {
+        Self {
+            chr: *other.chr(),
+            start: other.start(),
+            end: other.end(),
+            name: 0,
+            score: 0.0,
+            strand: other.strand().unwrap_or(Strand::Unknown),
+            thick_start: 0,
+            thick_end: 0,
+            item_rgb: 0,
+            block_count: 0,
+            block_sizes: 0,
+            block_starts: 0,
         }
     }
 }
@@ -265,6 +281,10 @@ impl Coordinates<usize, usize> for &NumericBed12 {
 
     fn strand(&self) -> Option<Strand> {
         Some(self.strand)
+    }
+
+    fn empty() -> Self {
+        unreachable!("Cannot create empty reference")
     }
 
     #[allow(dead_code)]
@@ -287,7 +307,7 @@ impl Coordinates<usize, usize> for &NumericBed12 {
 
     #[allow(dead_code)]
     #[allow(unused_variables)]
-    fn from(other: &Self) -> Self {
+    fn from<Iv>(other: &Iv) -> Self {
         unimplemented!("Cannot create owned instance of a reference")
     }
 }

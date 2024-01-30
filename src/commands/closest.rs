@@ -9,7 +9,7 @@ use crate::{
 use anyhow::Result;
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    Closest, Container,
+    IntervalContainer,
 };
 
 #[derive(Debug, PartialEq)]
@@ -33,8 +33,8 @@ impl ClosestType {
 }
 
 fn run_closest<'a, C, T, I>(
-    a_set: &'a impl Container<C, T, I>,
-    b_set: &'a impl Container<C, T, I>,
+    a_set: &'a IntervalContainer<I, C, T>,
+    b_set: &'a IntervalContainer<I, C, T>,
     method: ClosestType,
 ) -> impl Iterator<Item = IntervalPair<I, C, T>> + 'a
 where
@@ -195,7 +195,7 @@ mod testing {
     use crate::io::read_bed3_set;
 
     use super::*;
-    use bedrs::{GenomicInterval, GenomicIntervalSet};
+    use bedrs::{Coordinates, GenomicInterval};
 
     #[test]
     ///    x-----y      x-----y      x-------y
@@ -207,7 +207,7 @@ mod testing {
     fn closest() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
         let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
-        let query_set = GenomicIntervalSet::from_unsorted(vec![
+        let query_set = IntervalContainer::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
         ]);
@@ -216,9 +216,10 @@ mod testing {
             .map(|pair| pair.iv_b)
             .collect::<Vec<_>>();
         assert!(closest.len() == 3);
-        assert_eq!(closest[0], Some(GenomicInterval::new(1, 22, 23)));
-        assert_eq!(closest[1], Some(GenomicInterval::new(1, 42, 43)));
-        assert_eq!(closest[2], Some(GenomicInterval::new(1, 42, 43)));
+
+        assert!(closest[0].unwrap().eq(&GenomicInterval::new(1, 22, 23)));
+        assert!(closest[1].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
+        assert!(closest[2].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
     }
 
     #[test]
@@ -231,7 +232,7 @@ mod testing {
     fn closest_upstream() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
         let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
-        let query_set = GenomicIntervalSet::from_unsorted(vec![
+        let query_set = IntervalContainer::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
         ]);
@@ -240,9 +241,9 @@ mod testing {
             .map(|pair| pair.iv_b)
             .collect::<Vec<_>>();
         assert!(closest.len() == 3);
-        assert_eq!(closest[0], None);
-        assert_eq!(closest[1], Some(GenomicInterval::new(1, 22, 23)));
-        assert_eq!(closest[2], Some(GenomicInterval::new(1, 42, 43)));
+        assert!(closest[0].is_none());
+        assert!(closest[1].unwrap().eq(&GenomicInterval::new(1, 22, 23)));
+        assert!(closest[2].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
     }
 
     #[test]
@@ -255,7 +256,7 @@ mod testing {
     fn closest_downstream() {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
         let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
-        let query_set = GenomicIntervalSet::from_unsorted(vec![
+        let query_set = IntervalContainer::from_unsorted(vec![
             GenomicInterval::new(1, 22, 23),
             GenomicInterval::new(1, 42, 43),
         ]);
@@ -264,9 +265,9 @@ mod testing {
             .map(|pair| pair.iv_b)
             .collect::<Vec<_>>();
         assert!(closest.len() == 3);
-        assert_eq!(closest[0], Some(GenomicInterval::new(1, 22, 23)));
-        assert_eq!(closest[1], Some(GenomicInterval::new(1, 42, 43)));
-        assert_eq!(closest[2], None);
+        assert!(closest[0].unwrap().eq(&GenomicInterval::new(1, 22, 23)));
+        assert!(closest[1].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
+        assert!(closest[2].is_none());
     }
 
     #[test]

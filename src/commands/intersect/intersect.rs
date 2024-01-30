@@ -10,15 +10,15 @@ use crate::{
 };
 use anyhow::Result;
 use bedrs::{
-    traits::IntervalBounds, types::iterator::QueryMethod, Container, GenomicInterval,
-    IntersectIter, MergeIter,
+    traits::IntervalBounds, types::QueryMethod, GenomicInterval, IntersectIter, IntervalContainer,
+    MergeIter,
 };
 use serde::Serialize;
 use std::io::BufRead;
 
 fn run_intersect_set<I>(
-    query_set: &impl Container<usize, usize, I>,
-    target_set: &impl Container<usize, usize, I>,
+    query_set: &IntervalContainer<I, usize, usize>,
+    target_set: &IntervalContainer<I, usize, usize>,
     overlap_method: OverlapMethod,
     output_method: OutputMethod,
     output: Option<String>,

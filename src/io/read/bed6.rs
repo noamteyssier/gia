@@ -1,9 +1,11 @@
 use super::build_reader;
-use crate::types::{Bed6, NumericBed6, NumericBed6Set, Translater};
+use crate::types::{Bed6, NumericBed6, Translater};
 use anyhow::{bail, Result};
-use bedrs::Container;
+use bedrs::IntervalContainer;
 use csv::ByteRecord;
 use std::io::Read;
+
+type NumericBed6Set = IntervalContainer<NumericBed6, usize, usize>;
 
 pub fn read_bed6_set<R: Read>(
     reader: R,

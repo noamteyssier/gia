@@ -6,7 +6,7 @@ use crate::{
     types::{Genome, InputFormat, Translater},
 };
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, Container, Coordinates};
+use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
 use serde::Serialize;
 
 fn extend_left(iv: &mut impl Coordinates<usize, usize>, val: usize) {
@@ -35,7 +35,7 @@ fn extend_right(iv: &mut impl Coordinates<usize, usize>, val: usize, genome: Opt
 
 fn extend_set<I>(
     output: Option<String>,
-    set: &mut impl Container<usize, usize, I>,
+    set: &mut IntervalContainer<I, usize, usize>,
     both: Option<usize>,
     left: Option<usize>,
     right: Option<usize>,

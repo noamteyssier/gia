@@ -3,9 +3,7 @@ use crate::io::{
     write_records_iter_with,
 };
 use anyhow::Result;
-use bedrs::{
-    types::iterator::ComplementIter, Complement, Container, GenomicInterval, Merge, MergeIter,
-};
+use bedrs::{types::iterator::ComplementIter, GenomicInterval, MergeIter};
 
 fn complement_inplace(
     input: Option<String>,

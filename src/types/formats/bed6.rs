@@ -1,5 +1,4 @@
-use anyhow::{bail, Result};
-use bedrs::{Container, Coordinates, Strand};
+use bedrs::{Coordinates, Strand};
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 
@@ -52,61 +51,61 @@ impl FromIterator<NumericBed6> for NumericBed6Set {
         }
     }
 }
-impl Container<usize, usize, NumericBed6> for NumericBed6Set {
-    fn new(records: Vec<NumericBed6>) -> Self {
-        let max_len = records.iter().map(|iv| iv.len()).max();
-        Self {
-            records,
-            max_len,
-            is_sorted: false,
-        }
-    }
+// impl Container<usize, usize, NumericBed6> for NumericBed6Set {
+//     fn new(records: Vec<NumericBed6>) -> Self {
+//         let max_len = records.iter().map(|iv| iv.len()).max();
+//         Self {
+//             records,
+//             max_len,
+//             is_sorted: false,
+//         }
+//     }
 
-    fn records(&self) -> &Vec<NumericBed6> {
-        &self.records
-    }
-    fn records_mut(&mut self) -> &mut Vec<NumericBed6> {
-        &mut self.records
-    }
-    fn records_owned(self) -> Vec<NumericBed6> {
-        self.records
-    }
-    fn is_sorted(&self) -> bool {
-        self.is_sorted
-    }
-    fn sorted_mut(&mut self) -> &mut bool {
-        &mut self.is_sorted
-    }
-    fn max_len(&self) -> Option<usize> {
-        self.max_len
-    }
-    fn max_len_mut(&mut self) -> &mut Option<usize> {
-        &mut self.max_len
-    }
-    fn span(&self) -> Result<NumericBed6> {
-        if self.is_empty() {
-            bail!("Cannot get span of empty interval set")
-        } else if !self.is_sorted() {
-            bail!("Cannot get span of unsorted interval set")
-        } else {
-            let first = self.records().first().unwrap();
-            let last = self.records().last().unwrap();
-            if first.chr() != last.chr() {
-                bail!("Cannot get span of interval set spanning multiple chromosomes")
-            } else {
-                let iv = NumericBed6::new(
-                    *first.chr(),
-                    first.start(),
-                    last.end(),
-                    0,
-                    0.0,
-                    Strand::Unknown,
-                );
-                Ok(iv)
-            }
-        }
-    }
-}
+//     fn records(&self) -> &Vec<NumericBed6> {
+//         &self.records
+//     }
+//     fn records_mut(&mut self) -> &mut Vec<NumericBed6> {
+//         &mut self.records
+//     }
+//     fn records_owned(self) -> Vec<NumericBed6> {
+//         self.records
+//     }
+//     fn is_sorted(&self) -> bool {
+//         self.is_sorted
+//     }
+//     fn sorted_mut(&mut self) -> &mut bool {
+//         &mut self.is_sorted
+//     }
+//     fn max_len(&self) -> Option<usize> {
+//         self.max_len
+//     }
+//     fn max_len_mut(&mut self) -> &mut Option<usize> {
+//         &mut self.max_len
+//     }
+//     fn span(&self) -> Result<NumericBed6> {
+//         if self.is_empty() {
+//             bail!("Cannot get span of empty interval set")
+//         } else if !self.is_sorted() {
+//             bail!("Cannot get span of unsorted interval set")
+//         } else {
+//             let first = self.records().first().unwrap();
+//             let last = self.records().last().unwrap();
+//             if first.chr() != last.chr() {
+//                 bail!("Cannot get span of interval set spanning multiple chromosomes")
+//             } else {
+//                 let iv = NumericBed6::new(
+//                     *first.chr(),
+//                     first.start(),
+//                     last.end(),
+//                     0,
+//                     0.0,
+//                     Strand::Unknown,
+//                 );
+//                 Ok(iv)
+//             }
+//         }
+//     }
+// }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct NumericBed6 {
@@ -166,6 +165,17 @@ impl Coordinates<usize, usize> for NumericBed6 {
         self.end
     }
 
+    fn empty() -> Self {
+        Self {
+            chr: 0,
+            start: 0,
+            end: 0,
+            name: 0,
+            score: 0.0,
+            strand: Strand::Unknown,
+        }
+    }
+
     fn strand(&self) -> Option<Strand> {
         Some(self.strand)
     }
@@ -182,14 +192,14 @@ impl Coordinates<usize, usize> for NumericBed6 {
         self.end = *end;
     }
 
-    fn from(other: &Self) -> Self {
+    fn from<Iv: Coordinates<usize, usize>>(other: &Iv) -> Self {
         Self {
-            chr: other.chr,
-            start: other.start,
-            end: other.end,
-            name: other.name,
-            score: other.score,
-            strand: other.strand,
+            chr: *other.chr(),
+            start: other.start(),
+            end: other.end(),
+            name: 0,
+            score: 0.0,
+            strand: other.strand().unwrap_or(Strand::Unknown),
         }
     }
 }
@@ -208,6 +218,10 @@ impl Coordinates<usize, usize> for &NumericBed6 {
 
     fn strand(&self) -> Option<Strand> {
         Some(self.strand)
+    }
+
+    fn empty() -> Self {
+        unreachable!("Cannot create empty reference")
     }
 
     #[allow(dead_code)]
@@ -230,7 +244,7 @@ impl Coordinates<usize, usize> for &NumericBed6 {
 
     #[allow(dead_code)]
     #[allow(unused_variables)]
-    fn from(other: &Self) -> Self {
+    fn from<Iv>(other: &Iv) -> Self {
         unimplemented!("Cannot create owned instance of a reference")
     }
 }

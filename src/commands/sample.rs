@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use bedrs::{traits::IntervalBounds, Container, Sample};
+use bedrs::{traits::IntervalBounds, IntervalContainer};
 use serde::Serialize;
 
 use crate::{
@@ -12,7 +12,7 @@ use crate::{
 };
 
 fn sample_from_set<I>(
-    set: &impl Container<usize, usize, I>,
+    set: &mut IntervalContainer<I, usize, usize>,
     number: Option<usize>,
     fraction: Option<f64>,
     seed: Option<usize>,
@@ -74,9 +74,9 @@ pub fn sample(
     // handle input format
     match format {
         InputFormat::Bed3 => {
-            let (set, translater) = read_bed3_set(input_handle, named)?;
+            let (mut set, translater) = read_bed3_set(input_handle, named)?;
             sample_from_set(
-                &set,
+                &mut set,
                 number,
                 fraction,
                 seed,
@@ -87,9 +87,9 @@ pub fn sample(
             )
         }
         InputFormat::Bed6 => {
-            let (set, translater) = read_bed6_set(input_handle, named)?;
+            let (mut set, translater) = read_bed6_set(input_handle, named)?;
             sample_from_set(
-                &set,
+                &mut set,
                 number,
                 fraction,
                 seed,
@@ -100,9 +100,9 @@ pub fn sample(
             )
         }
         InputFormat::Bed12 => {
-            let (set, translater) = read_bed12_set(input_handle, named)?;
+            let (mut set, translater) = read_bed12_set(input_handle, named)?;
             sample_from_set(
-                &set,
+                &mut set,
                 number,
                 fraction,
                 seed,

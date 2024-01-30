@@ -1,7 +1,7 @@
 use anyhow::Result;
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    Container, Find,
+    IntervalContainer,
 };
 
 /// Describes the method used to find overlaps between query and target intervals.
@@ -46,13 +46,12 @@ impl OverlapMethod {
     }
 }
 
-pub fn run_find<'a, Co, I, C, T>(
+pub fn run_find<'a, I, C, T>(
     query: &'a I,
-    target_set: &'a Co,
+    target_set: &'a IntervalContainer<I, C, T>,
     method: OverlapMethod,
 ) -> Result<Box<dyn Iterator<Item = I> + 'a>>
 where
-    Co: Container<C, T, I>,
     I: IntervalBounds<C, T>,
     C: ChromBounds + 'a,
     T: ValueBounds + 'a,

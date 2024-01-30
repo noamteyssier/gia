@@ -1,6 +1,6 @@
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    Container,
+    IntervalContainer,
 };
 use rand::{thread_rng, RngCore, SeedableRng};
 use rand_chacha::ChaChaRng;
@@ -13,14 +13,15 @@ pub fn build_rng(seed: Option<usize>) -> Box<dyn RngCore> {
 }
 
 /// Sorts two sets if they are not already sorted
-pub fn sort_pairs<C, T, I>(
-    set_a: &mut impl Container<C, T, I>,
-    set_b: &mut impl Container<C, T, I>,
+pub fn sort_pairs<Ia, Ib, C, T>(
+    set_a: &mut IntervalContainer<Ia, C, T>,
+    set_b: &mut IntervalContainer<Ib, C, T>,
     sorted: bool,
 ) where
+    Ia: IntervalBounds<C, T>,
+    Ib: IntervalBounds<C, T>,
     C: ChromBounds,
     T: ValueBounds,
-    I: IntervalBounds<C, T>,
 {
     if !sorted {
         set_a.sort();

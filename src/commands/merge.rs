@@ -8,7 +8,7 @@ use crate::{
     types::InputFormat,
 };
 use anyhow::Result;
-use bedrs::{Container, GenomicInterval, Merge, MergeIter};
+use bedrs::{GenomicInterval, MergeIter};
 
 fn merge_in_memory_bed3<R, W>(
     input_handle: R,

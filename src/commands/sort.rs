@@ -6,12 +6,12 @@ use crate::{
     types::{InputFormat, Reorder, Retranslater, Translater},
 };
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, Container};
+use bedrs::{traits::IntervalBounds, IntervalContainer};
 use rayon::ThreadPoolBuilder;
 use serde::Serialize;
 
 fn sort_set<I>(
-    set: &mut impl Container<usize, usize, I>,
+    set: &mut IntervalContainer<I, usize, usize>,
     translater: Option<Translater>,
     parallel: bool,
 ) -> Option<Retranslater>
@@ -33,7 +33,7 @@ where
 }
 
 fn sort_and_write<I>(
-    mut set: impl Container<usize, usize, I>,
+    mut set: IntervalContainer<I, usize, usize>,
     output: Option<String>,
     translater: Option<Translater>,
     parallel: bool,
