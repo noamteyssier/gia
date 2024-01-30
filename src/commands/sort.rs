@@ -1,7 +1,7 @@
 use crate::{
     io::{
-        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
+        match_output, read_bed12_set, read_bed3_set, read_bed6_set, write_records_iter_with,
+        BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, Reorder, Retranslater, Translater},
 };
@@ -50,66 +50,6 @@ where
     Ok(())
 }
 
-fn sort_bed3(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (set, translater) = read_bed3_set(input_handle, named)?;
-    sort_and_write(
-        set,
-        output,
-        translater,
-        parallel,
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn sort_bed6(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (set, translater) = read_bed6_set(input_handle, named)?;
-    sort_and_write(
-        set,
-        output,
-        translater,
-        parallel,
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn sort_bed12(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (set, translater) = read_bed12_set(input_handle, named)?;
-    sort_and_write(
-        set,
-        output,
-        translater,
-        parallel,
-        compression_threads,
-        compression_level,
-    )
-}
-
 fn initialize_thread_pool(threads: usize) -> Result<bool> {
     if threads > 1 {
         ThreadPoolBuilder::new()
@@ -125,40 +65,68 @@ fn initialize_thread_pool(threads: usize) -> Result<bool> {
     }
 }
 
+fn match_and_sort(
+    bed_reader: BedReader,
+    output: Option<String>,
+    named: bool,
+    parallel: bool,
+    compression_threads: usize,
+    compression_level: u32,
+) -> Result<()> {
+    match bed_reader.format() {
+        InputFormat::Bed3 => {
+            let (set, translater) = read_bed3_set(bed_reader.reader(), named)?;
+            sort_and_write(
+                set,
+                output,
+                translater,
+                parallel,
+                compression_threads,
+                compression_level,
+            )
+        }
+        InputFormat::Bed6 => {
+            let (set, translater) = read_bed6_set(bed_reader.reader(), named)?;
+            sort_and_write(
+                set,
+                output,
+                translater,
+                parallel,
+                compression_threads,
+                compression_level,
+            )
+        }
+        InputFormat::Bed12 => {
+            let (set, translater) = read_bed12_set(bed_reader.reader(), named)?;
+            sort_and_write(
+                set,
+                output,
+                translater,
+                parallel,
+                compression_threads,
+                compression_level,
+            )
+        }
+    }
+}
+
 pub fn sort(
     input: Option<String>,
     output: Option<String>,
     named: bool,
-    format: InputFormat,
+    format: Option<InputFormat>,
     threads: usize,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
     let parallel = initialize_thread_pool(threads)?;
-    match format {
-        InputFormat::Bed3 => sort_bed3(
-            input,
-            output,
-            named,
-            parallel,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed6 => sort_bed6(
-            input,
-            output,
-            named,
-            parallel,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed12 => sort_bed12(
-            input,
-            output,
-            named,
-            parallel,
-            compression_threads,
-            compression_level,
-        ),
-    }
+    let bed_reader = BedReader::from_path(input, format)?;
+    match_and_sort(
+        bed_reader,
+        output,
+        named,
+        parallel,
+        compression_threads,
+        compression_level,
+    )
 }
