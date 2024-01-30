@@ -13,7 +13,8 @@ keywords = [ "genomics", "bioinformatics", "bed", "set", "interval" ]
 
 [dependencies]
 anyhow = "1.0.72"
-bedrs = { version = "0.1.11", features = ["serde", "rayon"] }
+# bedrs = { version = "0.1.11", features = ["serde", "rayon"] }
+bedrs = { git = "https://github.com/noamteyssier/bedrs", branch="bedrs-2.0", features = ["serde", "rayon"] }
 bstr = "1.6.0"
 clap = { version = "4.3.19", features = ["derive"] }
 csv = "1.2.2"
