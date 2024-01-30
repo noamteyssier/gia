@@ -3,7 +3,7 @@ use crate::{
         match_output, read_bed12_set, read_bed3_set, read_bed6_set, write_records_iter_with,
         BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, Reorder, Retranslater, Translater},
+    types::{FieldFormat, InputFormat, Reorder, Retranslater, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -68,12 +68,12 @@ fn initialize_thread_pool(threads: usize) -> Result<bool> {
 fn match_and_sort(
     bed_reader: BedReader,
     output: Option<String>,
-    named: bool,
     parallel: bool,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
-    match bed_reader.format() {
+    let named = bed_reader.is_named();
+    match bed_reader.input_format() {
         InputFormat::Bed3 => {
             let (set, translater) = read_bed3_set(bed_reader.reader(), named)?;
             sort_and_write(
@@ -113,18 +113,17 @@ fn match_and_sort(
 pub fn sort(
     input: Option<String>,
     output: Option<String>,
-    named: bool,
-    format: Option<InputFormat>,
+    input_format: Option<InputFormat>,
+    field_format: Option<FieldFormat>,
     threads: usize,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
     let parallel = initialize_thread_pool(threads)?;
-    let bed_reader = BedReader::from_path(input, format)?;
+    let bed_reader = BedReader::from_path(input, input_format, field_format)?;
     match_and_sort(
         bed_reader,
         output,
-        named,
         parallel,
         compression_threads,
         compression_level,

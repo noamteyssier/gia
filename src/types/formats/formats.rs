@@ -1,9 +1,4 @@
-use anyhow::{bail, Result};
 use clap::ValueEnum;
-use std::{
-    io::{BufRead, BufReader, Read},
-    str::from_utf8,
-};
 
 /// Determines the input format of a file or stream.
 ///
@@ -18,61 +13,18 @@ pub enum InputFormat {
     Bed12,
 }
 
-// /// Determines the field format of a file or stream.
-// ///
-// /// Will read the first line of the file and try to parse the first and fourth fields as integers.
-// /// (i.e. the chromosome and name fields of a bed[46] file)
-// ///
-// /// Will *not* consume the first line of the file.
-// #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-// pub enum FieldFormat {
-//     #[default]
-//     IntegerBased,
-//     StringBased,
-// }
-// impl FieldFormat {
-//     #[allow(dead_code)]
-//     pub fn predict<R: Read>(reader: &mut BufReader<R>) -> Result<Self> {
-//         reader.fill_buf()?;
-//         let internal = reader.buffer();
-//         let first = internal.split(|b| *b == b'\n').next().unwrap();
-//         Self::predict_from_bytes(first)
-//     }
-
-//     pub fn predict_from_bytes(line: &[u8]) -> Result<Self> {
-//         // let input_format = InputFormat::predict_from_bytes(line)?;
-//         let mut fields = line.split(|b| *b == b'\t');
-//         match input_format {
-//             InputFormat::Bed12 => {
-//                 let chr = from_utf8(fields.nth(0).unwrap())?;
-//                 let name = from_utf8(fields.nth(3).unwrap())?;
-//                 if chr.parse::<usize>().is_ok() && name.parse::<usize>().is_ok() {
-//                     Ok(Self::IntegerBased)
-//                 } else {
-//                     Ok(Self::StringBased)
-//                 }
-//             }
-//             InputFormat::Bed6 => {
-//                 let chr = from_utf8(fields.nth(0).unwrap())?;
-//                 let name = from_utf8(fields.nth(2).unwrap())?;
-//                 if chr.parse::<usize>().is_ok() && name.parse::<usize>().is_ok() {
-//                     Ok(Self::IntegerBased)
-//                 } else {
-//                     Ok(Self::StringBased)
-//                 }
-//             }
-//             InputFormat::Bed3 => {
-//                 let chr = from_utf8(fields.nth(0).unwrap())?;
-//                 if chr.parse::<usize>().is_ok() {
-//                     Ok(Self::IntegerBased)
-//                 } else {
-//                     Ok(Self::StringBased)
-//                 }
-//             }
-//             InputFormat::Auto => bail!("Cannot predict field format from Auto input format"),
-//         }
-//     }
-// }
+/// Determines the field format of a file or stream.
+///
+/// Will read the first line of the file and try to parse the first and fourth fields as integers.
+/// (i.e. the chromosome and name fields of a bed[46] file)
+///
+/// Will *not* consume the first line of the file.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum FieldFormat {
+    #[default]
+    IntegerBased,
+    StringBased,
+}
 
 #[cfg(test)]
 mod testing {

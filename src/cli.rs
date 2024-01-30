@@ -1,4 +1,4 @@
-use crate::types::InputFormat;
+use crate::types::{FieldFormat, InputFormat};
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -337,13 +337,13 @@ pub enum Command {
         #[clap(short, long)]
         output: Option<String>,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
         /// Input file format
         #[clap(short = 'T', long)]
-        format: Option<InputFormat>,
+        input_format: Option<InputFormat>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        field_format: Option<FieldFormat>,
 
         /// Number of threads to use for sorting (default=1)
         #[clap(short = 't', long, default_value = "1")]

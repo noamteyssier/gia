@@ -185,14 +185,14 @@ fn main() -> Result<()> {
         Command::Sort {
             input,
             output,
-            named,
-            format,
+            input_format,
+            field_format,
             threads,
         } => sort(
             input,
             output,
-            named,
-            format,
+            input_format,
+            field_format,
             threads,
             cli.compression_threads,
             cli.compression_level,
