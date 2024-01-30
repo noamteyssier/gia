@@ -23,7 +23,7 @@ mod testing {
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
             let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -53,7 +53,7 @@ mod testing {
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
             let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -78,7 +78,7 @@ mod testing {
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
             let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -112,7 +112,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -148,7 +148,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -183,7 +183,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -218,7 +218,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
             assert_eq!(fields[3], "0");
             assert_eq!(fields[4], "0.0");
@@ -255,7 +255,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -291,7 +291,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -326,7 +326,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -361,7 +361,7 @@ mod testing {
                 .collect::<Vec<u32>>();
             let interval =
                 GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
             assert_eq!(fields[3], "0");
             assert_eq!(fields[4], "0.0");
