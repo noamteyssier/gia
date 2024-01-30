@@ -4,10 +4,10 @@ use serde::Serialize;
 
 use crate::{
     io::{
-        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
+        match_output, read_bed12_set, read_bed3_set, read_bed6_set, write_records_iter_with,
+        BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, Translater},
+    types::{FieldFormat, InputFormat, Translater},
     utils::build_rng,
 };
 
@@ -63,18 +63,19 @@ pub fn sample(
     number: Option<usize>,
     fraction: Option<f64>,
     seed: Option<usize>,
-    named: bool,
-    format: InputFormat,
+    input_format: Option<InputFormat>,
+    field_format: Option<FieldFormat>,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
     // read input
-    let input_handle = match_input(input)?;
+    let bed_reader = BedReader::from_path(input, input_format, field_format)?;
+    let named = bed_reader.is_named();
 
     // handle input format
-    match format {
+    match bed_reader.input_format() {
         InputFormat::Bed3 => {
-            let (mut set, translater) = read_bed3_set(input_handle, named)?;
+            let (mut set, translater) = read_bed3_set(bed_reader.reader(), named)?;
             sample_from_set(
                 &mut set,
                 number,
@@ -87,7 +88,7 @@ pub fn sample(
             )
         }
         InputFormat::Bed6 => {
-            let (mut set, translater) = read_bed6_set(input_handle, named)?;
+            let (mut set, translater) = read_bed6_set(bed_reader.reader(), named)?;
             sample_from_set(
                 &mut set,
                 number,
@@ -100,7 +101,7 @@ pub fn sample(
             )
         }
         InputFormat::Bed12 => {
-            let (mut set, translater) = read_bed12_set(input_handle, named)?;
+            let (mut set, translater) = read_bed12_set(bed_reader.reader(), named)?;
             sample_from_set(
                 &mut set,
                 number,

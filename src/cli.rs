@@ -318,13 +318,13 @@ pub enum Command {
         #[clap(short, long)]
         seed: Option<usize>,
 
+        /// Input file format
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Format of input file
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        field_format: Option<FieldFormat>,
     },
 
     /// Sorts a BED file by chromosome, start, and end
