@@ -2,8 +2,8 @@ mod formats;
 mod pairs;
 mod translater;
 pub use formats::{
-    Bed12, Bed6, FieldFormat, Genome, InputFormat, NumericBed12, NumericBed12Set, NumericBed6,
-    NumericBed6Set,
+    Bed12Set, Bed3Set, Bed6Set, FieldFormat, Genome, InputFormat, NamedBed12, NamedBed3, NamedBed6,
+    NumericBed12, NumericBed3, NumericBed6,
 };
 pub use pairs::IntervalPair;
 pub use translater::{Reorder, Retranslater, StreamTranslater, Translate, Translater};

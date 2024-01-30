@@ -192,10 +192,9 @@ pub fn closest(
 #[cfg(test)]
 mod testing {
 
-    use crate::io::read_bed3_set;
-
     use super::*;
-    use bedrs::{Coordinates, GenomicInterval};
+    use crate::{io::read_bed3_set, types::NumericBed3};
+    use bedrs::Coordinates;
 
     #[test]
     ///    x-----y      x-----y      x-------y
@@ -208,8 +207,8 @@ mod testing {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
         let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
         let query_set = IntervalContainer::from_unsorted(vec![
-            GenomicInterval::new(1, 22, 23),
-            GenomicInterval::new(1, 42, 43),
+            NumericBed3::new(1, 22, 23),
+            NumericBed3::new(1, 42, 43),
         ]);
         let method = ClosestType::Both;
         let closest = run_closest(&set, &query_set, method)
@@ -217,9 +216,9 @@ mod testing {
             .collect::<Vec<_>>();
         assert!(closest.len() == 3);
 
-        assert!(closest[0].unwrap().eq(&GenomicInterval::new(1, 22, 23)));
-        assert!(closest[1].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
-        assert!(closest[2].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
+        assert!(closest[0].unwrap().eq(&NumericBed3::new(1, 22, 23)));
+        assert!(closest[1].unwrap().eq(&NumericBed3::new(1, 42, 43)));
+        assert!(closest[2].unwrap().eq(&NumericBed3::new(1, 42, 43)));
     }
 
     #[test]
@@ -233,8 +232,8 @@ mod testing {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
         let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
         let query_set = IntervalContainer::from_unsorted(vec![
-            GenomicInterval::new(1, 22, 23),
-            GenomicInterval::new(1, 42, 43),
+            NumericBed3::new(1, 22, 23),
+            NumericBed3::new(1, 42, 43),
         ]);
         let method = ClosestType::Upstream;
         let closest = run_closest(&set, &query_set, method)
@@ -242,8 +241,8 @@ mod testing {
             .collect::<Vec<_>>();
         assert!(closest.len() == 3);
         assert!(closest[0].is_none());
-        assert!(closest[1].unwrap().eq(&GenomicInterval::new(1, 22, 23)));
-        assert!(closest[2].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
+        assert!(closest[1].unwrap().eq(&NumericBed3::new(1, 22, 23)));
+        assert!(closest[2].unwrap().eq(&NumericBed3::new(1, 42, 43)));
     }
 
     #[test]
@@ -257,16 +256,16 @@ mod testing {
         let interval_text = "1\t10\t20\n1\t30\t40\n1\t50\t60\n";
         let (set, _) = read_bed3_set(interval_text.as_bytes(), false).unwrap();
         let query_set = IntervalContainer::from_unsorted(vec![
-            GenomicInterval::new(1, 22, 23),
-            GenomicInterval::new(1, 42, 43),
+            NumericBed3::new(1, 22, 23),
+            NumericBed3::new(1, 42, 43),
         ]);
         let method = ClosestType::Downstream;
         let closest = run_closest(&set, &query_set, method)
             .map(|pair| pair.iv_b)
             .collect::<Vec<_>>();
         assert!(closest.len() == 3);
-        assert!(closest[0].unwrap().eq(&GenomicInterval::new(1, 22, 23)));
-        assert!(closest[1].unwrap().eq(&GenomicInterval::new(1, 42, 43)));
+        assert!(closest[0].unwrap().eq(&NumericBed3::new(1, 22, 23)));
+        assert!(closest[1].unwrap().eq(&NumericBed3::new(1, 42, 43)));
         assert!(closest[2].is_none());
     }
 

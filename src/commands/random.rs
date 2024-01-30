@@ -1,10 +1,10 @@
 use crate::{
     io::{match_input, match_output, write_records_iter_with},
-    types::{Genome, InputFormat, NumericBed12, NumericBed6, Translater},
+    types::{Genome, InputFormat, NumericBed12, NumericBed3, NumericBed6, Translater},
     utils::build_rng,
 };
 use anyhow::Result;
-use bedrs::{GenomicInterval, Strand};
+use bedrs::Strand;
 use rand::Rng;
 
 fn build_chr_size<'a>(
@@ -57,7 +57,7 @@ pub fn random_bed3(
             (c, x, y)
         })
         // build the interval
-        .map(|(c, x, y)| GenomicInterval::new(c, x, y));
+        .map(|(c, x, y)| NumericBed3::new(c, x, y));
 
     let output_handle = match_output(output, compression_threads, compression_level)?;
     write_records_iter_with(interval_gen, output_handle, genome.translater())?;

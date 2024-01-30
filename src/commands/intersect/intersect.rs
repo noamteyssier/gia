@@ -6,12 +6,11 @@ use crate::{
         read_paired_bed6_sets, write_named_records_iter_dashmap, write_records_iter_with,
         NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, StreamTranslater, Translater},
+    types::{InputFormat, NumericBed3, StreamTranslater, Translater},
 };
 use anyhow::Result;
 use bedrs::{
-    traits::IntervalBounds, types::QueryMethod, GenomicInterval, IntersectIter, IntervalContainer,
-    MergeIter,
+    traits::IntervalBounds, types::QueryMethod, IntersectIter, IntervalContainer, MergeIter,
 };
 use serde::Serialize;
 use std::io::BufRead;
@@ -274,7 +273,7 @@ fn intersect_stream(
 
     if named {
         let translater = StreamTranslater::new();
-        let query_iter: NamedIter<'_, '_, Box<dyn BufRead>, GenomicInterval<usize>> =
+        let query_iter: NamedIter<'_, '_, Box<dyn BufRead>, NumericBed3> =
             NamedIter::new(&mut query_csv, &translater);
         let target_iter = NamedIter::new(&mut target_csv, &translater);
         let merged_query_iter = MergeIter::new(query_iter);
@@ -283,7 +282,7 @@ fn intersect_stream(
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
         write_named_records_iter_dashmap(intersect_iter, output_handle, &translater)?;
     } else {
-        let query_iter: UnnamedIter<'_, Box<dyn BufRead>, GenomicInterval<usize>> =
+        let query_iter: UnnamedIter<'_, Box<dyn BufRead>, NumericBed3> =
             UnnamedIter::new(&mut query_csv);
         let target_iter = UnnamedIter::new(&mut target_csv);
         let merged_query_iter = MergeIter::new(query_iter);

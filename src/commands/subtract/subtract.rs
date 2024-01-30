@@ -13,12 +13,12 @@ use bedrs::{
     Coordinates, IntervalContainer, Subtract,
 };
 use serde::Serialize;
-use std::io::Write;
+use std::{fmt::Debug, io::Write};
 
 fn queued_diff<It, I, C, T>(query: &I, overlaps: It) -> Box<dyn Iterator<Item = I>>
 where
     It: Iterator<Item = I>,
-    I: IntervalBounds<C, T> + Copy + 'static,
+    I: IntervalBounds<C, T> + Copy + 'static + Debug,
     C: ChromBounds,
     T: ValueBounds,
 {
@@ -46,7 +46,7 @@ fn iter_subtraction<'a, I, C, T>(
     method: &'a OverlapMethod,
 ) -> Box<dyn Iterator<Item = I> + 'a>
 where
-    I: IntervalBounds<C, T> + Copy + 'static,
+    I: IntervalBounds<C, T> + Copy + 'static + Debug,
     C: ChromBounds,
     T: ValueBounds,
 {
@@ -66,7 +66,7 @@ fn run_subtract<'a, I, C, T, W>(
     translater: Option<&'a Translater>,
 ) -> Result<()>
 where
-    I: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize,
+    I: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize + Debug,
     C: ChromBounds,
     T: ValueBounds,
     W: Write,

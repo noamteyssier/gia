@@ -1,10 +1,10 @@
 use super::NamedInterval;
-use crate::types::{Bed6, NumericBed6, StreamTranslater};
-use bedrs::{Coordinates, GenomicInterval};
+use crate::types::{NamedBed6, NumericBed3, NumericBed6, StreamTranslater};
+use bedrs::Coordinates;
 use csv::ByteRecord;
 use std::{io::Read, marker::PhantomData};
 
-/// An iterator over a BED file that yields `GenomicInterval<usize>`s.
+/// An iterator over a BED file that yields `NumericBed3`s.
 ///
 /// It keeps a reference to a `csv::Reader` and a `DashMap` that maps chromosome names to indices.
 /// This allows it to yield `GenomicInterval`s with `usize` chromosome indices instead of `String`s.
@@ -24,8 +24,8 @@ impl<'a, 'b, R: Read, C: Coordinates<usize, usize>> NamedIter<'a, 'b, R, C> {
         }
     }
 }
-impl<'a, 'b, R: Read> Iterator for NamedIter<'a, 'b, R, GenomicInterval<usize>> {
-    type Item = GenomicInterval<usize>;
+impl<'a, 'b, R: Read> Iterator for NamedIter<'a, 'b, R, NumericBed3> {
+    type Item = NumericBed3;
 
     fn next(&mut self) -> Option<Self::Item> {
         if !self
@@ -41,7 +41,7 @@ impl<'a, 'b, R: Read> Iterator for NamedIter<'a, 'b, R, GenomicInterval<usize>> 
             .expect("Error parsing BED record");
         self.translater.add_name(record.name);
         let chr_idx = self.translater.get_name_to_idx().get(record.name).unwrap();
-        let iv = GenomicInterval::new(*chr_idx, record.start, record.end);
+        let iv = NumericBed3::new(*chr_idx, record.start, record.end);
         Some(iv)
     }
 }
@@ -56,21 +56,29 @@ impl<'a, 'b, R: Read> Iterator for NamedIter<'a, 'b, R, NumericBed6> {
         {
             return None;
         }
-        let record: Bed6 = self
+        let record: NamedBed6 = self
             .byterecord
             .deserialize(None)
             .expect("Error parsing BED record");
-        self.translater.add_name(record.chr);
-        self.translater.add_name(record.name);
-        let chr_idx = self.translater.get_name_to_idx().get(record.chr).unwrap();
-        let name_idx = self.translater.get_name_to_idx().get(record.name).unwrap();
+        self.translater.add_name(record.chr());
+        self.translater.add_name(record.name());
+        let chr_idx = self
+            .translater
+            .get_name_to_idx()
+            .get(record.chr() as &str)
+            .unwrap();
+        let name_idx = self
+            .translater
+            .get_name_to_idx()
+            .get(record.name() as &str)
+            .unwrap();
         let iv = NumericBed6::new(
             *chr_idx,
-            record.start,
-            record.end,
+            record.start(),
+            record.end(),
             *name_idx,
-            record.score,
-            record.strand,
+            *record.score(),
+            record.strand().unwrap_or_default(),
         );
         Some(iv)
     }
@@ -93,8 +101,8 @@ impl<'a, R: Read, C: Coordinates<usize, usize>> UnnamedIter<'a, R, C> {
         }
     }
 }
-impl<'a, R: Read> Iterator for UnnamedIter<'a, R, GenomicInterval<usize>> {
-    type Item = GenomicInterval<usize>;
+impl<'a, R: Read> Iterator for UnnamedIter<'a, R, NumericBed3> {
+    type Item = NumericBed3;
 
     fn next(&mut self) -> Option<Self::Item> {
         if !self
@@ -104,7 +112,7 @@ impl<'a, R: Read> Iterator for UnnamedIter<'a, R, GenomicInterval<usize>> {
         {
             return None;
         }
-        let iv: GenomicInterval<usize> = self
+        let iv: NumericBed3 = self
             .byterecord
             .deserialize(None)
             .expect("Error parsing BED record");

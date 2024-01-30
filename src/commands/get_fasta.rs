@@ -1,9 +1,9 @@
 use crate::{
     io::{build_reader, match_input, match_output},
-    types::{Bed12, Bed6, InputFormat},
+    types::{InputFormat, NamedBed12, NamedBed3, NamedBed6},
 };
 use anyhow::Result;
-use bedrs::{Coordinates, NamedInterval};
+use bedrs::Coordinates;
 use bstr::ByteSlice;
 use csv::ByteRecord;
 use faiquery::{FastaIndex, IndexedFasta};
@@ -29,7 +29,7 @@ fn get_fasta_bed3(
     let mut output = match_output(output, compression_threads, compression_level)?;
 
     while csv_reader.read_byte_record(&mut byterecord)? {
-        let record: NamedInterval<&str, usize> = byterecord.deserialize(None)?;
+        let record: NamedBed3 = byterecord.deserialize(None)?;
         match fasta.query_buffer(record.chr(), record.start(), record.end()) {
             Ok(buffer) => {
                 write!(
@@ -66,13 +66,18 @@ fn get_fasta_bed6(
     let mut output = match_output(output, compression_threads, compression_level)?;
 
     while csv_reader.read_byte_record(&mut byterecord)? {
-        let record: Bed6 = byterecord.deserialize(None)?;
-        match fasta.query_buffer(record.chr, record.start, record.end) {
+        let record: NamedBed6 = byterecord.deserialize(None)?;
+        match fasta.query_buffer(record.chr(), record.start(), record.end()) {
             Ok(buffer) => {
                 write!(
                     output,
                     ">{}:{}-{}::{}::{}::{}\n",
-                    record.chr, record.start, record.end, record.name, record.score, record.strand,
+                    record.chr(),
+                    record.start(),
+                    record.end(),
+                    record.name(),
+                    record.score(),
+                    record.strand().unwrap_or_default(),
                 )?;
                 for subseq in buffer.split_str("\n") {
                     output.write(subseq)?;
@@ -101,24 +106,24 @@ fn get_fasta_bed12(
     let mut output = match_output(output, compression_threads, compression_level)?;
 
     while csv_reader.read_byte_record(&mut byterecord)? {
-        let record: Bed12 = byterecord.deserialize(None)?;
-        match fasta.query_buffer(record.chr, record.start, record.end) {
+        let record: NamedBed12 = byterecord.deserialize(None)?;
+        match fasta.query_buffer(record.chr(), record.start(), record.end()) {
             Ok(buffer) => {
                 write!(
                     output,
                     ">{}:{}-{}::{}::{}::{}::{}::{}::{}::{}::{}::{}\n",
-                    record.chr,
-                    record.start,
-                    record.end,
-                    record.name,
-                    record.score,
-                    record.strand,
-                    record.thick_start,
-                    record.thick_end,
-                    record.item_rgb,
-                    record.block_count,
-                    record.block_sizes,
-                    record.block_starts,
+                    record.chr(),
+                    record.start(),
+                    record.end(),
+                    record.name(),
+                    record.score(),
+                    record.strand().unwrap_or_default(),
+                    record.thick_start(),
+                    record.thick_end(),
+                    record.item_rgb(),
+                    record.block_count(),
+                    record.block_sizes(),
+                    record.block_starts(),
                 )?;
                 for subseq in buffer.split_str("\n") {
                     output.write(subseq)?;

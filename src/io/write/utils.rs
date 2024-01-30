@@ -1,6 +1,6 @@
-use crate::types::{IntervalPair, StreamTranslater, Translate, Translater};
+use crate::types::{IntervalPair, NumericBed3, StreamTranslater, Translate, Translater};
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, Coordinates, GenomicInterval};
+use bedrs::{traits::IntervalBounds, Coordinates};
 use serde::Serialize;
 use std::io::Write;
 
@@ -96,7 +96,7 @@ where
     Ok(())
 }
 
-pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = GenomicInterval<usize>>>(
+pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = NumericBed3>>(
     records: I,
     writer: W,
     translater: &StreamTranslater,
