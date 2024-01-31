@@ -224,7 +224,7 @@ pub enum Command {
         /// and will result in undefined behavior if it is not.
         ///
         /// Currently does not support non-integer chromosome names.
-        #[clap(short = 'S', long, conflicts_with = "named")]
+        #[clap(short = 'S', long)]
         stream: bool,
 
         /// Input file format

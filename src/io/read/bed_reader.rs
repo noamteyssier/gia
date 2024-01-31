@@ -1,5 +1,5 @@
 use crate::types::{FieldFormat, InputFormat};
-use anyhow::{bail, Result};
+use anyhow::Result;
 use flate2::read::MultiGzDecoder;
 use gzp::BgzfSyncReader;
 use std::{
@@ -7,7 +7,6 @@ use std::{
     fs::File,
     io::{BufRead, BufReader, Read},
     path::Path,
-    str::from_utf8,
 };
 const DEFAULT_BUFFER_SIZE: usize = 8 * 1024;
 
@@ -43,11 +42,11 @@ impl BedReader {
         reader.fill_buf()?;
         let input_format = match input_format {
             Some(f) => f,
-            None => predict_input_format(&reader)?,
+            None => InputFormat::predict(&reader)?,
         };
         let field_format = match field_format {
             Some(f) => f,
-            None => predict_field_format(&reader, input_format)?,
+            None => FieldFormat::predict(&reader, input_format)?,
         };
         Ok(Self {
             reader,
@@ -94,56 +93,5 @@ impl BedReader {
             DEFAULT_BUFFER_SIZE,
             Box::new(handle),
         ))
-    }
-}
-
-pub fn predict_input_format<R>(bufreader: &BufReader<R>) -> Result<InputFormat> {
-    let internal = bufreader.buffer();
-    let first = if let Some(first) = internal.split(|b| *b == b'\n').next() {
-        first
-    } else {
-        bail!("Empty file or stream")
-    };
-    let num_fields = first.split(|b| *b == b'\t').count();
-    match num_fields {
-        3 => Ok(InputFormat::Bed3),
-        6 => Ok(InputFormat::Bed6),
-        12 => Ok(InputFormat::Bed12),
-        _ => bail!(
-            "Cannot predict input format from line: {}",
-            std::str::from_utf8(first)?
-        ),
-    }
-}
-
-pub fn predict_field_format<R>(
-    bufreader: &BufReader<R>,
-    input_format: InputFormat,
-) -> Result<FieldFormat> {
-    let internal = bufreader.buffer();
-    let first = if let Some(first) = internal.split(|b| *b == b'\n').next() {
-        first
-    } else {
-        bail!("Empty file or stream")
-    };
-    let fields = first.split(|b| *b == b'\t').collect::<Vec<_>>();
-    match input_format {
-        InputFormat::Bed3 => {
-            let chr = from_utf8(fields[0])?;
-            if chr.parse::<u32>().is_err() {
-                Ok(FieldFormat::StringBased)
-            } else {
-                Ok(FieldFormat::IntegerBased)
-            }
-        }
-        InputFormat::Bed6 | InputFormat::Bed12 => {
-            let chr = from_utf8(fields[0])?;
-            let name = from_utf8(fields[3])?;
-            if chr.parse::<u32>().is_err() || name.parse::<u32>().is_err() {
-                Ok(FieldFormat::StringBased)
-            } else {
-                Ok(FieldFormat::IntegerBased)
-            }
-        }
     }
 }
