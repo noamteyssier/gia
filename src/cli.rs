@@ -133,8 +133,8 @@ pub enum Command {
         output: Option<String>,
 
         /// Format of input file
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
     },
 
     /// Intersects two BED files
