@@ -109,13 +109,13 @@ pub enum Command {
         #[clap(short, long)]
         genome: Option<String>,
 
+        /// Format of input file
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Format of input file
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        field_format: Option<FieldFormat>,
     },
 
     /// Extracts FASTA sequences using intervals from a BED file

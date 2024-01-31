@@ -1,9 +1,9 @@
 use crate::{
     io::{
         match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
+        write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{Genome, InputFormat, Translater},
+    types::{FieldFormat, Genome, InputFormat, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
@@ -34,12 +34,12 @@ fn extend_right(iv: &mut impl Coordinates<usize, usize>, val: usize, genome: Opt
 }
 
 fn extend_set<I>(
+    genome_path: Option<String>,
     output: Option<String>,
     set: &mut IntervalContainer<I, usize, usize>,
     both: Option<usize>,
     left: Option<usize>,
     right: Option<usize>,
-    genome: Option<Genome>,
     translater: Option<&Translater>,
     compression_threads: usize,
     compression_level: u32,
@@ -48,6 +48,13 @@ where
     I: IntervalBounds<usize, usize> + Serialize + Copy,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
+    let genome = if let Some(path) = genome_path {
+        let genome_handle = match_input(Some(path))?;
+        let genome = Genome::from_reader_immutable(genome_handle, translater, false)?;
+        Some(genome)
+    } else {
+        None
+    };
     let extend_iter = set.records_mut().into_iter().map(|iv| {
         if let Some(ref val) = both {
             extend_left(iv, *val);
@@ -67,105 +74,61 @@ where
     Ok(())
 }
 
-fn extend_bed3(
-    input: Option<String>,
+fn match_and_extend(
+    bed_reader: BedReader,
     output: Option<String>,
     both: Option<usize>,
     left: Option<usize>,
     right: Option<usize>,
     genome_path: Option<String>,
-    named: bool,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (mut iset, translater) = read_bed3_set(input_handle, named)?;
-    let genome = if let Some(path) = genome_path {
-        let genome_handle = match_input(Some(path))?;
-        let genome = Genome::from_reader_immutable(genome_handle, translater.as_ref(), false)?;
-        Some(genome)
-    } else {
-        None
-    };
-    extend_set(
-        output,
-        &mut iset,
-        both,
-        left,
-        right,
-        genome,
-        translater.as_ref(),
-        compression_threads,
-        compression_level,
-    )?;
-    Ok(())
-}
-
-fn extend_bed6(
-    input: Option<String>,
-    output: Option<String>,
-    both: Option<usize>,
-    left: Option<usize>,
-    right: Option<usize>,
-    genome_path: Option<String>,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (mut iset, translater) = read_bed6_set(input_handle, named)?;
-    let genome = if let Some(path) = genome_path {
-        let genome_handle = match_input(Some(path))?;
-        let genome = Genome::from_reader_immutable(genome_handle, translater.as_ref(), false)?;
-        Some(genome)
-    } else {
-        None
-    };
-    extend_set(
-        output,
-        &mut iset,
-        both,
-        left,
-        right,
-        genome,
-        translater.as_ref(),
-        compression_threads,
-        compression_level,
-    )?;
-    Ok(())
-}
-
-fn extend_bed12(
-    input: Option<String>,
-    output: Option<String>,
-    both: Option<usize>,
-    left: Option<usize>,
-    right: Option<usize>,
-    genome_path: Option<String>,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (mut iset, translater) = read_bed12_set(input_handle, named)?;
-    let genome = if let Some(path) = genome_path {
-        let genome_handle = match_input(Some(path))?;
-        let genome = Genome::from_reader_immutable(genome_handle, translater.as_ref(), false)?;
-        Some(genome)
-    } else {
-        None
-    };
-    extend_set(
-        output,
-        &mut iset,
-        both,
-        left,
-        right,
-        genome,
-        translater.as_ref(),
-        compression_threads,
-        compression_level,
-    )?;
+    let named = bed_reader.is_named();
+    match bed_reader.input_format() {
+        InputFormat::Bed3 => {
+            let (mut iset, translater) = read_bed3_set(bed_reader.reader(), named)?;
+            extend_set(
+                genome_path,
+                output,
+                &mut iset,
+                both,
+                left,
+                right,
+                translater.as_ref(),
+                compression_threads,
+                compression_level,
+            )?;
+        }
+        InputFormat::Bed6 => {
+            let (mut iset, translater) = read_bed6_set(bed_reader.reader(), named)?;
+            extend_set(
+                genome_path,
+                output,
+                &mut iset,
+                both,
+                left,
+                right,
+                translater.as_ref(),
+                compression_threads,
+                compression_level,
+            )?;
+        }
+        InputFormat::Bed12 => {
+            let (mut iset, translater) = read_bed12_set(bed_reader.reader(), named)?;
+            extend_set(
+                genome_path,
+                output,
+                &mut iset,
+                both,
+                left,
+                right,
+                translater.as_ref(),
+                compression_threads,
+                compression_level,
+            )?;
+        }
+    }
     Ok(())
 }
 
@@ -176,44 +139,20 @@ pub fn extend(
     left: Option<usize>,
     right: Option<usize>,
     genome_path: Option<String>,
-    named: bool,
-    format: InputFormat,
+    input_format: Option<InputFormat>,
+    field_format: Option<FieldFormat>,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
-    match format {
-        InputFormat::Bed3 => extend_bed3(
-            input,
-            output,
-            both,
-            left,
-            right,
-            genome_path,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed6 => extend_bed6(
-            input,
-            output,
-            both,
-            left,
-            right,
-            genome_path,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed12 => extend_bed12(
-            input,
-            output,
-            both,
-            left,
-            right,
-            genome_path,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-    }
+    let bed_reader = BedReader::from_path(input, input_format, field_format)?;
+    match_and_extend(
+        bed_reader,
+        output,
+        both,
+        left,
+        right,
+        genome_path,
+        compression_threads,
+        compression_level,
+    )
 }
