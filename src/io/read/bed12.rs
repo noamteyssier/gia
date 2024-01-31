@@ -15,6 +15,17 @@ pub fn read_bed12_set<R: Read>(reader: R, named: bool) -> Result<(Bed12Set, Opti
     }
 }
 
+pub fn read_bed12_set_with<R: Read>(
+    reader: R,
+    translater: Option<&mut Translater>,
+) -> Result<Bed12Set> {
+    if let Some(translater) = translater {
+        convert_bed12_set(reader, translater)
+    } else {
+        read_bed12_set_unnamed(reader)
+    }
+}
+
 pub fn read_paired_bed12_sets<R: Read>(
     reader_1: R,
     reader_2: R,

@@ -1,171 +1,194 @@
-use super::iter::{run_function, OutputMethod};
+use super::iter::{run_function_query, run_function_target, OutputMethod};
 use crate::{
-    commands::{run_find, OverlapMethod},
     io::{
-        build_reader, match_input, match_output, read_paired_bed12_sets, read_paired_bed3_sets,
-        read_paired_bed6_sets, write_named_records_iter_dashmap, write_records_iter_with,
-        NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
+        build_reader, match_output, write_named_records_iter_dashmap, write_records_iter_with,
+        BedReader, NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, NumericBed3, StreamTranslater, Translater},
 };
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bedrs::{
     traits::IntervalBounds, types::QueryMethod, IntersectIter, IntervalContainer, MergeIter,
 };
 use serde::Serialize;
-use std::io::BufRead;
+use std::io::Write;
 
-fn run_intersect_set<I>(
-    query_set: &IntervalContainer<I, usize, usize>,
-    target_set: &IntervalContainer<I, usize, usize>,
-    overlap_method: OverlapMethod,
-    output_method: OutputMethod,
-    output: Option<String>,
+pub fn intersect_sets<'a, Ia, Ib, W>(
+    set_a: &'a IntervalContainer<Ia, usize, usize>,
+    set_b: &'a IntervalContainer<Ib, usize, usize>,
     translater: Option<&Translater>,
-    compression_threads: usize,
-    compression_level: u32,
+    query_method: QueryMethod<usize>,
+    output_method: OutputMethod,
+    output_handle: W,
 ) -> Result<()>
 where
-    I: IntervalBounds<usize, usize> + Copy + Serialize,
-    WriteNamedIterImpl: WriteNamedIter<I>,
+    Ia: IntervalBounds<usize, usize> + Copy + Serialize,
+    Ib: IntervalBounds<usize, usize> + Copy + Serialize,
+    W: Write,
+    WriteNamedIterImpl: WriteNamedIter<Ia> + WriteNamedIter<Ib>,
 {
-    let ix_iter = query_set.records().iter().flat_map(|iv| {
-        let overlaps = run_find(iv, target_set, overlap_method).expect("Error in finding overlaps");
-        let intersections = run_function(iv, overlaps, output_method);
-        intersections
-    });
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    write_records_iter_with(ix_iter, output_handle, translater)?;
+    match output_method {
+        // Output the target intervals
+        OutputMethod::Target => {
+            let ix_iter = set_a.records().iter().flat_map(|iv| {
+                let overlaps = set_b
+                    .find_iter_sorted_method_unchecked(iv, query_method)
+                    .expect("Error in finding overlaps")
+                    .cloned();
+                let intersections = run_function_target(overlaps, output_method);
+                intersections
+            });
+            write_records_iter_with(ix_iter, output_handle, translater)?;
+        }
+        // Output the query intervals with various formats
+        _ => {
+            let ix_iter = set_a.records().iter().flat_map(|iv| {
+                let overlaps = set_b
+                    .find_iter_sorted_method_unchecked(iv, query_method)
+                    .expect("Error in finding overlaps")
+                    .cloned();
+                let intersections = run_function_query(iv, overlaps, output_method);
+                intersections
+            });
+            write_records_iter_with(ix_iter, output_handle, translater)?;
+        }
+    }
     Ok(())
 }
 
-fn intersect_bed3(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    overlap_method: OverlapMethod,
+fn match_and_intersect_sets<W: Write>(
+    reader_a: BedReader,
+    reader_b: BedReader,
+    output_handle: W,
+    query_method: QueryMethod<usize>,
     output_method: OutputMethod,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
 ) -> Result<()> {
-    let handle_a = match_input(a)?;
-    let handle_b = match_input(Some(b))?;
-    let (query_set, target_set, translater) = read_paired_bed3_sets(handle_a, handle_b, named)?;
-    run_intersect_set(
-        &query_set,
-        &target_set,
-        overlap_method,
-        output_method,
-        output,
-        translater.as_ref(),
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn intersect_bed6(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    overlap_method: OverlapMethod,
-    output_method: OutputMethod,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let handle_a = match_input(a)?;
-    let handle_b = match_input(Some(b))?;
-    let (query_set, target_set, translater) = read_paired_bed6_sets(handle_a, handle_b, named)?;
-    run_intersect_set(
-        &query_set,
-        &target_set,
-        overlap_method,
-        output_method,
-        output,
-        translater.as_ref(),
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn intersect_bed12(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    overlap_method: OverlapMethod,
-    output_method: OutputMethod,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let handle_a = match_input(a)?;
-    let handle_b = match_input(Some(b))?;
-    let (query_set, target_set, translater) = read_paired_bed12_sets(handle_a, handle_b, named)?;
-    run_intersect_set(
-        &query_set,
-        &target_set,
-        overlap_method,
-        output_method,
-        output,
-        translater.as_ref(),
-        compression_threads,
-        compression_level,
-    )
-}
-
-pub fn intersect_set(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    fraction_query: Option<f64>,
-    fraction_target: Option<f64>,
-    reciprocal: bool,
-    either: bool,
-    with_query: bool,
-    with_target: bool,
-    unique: bool,
-    inverse: bool,
-    named: bool,
-    format: InputFormat,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let overlap_method =
-        OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
-    let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
-    match format {
-        InputFormat::Bed3 => intersect_bed3(
-            a,
-            b,
-            output,
-            overlap_method,
-            output_method,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed6 => intersect_bed6(
-            a,
-            b,
-            output,
-            overlap_method,
-            output_method,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed12 => intersect_bed12(
-            a,
-            b,
-            output,
-            overlap_method,
-            output_method,
-            named,
-            compression_threads,
-            compression_level,
-        ),
+    if reader_a.is_named() != reader_b.is_named() {
+        bail!("Input files must both be named or both be unnamed");
     }
+    let mut translater = if reader_a.is_named() {
+        Some(Translater::new())
+    } else {
+        None
+    };
+    match reader_a.input_format() {
+        InputFormat::Bed3 => {
+            let set_a = reader_a.bed3_set_with(translater.as_mut())?;
+            match reader_b.input_format() {
+                InputFormat::Bed3 => {
+                    let set_b = reader_b.bed3_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+                InputFormat::Bed6 => {
+                    let set_b = reader_b.bed6_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+                InputFormat::Bed12 => {
+                    let set_b = reader_b.bed12_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+            }
+        }
+        InputFormat::Bed6 => {
+            let set_a = reader_a.bed6_set_with(translater.as_mut())?;
+            match reader_b.input_format() {
+                InputFormat::Bed3 => {
+                    let set_b = reader_b.bed3_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+                InputFormat::Bed6 => {
+                    let set_b = reader_b.bed6_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+                InputFormat::Bed12 => {
+                    let set_b = reader_b.bed12_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+            }
+        }
+        InputFormat::Bed12 => {
+            let set_a = reader_a.bed12_set_with(translater.as_mut())?;
+            match reader_b.input_format() {
+                InputFormat::Bed3 => {
+                    let set_b = reader_b.bed3_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+                InputFormat::Bed6 => {
+                    let set_b = reader_b.bed6_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+                InputFormat::Bed12 => {
+                    let set_b = reader_b.bed12_set_with(translater.as_mut())?;
+                    intersect_sets(
+                        &set_a,
+                        &set_b,
+                        translater.as_ref(),
+                        query_method,
+                        output_method,
+                        output_handle,
+                    )?;
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
 
 pub fn intersect(
@@ -180,9 +203,7 @@ pub fn intersect(
     with_target: bool,
     unique: bool,
     inverse: bool,
-    named: bool,
     stream: bool,
-    format: InputFormat,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
@@ -195,28 +216,16 @@ pub fn intersect(
             fraction_target,
             reciprocal,
             either,
-            named,
             compression_threads,
             compression_level,
         )
     } else {
-        intersect_set(
-            a,
-            b,
-            output,
-            fraction_query,
-            fraction_target,
-            reciprocal,
-            either,
-            with_query,
-            with_target,
-            unique,
-            inverse,
-            named,
-            format,
-            compression_threads,
-            compression_level,
-        )
+        let bed_a = BedReader::from_path(a, None, None)?;
+        let bed_b = BedReader::from_path(Some(b), None, None)?;
+        let query_method = assign_method(fraction_query, fraction_target, reciprocal, either);
+        let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
+        let output_handle = match_output(output, compression_threads, compression_level)?;
+        match_and_intersect_sets(bed_a, bed_b, output_handle, query_method, output_method)
     }
 }
 
@@ -260,12 +269,17 @@ fn intersect_stream(
     fraction_target: Option<f64>,
     reciprocal: bool,
     either: bool,
-    named: bool,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
-    let query_handle = match_input(a)?;
-    let target_handle = match_input(Some(b))?;
+    let bed_a = BedReader::from_path(a, None, None)?;
+    let bed_b = BedReader::from_path(Some(b), None, None)?;
+    if bed_a.is_named() != bed_b.is_named() {
+        bail!("Input files must both be named or both be unnamed");
+    }
+    let named = bed_a.is_named();
+    let query_handle = bed_a.reader();
+    let target_handle = bed_b.reader();
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
     let output_handle = match_output(output, compression_threads, compression_level)?;
@@ -273,7 +287,7 @@ fn intersect_stream(
 
     if named {
         let translater = StreamTranslater::new();
-        let query_iter: NamedIter<'_, '_, Box<dyn BufRead>, NumericBed3> =
+        let query_iter: NamedIter<'_, '_, _, NumericBed3> =
             NamedIter::new(&mut query_csv, &translater);
         let target_iter = NamedIter::new(&mut target_csv, &translater);
         let merged_query_iter = MergeIter::new(query_iter);
@@ -282,8 +296,7 @@ fn intersect_stream(
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
         write_named_records_iter_dashmap(intersect_iter, output_handle, &translater)?;
     } else {
-        let query_iter: UnnamedIter<'_, Box<dyn BufRead>, NumericBed3> =
-            UnnamedIter::new(&mut query_csv);
+        let query_iter: UnnamedIter<'_, _, NumericBed3> = UnnamedIter::new(&mut query_csv);
         let target_iter = UnnamedIter::new(&mut target_csv);
         let merged_query_iter = MergeIter::new(query_iter);
         let merged_target_iter = MergeIter::new(target_iter);

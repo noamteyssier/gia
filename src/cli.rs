@@ -190,18 +190,10 @@ pub enum Command {
         #[clap(short = 'v', long, conflicts_with_all = &["with_query", "with_target", "unique"])]
         inverse: bool,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
         /// Stream the input files instead of loading them into memory
         /// (only works if both files are sorted)
         #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
         stream: bool,
-
-        /// Input formats
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
     },
 
     /// Merges intervals of a BED file with overlapping regions

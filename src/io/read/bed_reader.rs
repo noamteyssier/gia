@@ -1,4 +1,5 @@
-use crate::types::{FieldFormat, InputFormat};
+use super::{read_bed12_set_with, read_bed3_set_with, read_bed6_set_with};
+use crate::types::{Bed12Set, Bed3Set, Bed6Set, FieldFormat, InputFormat, Translater};
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
 use gzp::BgzfSyncReader;
@@ -93,5 +94,20 @@ impl BedReader {
             DEFAULT_BUFFER_SIZE,
             Box::new(handle),
         ))
+    }
+
+    /// Returns a Bed3Set from the reader
+    pub fn bed3_set_with(self, translater: Option<&mut Translater>) -> Result<Bed3Set> {
+        read_bed3_set_with(self.reader(), translater)
+    }
+
+    /// Returns a Bed6Set from the reader
+    pub fn bed6_set_with(self, translater: Option<&mut Translater>) -> Result<Bed6Set> {
+        read_bed6_set_with(self.reader(), translater)
+    }
+
+    /// Returns a Bed6Set from the reader
+    pub fn bed12_set_with(self, translater: Option<&mut Translater>) -> Result<Bed12Set> {
+        read_bed12_set_with(self.reader(), translater)
     }
 }

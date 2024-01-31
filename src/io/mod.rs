@@ -1,6 +1,6 @@
 mod general;
 mod iter;
-mod read;
+pub mod read;
 mod write;
 pub use general::{match_input, match_output};
 pub use iter::{NamedIter, UnnamedIter};
