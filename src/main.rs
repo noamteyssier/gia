@@ -198,8 +198,6 @@ fn main() -> Result<()> {
             reciprocal,
             either,
             unmerged,
-            named,
-            format,
         } => {
             subtract(
                 a,
@@ -210,8 +208,6 @@ fn main() -> Result<()> {
                 reciprocal,
                 either,
                 unmerged,
-                named,
-                format,
                 cli.compression_threads,
                 cli.compression_level,
             )?;

@@ -378,13 +378,5 @@ pub enum Command {
         /// regions.
         #[clap(short, long)]
         unmerged: bool,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Input file formats
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
     },
 }

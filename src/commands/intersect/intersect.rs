@@ -5,6 +5,7 @@ use crate::{
         BedReader, NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, NumericBed3, StreamTranslater, Translater},
+    utils::assign_query_method,
 };
 use anyhow::{bail, Result};
 use bedrs::{
@@ -222,42 +223,10 @@ pub fn intersect(
     } else {
         let bed_a = BedReader::from_path(a, None, None)?;
         let bed_b = BedReader::from_path(Some(b), None, None)?;
-        let query_method = assign_method(fraction_query, fraction_target, reciprocal, either);
+        let query_method = assign_query_method(fraction_query, fraction_target, reciprocal, either);
         let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
         let output_handle = match_output(output, compression_threads, compression_level)?;
         match_and_intersect_sets(bed_a, bed_b, output_handle, query_method, output_method)
-    }
-}
-
-fn assign_method(
-    fraction_query: Option<f64>,
-    fraction_target: Option<f64>,
-    reciprocal: bool,
-    either: bool,
-) -> QueryMethod<usize> {
-    let fraction_target = if reciprocal {
-        fraction_query
-    } else {
-        fraction_target
-    };
-    if fraction_query.is_some() && fraction_target.is_some() {
-        if either {
-            QueryMethod::CompareReciprocalFractionOr(
-                fraction_query.unwrap(),
-                fraction_target.unwrap(),
-            )
-        } else {
-            QueryMethod::CompareReciprocalFractionAnd(
-                fraction_query.unwrap(),
-                fraction_target.unwrap(),
-            )
-        }
-    } else if fraction_query.is_some() {
-        QueryMethod::CompareByQueryFraction(fraction_query.unwrap())
-    } else if fraction_target.is_some() {
-        QueryMethod::CompareByTargetFraction(fraction_target.unwrap())
-    } else {
-        QueryMethod::Compare
     }
 }
 
@@ -283,7 +252,7 @@ fn intersect_stream(
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
     let output_handle = match_output(output, compression_threads, compression_level)?;
-    let method = assign_method(fraction_query, fraction_target, reciprocal, either);
+    let method = assign_query_method(fraction_query, fraction_target, reciprocal, either);
 
     if named {
         let translater = StreamTranslater::new();
