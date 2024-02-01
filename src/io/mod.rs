@@ -5,8 +5,7 @@ mod write;
 pub use general::{match_input, match_output};
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{
-    build_reader, iter_unnamed, read_bed12_set, read_bed3_set, read_bed6_set,
-    read_paired_bed12_sets, read_paired_bed3_sets, read_paired_bed6_sets, BedReader,
+    build_reader, iter_unnamed, read_bed12_set, read_bed3_set, read_bed6_set, BedReader,
 };
 use serde::{Deserialize, Serialize};
 pub use write::{

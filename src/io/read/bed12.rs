@@ -26,21 +26,6 @@ pub fn read_bed12_set_with<R: Read>(
     }
 }
 
-pub fn read_paired_bed12_sets<R: Read>(
-    reader_1: R,
-    reader_2: R,
-    named: bool,
-) -> Result<(Bed12Set, Bed12Set, Option<Translater>)> {
-    if named {
-        let (query_set, target_set, translater) = read_paired_bed12_named(reader_1, reader_2)?;
-        Ok((query_set, target_set, Some(translater)))
-    } else {
-        let query_set = read_bed12_set_unnamed(reader_1)?;
-        let target_set = read_bed12_set_unnamed(reader_2)?;
-        Ok((query_set, target_set, None))
-    }
-}
-
 fn read_bed12_set_unnamed<R: Read>(reader: R) -> Result<Bed12Set> {
     let mut reader = build_reader(reader);
     let set = reader
@@ -104,15 +89,4 @@ fn convert_bed12_set<R: Read>(reader: R, translater: &mut Translater) -> Result<
         set.insert(interval);
     }
     Ok(set)
-}
-
-/// Reads two files into two Bed12Set and a Translater
-fn read_paired_bed12_named<R: Read>(
-    reader_1: R,
-    reader_2: R,
-) -> Result<(Bed12Set, Bed12Set, Translater)> {
-    let mut translater = Translater::new();
-    let set_1 = convert_bed12_set(reader_1, &mut translater)?;
-    let set_2 = convert_bed12_set(reader_2, &mut translater)?;
-    Ok((set_1, set_2, translater))
 }
