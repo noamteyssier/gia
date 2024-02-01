@@ -41,15 +41,7 @@ pub enum Command {
         #[clap(short = 'd', long, conflicts_with = "upstream")]
         downstream: bool,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Format of the input files
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
-
-        /// Specify that the input files are already sorted
+        /// Specify that the input files are already presorted
         #[clap(short, long)]
         sorted: bool,
     },

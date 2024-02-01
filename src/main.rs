@@ -21,8 +21,6 @@ fn main() -> Result<()> {
             output,
             upstream,
             downstream,
-            named,
-            format,
             sorted,
         } => closest(
             a,
@@ -30,8 +28,6 @@ fn main() -> Result<()> {
             output,
             upstream,
             downstream,
-            named,
-            format,
             sorted,
             cli.compression_threads,
             cli.compression_level,

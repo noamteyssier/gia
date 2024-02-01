@@ -6,4 +6,6 @@ pub use formats::{
     NumericBed12, NumericBed3, NumericBed6,
 };
 pub use pairs::IntervalPair;
-pub use translater::{Reorder, Retranslater, StreamTranslater, Translate, Translater};
+pub use translater::{
+    Rename, Renamer, Reorder, Retranslater, StreamTranslater, Translate, Translater,
+};
