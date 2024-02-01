@@ -107,8 +107,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed6")
             .output()?;
 
         let expected = vec![
@@ -136,8 +134,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed12")
             .output()?;
 
         let expected = vec![
@@ -194,8 +190,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed6")
             .arg("-u")
             .output()?;
 
@@ -225,8 +219,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed12")
             .arg("-u")
             .output()?;
 

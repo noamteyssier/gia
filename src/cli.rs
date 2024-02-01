@@ -1,4 +1,4 @@
-use crate::types::InputFormat;
+use crate::types::{FieldFormat, InputFormat};
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -41,15 +41,7 @@ pub enum Command {
         #[clap(short = 'd', long, conflicts_with = "upstream")]
         downstream: bool,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Format of the input files
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
-
-        /// Specify that the input files are already sorted
+        /// Specify that the input files are already presorted
         #[clap(short, long)]
         sorted: bool,
     },
@@ -109,13 +101,13 @@ pub enum Command {
         #[clap(short, long)]
         genome: Option<String>,
 
+        /// Format of input file
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Format of input file
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        field_format: Option<FieldFormat>,
     },
 
     /// Extracts FASTA sequences using intervals from a BED file
@@ -133,8 +125,8 @@ pub enum Command {
         output: Option<String>,
 
         /// Format of input file
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
     },
 
     /// Intersects two BED files
@@ -190,18 +182,10 @@ pub enum Command {
         #[clap(short = 'v', long, conflicts_with_all = &["with_query", "with_target", "unique"])]
         inverse: bool,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
         /// Stream the input files instead of loading them into memory
         /// (only works if both files are sorted)
         #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
         stream: bool,
-
-        /// Input formats
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
     },
 
     /// Merges intervals of a BED file with overlapping regions
@@ -218,22 +202,22 @@ pub enum Command {
         #[clap(short, long)]
         sorted: bool,
 
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
         /// Stream the input file instead of loading it into memory
         ///
         /// Note that this requires the input file to be sorted
         /// and will result in undefined behavior if it is not.
         ///
         /// Currently does not support non-integer chromosome names.
-        #[clap(short = 'S', long, conflicts_with = "named")]
+        #[clap(short = 'S', long)]
         stream: bool,
 
-        /// Set the format of the input bed
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        /// Input file format
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
+        /// Allow for non-integer chromosome names
+        #[clap(short = 'N', long)]
+        field_format: Option<FieldFormat>,
     },
 
     /// Builds a two column map of chromosome names to integers
@@ -318,13 +302,13 @@ pub enum Command {
         #[clap(short, long)]
         seed: Option<usize>,
 
+        /// Input file format
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Format of input file
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        field_format: Option<FieldFormat>,
     },
 
     /// Sorts a BED file by chromosome, start, and end
@@ -337,13 +321,13 @@ pub enum Command {
         #[clap(short, long)]
         output: Option<String>,
 
+        /// Input file format
+        #[clap(short = 'T', long)]
+        input_format: Option<InputFormat>,
+
         /// Allow for non-integer chromosome names
         #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Input file format
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
+        field_format: Option<FieldFormat>,
 
         /// Number of threads to use for sorting (default=1)
         #[clap(short = 't', long, default_value = "1")]
@@ -394,13 +378,5 @@ pub enum Command {
         /// regions.
         #[clap(short, long)]
         unmerged: bool,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Input file formats
-        #[clap(short = 'T', long, default_value = "bed3")]
-        format: InputFormat,
     },
 }

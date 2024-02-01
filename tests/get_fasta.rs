@@ -49,8 +49,6 @@ mod testing {
             .arg(input)
             .arg("-f")
             .arg(fasta)
-            .arg("--format")
-            .arg("bed6")
             .output()?;
         let expected = ">1:20-30::0::0::+\nAGCGACTACG\n>2:30-40::0::0::-\nCGATCGATCG\n";
         assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
@@ -68,8 +66,6 @@ mod testing {
             .arg(input)
             .arg("-f")
             .arg(fasta)
-            .arg("--format")
-            .arg("bed6")
             .output()?;
         let expected = ">chr1:20-30::0::0::+\nAGCGACTACG\n>chr2:30-40::0::0::-\nCGATCGATCG\n";
         assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
@@ -87,8 +83,6 @@ mod testing {
             .arg(input)
             .arg("-f")
             .arg(fasta)
-            .arg("--format")
-            .arg("bed12")
             .output()?;
         let expected = ">1:20-30::0::0::+::0::0::0::0::0::0\nAGCGACTACG\n>2:30-40::0::0::-::0::0::0::0::0::0\nCGATCGATCG\n";
         assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
@@ -106,8 +100,6 @@ mod testing {
             .arg(input)
             .arg("-f")
             .arg(fasta)
-            .arg("--format")
-            .arg("bed12")
             .output()?;
         let expected = ">chr1:20-30::0::0::+::0::0::0::0::0::0\nAGCGACTACG\n>chr2:30-40::0::0::-::0::0::0::0::0::0\nCGATCGATCG\n";
         assert_eq!(String::from_utf8_lossy(&output.stdout), expected);

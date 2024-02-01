@@ -52,8 +52,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed6")
             .output()?;
 
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
@@ -82,8 +80,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed12")
             .output()?;
 
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;

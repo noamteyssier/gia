@@ -1,24 +1,22 @@
 use crate::{
-    commands::{run_find, OverlapMethod},
-    io::{
-        match_input, match_output, read_paired_bed12_sets, read_paired_bed3_sets,
-        read_paired_bed6_sets, write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
-    },
+    io::{match_output, write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, Translater},
-    utils::sort_pairs,
+    utils::{assign_query_method, sort_pairs},
 };
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
+    types::QueryMethod,
     Coordinates, IntervalContainer, Subtract,
 };
 use serde::Serialize;
 use std::{fmt::Debug, io::Write};
 
-fn queued_diff<It, I, C, T>(query: &I, overlaps: It) -> Box<dyn Iterator<Item = I>>
+fn queued_diff<It, Ia, Ib, C, T>(query: &Ia, overlaps: It) -> Box<dyn Iterator<Item = Ia>>
 where
-    It: Iterator<Item = I>,
-    I: IntervalBounds<C, T> + Copy + 'static + Debug,
+    It: Iterator<Item = Ib>,
+    Ia: IntervalBounds<C, T> + Copy + 'static + Debug,
+    Ib: IntervalBounds<C, T> + Copy + 'static + Debug,
     C: ChromBounds,
     T: ValueBounds,
 {
@@ -40,140 +38,185 @@ where
     }
 }
 
-fn iter_subtraction<'a, I, C, T>(
-    aset: &'a IntervalContainer<I, C, T>,
-    bset: &'a IntervalContainer<I, C, T>,
-    method: &'a OverlapMethod,
-) -> Box<dyn Iterator<Item = I> + 'a>
+fn iter_subtraction<'a, Ia, Ib, C, T>(
+    aset: &'a IntervalContainer<Ia, C, T>,
+    bset: &'a IntervalContainer<Ib, C, T>,
+    method: QueryMethod<T>,
+) -> Box<dyn Iterator<Item = Ia> + 'a>
 where
-    I: IntervalBounds<C, T> + Copy + 'static + Debug,
+    Ia: IntervalBounds<C, T> + Copy + 'static + Debug,
+    Ib: IntervalBounds<C, T> + Copy + 'static + Debug,
     C: ChromBounds,
     T: ValueBounds,
 {
-    let sub_iter = aset.records().iter().flat_map(|iv| {
-        let overlaps = run_find(iv, bset, *method).expect("Error in finding overlaps");
+    let sub_iter = aset.records().iter().flat_map(move |iv| {
+        let overlaps = bset
+            .find_iter_sorted_method_unchecked(iv, method)
+            .expect("Error in finding overlaps")
+            .copied();
         queued_diff(iv, overlaps)
     });
     Box::new(sub_iter)
 }
 
-fn run_subtract<'a, I, C, T, W>(
-    aset: &'a IntervalContainer<I, C, T>,
-    bset: &'a IntervalContainer<I, C, T>,
-    method: &'a OverlapMethod,
+fn run_subtract<'a, Ia, Ib, C, T, W>(
+    aset: &'a mut IntervalContainer<Ia, C, T>,
+    bset: &'a mut IntervalContainer<Ib, C, T>,
+    method: QueryMethod<T>,
     unmerged: bool,
     output_handle: W,
     translater: Option<&'a Translater>,
 ) -> Result<()>
 where
-    I: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize + Debug,
+    Ia: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize + Debug,
+    Ib: IntervalBounds<C, T> + Copy + 'static + Coordinates<usize, usize> + Serialize + Debug,
     C: ChromBounds,
     T: ValueBounds,
     W: Write,
-    WriteNamedIterImpl: WriteNamedIter<I>,
+    WriteNamedIterImpl: WriteNamedIter<Ia> + WriteNamedIter<Ib>,
 {
+    sort_pairs(aset, bset, false);
     if unmerged {
         let sub_iter = iter_subtraction(aset, bset, method);
-        write_records_iter_with(sub_iter, output_handle, translater)?;
+        write_records_iter_with(sub_iter, output_handle, translater)
     } else {
         let aset = aset.merge()?;
         let sub_iter = iter_subtraction(&aset, bset, method);
-        write_records_iter_with(sub_iter, output_handle, translater)?;
+        write_records_iter_with(sub_iter, output_handle, translater)
     }
-    Ok(())
 }
 
-fn subtract_bed3<W: Write>(
-    query_path: Option<String>,
-    target_path: String,
-    output_handle: W,
-    overlap_method: OverlapMethod,
+fn dispatch_subtract<W: Write>(
+    reader_a: BedReader,
+    reader_b: BedReader,
+    query_method: QueryMethod<usize>,
     unmerged: bool,
-    named: bool,
-) -> Result<()> {
-    // load query and target sets
-    let query_handle = match_input(query_path)?;
-    let target_handle = match_input(Some(target_path))?;
-    let (mut query_set, mut target_set, translater) =
-        read_paired_bed3_sets(query_handle, target_handle, named)?;
-
-    // sort query and target sets
-    sort_pairs(&mut query_set, &mut target_set, false);
-
-    // merge target set
-    let bset = target_set.merge()?;
-
-    // run subtraction
-    run_subtract(
-        &query_set,
-        &bset,
-        &overlap_method,
-        unmerged,
-        output_handle,
-        translater.as_ref(),
-    )
-}
-
-fn subtract_bed6<W: Write>(
-    query_path: Option<String>,
-    target_path: String,
     output_handle: W,
-    overlap_method: OverlapMethod,
-    unmerged: bool,
-    named: bool,
 ) -> Result<()> {
-    // load query and target sets
-    let query_handle = match_input(query_path)?;
-    let target_handle = match_input(Some(target_path))?;
-    let (mut query_set, mut target_set, translater) =
-        read_paired_bed6_sets(query_handle, target_handle, named)?;
-
-    // sort query and target sets
-    sort_pairs(&mut query_set, &mut target_set, false);
-
-    // merge target set
-    let bset = target_set.merge()?;
-
-    // run subtraction
-    run_subtract(
-        &query_set,
-        &bset,
-        &overlap_method,
-        unmerged,
-        output_handle,
-        translater.as_ref(),
-    )
-}
-
-fn subtract_bed12<W: Write>(
-    query_path: Option<String>,
-    target_path: String,
-    output_handle: W,
-    overlap_method: OverlapMethod,
-    unmerged: bool,
-    named: bool,
-) -> Result<()> {
-    // load query and target sets
-    let query_handle = match_input(query_path)?;
-    let target_handle = match_input(Some(target_path))?;
-    let (mut query_set, mut target_set, translater) =
-        read_paired_bed12_sets(query_handle, target_handle, named)?;
-
-    // sort query and target sets
-    sort_pairs(&mut query_set, &mut target_set, false);
-
-    // merge target set
-    let bset = target_set.merge()?;
-
-    // run subtraction
-    run_subtract(
-        &query_set,
-        &bset,
-        &overlap_method,
-        unmerged,
-        output_handle,
-        translater.as_ref(),
-    )
+    if reader_a.is_named() != reader_b.is_named() {
+        bail!("Input files must both be named or both be unnamed");
+    }
+    let mut translater = if reader_a.is_named() {
+        Some(Translater::new())
+    } else {
+        None
+    };
+    match reader_a.input_format() {
+        InputFormat::Bed3 => {
+            let mut set_a = reader_a.bed3_set_with(translater.as_mut())?;
+            match reader_b.input_format() {
+                InputFormat::Bed3 => {
+                    let mut set_b = reader_b.bed3_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+                InputFormat::Bed6 => {
+                    let mut set_b = reader_b.bed6_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+                InputFormat::Bed12 => {
+                    let mut set_b = reader_b.bed12_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+            }
+        }
+        InputFormat::Bed6 => {
+            let mut set_a = reader_a.bed6_set_with(translater.as_mut())?;
+            match reader_b.input_format() {
+                InputFormat::Bed3 => {
+                    let mut set_b = reader_b.bed3_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+                InputFormat::Bed6 => {
+                    let mut set_b = reader_b.bed6_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+                InputFormat::Bed12 => {
+                    let mut set_b = reader_b.bed12_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+            }
+        }
+        InputFormat::Bed12 => {
+            let mut set_a = reader_a.bed12_set_with(translater.as_mut())?;
+            match reader_b.input_format() {
+                InputFormat::Bed3 => {
+                    let mut set_b = reader_b.bed3_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+                InputFormat::Bed6 => {
+                    let mut set_b = reader_b.bed6_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+                InputFormat::Bed12 => {
+                    let mut set_b = reader_b.bed12_set_with(translater.as_mut())?;
+                    run_subtract(
+                        &mut set_a,
+                        &mut set_b,
+                        query_method,
+                        unmerged,
+                        output_handle,
+                        translater.as_ref(),
+                    )
+                }
+            }
+        }
+    }
 }
 
 pub fn subtract(
@@ -185,38 +228,12 @@ pub fn subtract(
     reciprocal: bool,
     either: bool,
     unmerged: bool,
-    named: bool,
-    format: InputFormat,
     compression_threads: usize,
     compression_level: u32,
 ) -> Result<()> {
-    let overlap_method =
-        OverlapMethod::from_inputs(fraction_query, fraction_target, reciprocal, either);
+    let query_method = assign_query_method(fraction_query, fraction_target, reciprocal, either);
     let output_handle = match_output(output_path, compression_threads, compression_level)?;
-    match format {
-        InputFormat::Bed3 => subtract_bed3(
-            query_path,
-            target_path,
-            output_handle,
-            overlap_method,
-            unmerged,
-            named,
-        ),
-        InputFormat::Bed6 => subtract_bed6(
-            query_path,
-            target_path,
-            output_handle,
-            overlap_method,
-            unmerged,
-            named,
-        ),
-        InputFormat::Bed12 => subtract_bed12(
-            query_path,
-            target_path,
-            output_handle,
-            overlap_method,
-            unmerged,
-            named,
-        ),
-    }
+    let bed_a = BedReader::from_path(query_path, None, None)?;
+    let bed_b = BedReader::from_path(Some(target_path), None, None)?;
+    dispatch_subtract(bed_a, bed_b, query_method, unmerged, output_handle)
 }

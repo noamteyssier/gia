@@ -10,9 +10,10 @@ use std::{
 };
 
 fn compression_aware_read_buffer(file: File) -> Result<Box<dyn BufRead>> {
-    let buffer = BufReader::new(file);
-    let (reader, _compression) = get_reader(Box::new(buffer))?;
-    Ok(Box::new(BufReader::new(reader)))
+    let (reader, _compression) = get_reader(Box::new(file))?;
+    let mut buffer = BufReader::new(reader);
+    buffer.fill_buf()?;
+    Ok(Box::new(buffer))
 }
 
 pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
@@ -24,7 +25,8 @@ pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
         None => {
             let stdin = std::io::stdin();
             let handle = stdin.lock();
-            let buffer = BufReader::new(handle);
+            let mut buffer = BufReader::new(handle);
+            buffer.fill_buf()?;
             Ok(Box::new(buffer))
         }
     }

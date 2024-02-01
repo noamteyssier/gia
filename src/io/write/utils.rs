@@ -1,4 +1,4 @@
-use crate::types::{IntervalPair, NumericBed3, StreamTranslater, Translate, Translater};
+use crate::types::{IntervalPair, NumericBed3, Rename, Renamer, StreamTranslater, Translater};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
 use serde::Serialize;
@@ -25,72 +25,59 @@ where
     Ok(())
 }
 
-pub fn write_pairs_iter_with<W, I, It>(
+pub fn write_pairs_iter_with<'a, W, Ia, Ib, Na, Nb, It>(
     records: It,
     writer: W,
     translater: Option<&Translater>,
 ) -> Result<()>
 where
-    I: IntervalBounds<usize, usize> + Serialize,
+    Ia: IntervalBounds<usize, usize> + Serialize,
+    Ib: IntervalBounds<usize, usize> + Serialize,
+    Na: IntervalBounds<&'a str, usize> + Serialize,
+    Nb: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,
-    It: Iterator<Item = IntervalPair<I, usize, usize>>,
+    It: Iterator<Item = IntervalPair<'a, Ia, Ib, Na, Nb>>,
+    Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
-    if let Some(translater) = translater {
-        write_named_pairs_iter(records, writer, translater)?;
+    if translater.is_some() {
+        write_named_pairs_iter(records, writer)?;
     } else {
         write_pairs_iter(records, writer)?;
     }
     Ok(())
 }
 
-pub fn write_pairs_iter<W, I, It>(records: It, writer: W) -> Result<()>
+pub fn write_pairs_iter<'a, W, Ia, Ib, Na, Nb, It>(records: It, writer: W) -> Result<()>
 where
-    I: IntervalBounds<usize, usize> + Serialize,
+    Ia: IntervalBounds<usize, usize> + Serialize,
+    Ib: IntervalBounds<usize, usize> + Serialize,
+    Na: IntervalBounds<&'a str, usize> + Serialize,
+    Nb: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,
-    It: Iterator<Item = IntervalPair<I, usize, usize>>,
+    It: Iterator<Item = IntervalPair<'a, Ia, Ib, Na, Nb>>,
+    Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
     let mut wtr = build_writer(writer);
     for record in records {
-        let pair = (
-            record.iv_a.chr(),
-            record.iv_a.start(),
-            record.iv_a.end(),
-            record.iv_b.as_ref().map(|iv| iv.chr()),
-            record.iv_b.as_ref().map(|iv| iv.start()),
-            record.iv_b.as_ref().map(|iv| iv.end()),
-        );
-        wtr.serialize(pair)?;
+        wtr.serialize(record.get_tuple())?;
     }
     Ok(())
 }
 
-pub fn write_named_pairs_iter<I, W, It>(
-    records: It,
-    writer: W,
-    translater: &Translater,
-) -> Result<()>
+pub fn write_named_pairs_iter<'a, Ia, Ib, Na, Nb, W, It>(records: It, writer: W) -> Result<()>
 where
-    I: IntervalBounds<usize, usize>,
+    Ia: IntervalBounds<usize, usize> + Serialize,
+    Ib: IntervalBounds<usize, usize> + Serialize,
+    Na: IntervalBounds<&'a str, usize> + Serialize,
+    Nb: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,
-    It: Iterator<Item = IntervalPair<I, usize, usize>>,
+    It: Iterator<Item = IntervalPair<'a, Ia, Ib, Na, Nb>>,
+    Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
     let mut wtr = build_writer(writer);
     for record in records {
-        let chr_a = translater.get_name(*record.iv_a.chr()).unwrap();
-        let chr_b = if let Some(ref iv_b) = record.iv_b {
-            Some(translater.get_name(*iv_b.chr()).unwrap())
-        } else {
-            None
-        };
-        let named_pair = (
-            chr_a,
-            record.iv_a.start(),
-            record.iv_a.end(),
-            chr_b,
-            record.iv_b.as_ref().map(|iv| iv.start()),
-            record.iv_b.as_ref().map(|iv| iv.end()),
-        );
-        wtr.serialize(named_pair)?;
+        let pair = record.get_named_tuple();
+        wtr.serialize(pair)?;
     }
     wtr.flush()?;
     Ok(())
