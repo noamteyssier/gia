@@ -125,15 +125,19 @@ pub enum Command {
 
         /// flanks intervals on both sides by the same provided amount
         #[clap(short, long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
-        both: Option<usize>,
+        both: Option<f32>,
 
         /// Flank intervals on the left side by the provided amount
         #[clap(short, long, required_unless_present_any(["both", "right"]))]
-        left: Option<usize>,
+        left: Option<f32>,
 
         /// Flank intervals on the right side by the provided amount
         #[clap(short, long, required_unless_present_any(["both", "left"]))]
-        right: Option<usize>,
+        right: Option<f32>,
+
+        /// Convert values provided to percentages of the interval length
+        #[clap(short, long)]
+        percent: bool,
 
         /// Genome file to validate extensions against
         #[clap(short, long)]
