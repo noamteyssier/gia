@@ -9,7 +9,7 @@ use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
     closest, complement, extend, flank, get_fasta, intersect, merge, name_map, random, sample,
-    sort, subtract,
+    shift, sort, subtract,
 };
 
 fn main() -> Result<()> {
@@ -192,6 +192,25 @@ fn main() -> Result<()> {
             number,
             fraction,
             seed,
+            input_format,
+            field_format,
+            cli.compression_threads,
+            cli.compression_level,
+        )?,
+        Command::Shift {
+            input,
+            output,
+            genome,
+            amount,
+            percent,
+            input_format,
+            field_format,
+        } => shift(
+            input,
+            output,
+            genome,
+            amount,
+            percent,
             input_format,
             field_format,
             cli.compression_threads,
