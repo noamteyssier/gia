@@ -8,8 +8,8 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    closest, complement, extend, get_fasta, intersect, merge, name_map, random, sample, sort,
-    subtract,
+    closest, complement, extend, flank, get_fasta, intersect, merge, name_map, random, sample,
+    sort, subtract,
 };
 
 fn main() -> Result<()> {
@@ -61,6 +61,27 @@ fn main() -> Result<()> {
             left,
             right,
             genome,
+            input_format,
+            field_format,
+            cli.compression_threads,
+            cli.compression_level,
+        )?,
+        Command::Flank {
+            input,
+            output,
+            both,
+            left,
+            right,
+            genome,
+            input_format,
+            field_format,
+        } => flank(
+            input,
+            output,
+            genome,
+            both,
+            left,
+            right,
             input_format,
             field_format,
             cli.compression_threads,
