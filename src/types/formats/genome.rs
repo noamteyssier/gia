@@ -1,4 +1,7 @@
-use crate::{io::build_reader, types::Translater};
+use crate::{
+    io::{build_reader, match_input},
+    types::Translater,
+};
 use anyhow::Result;
 use csv::ByteRecord;
 use hashbrown::HashMap;
@@ -39,6 +42,27 @@ impl<'a> Genome<'a> {
                 Self::from_reader_named_immutable(reader, translater, break_on_missing)
             }
             None => Self::from_reader_unnamed(reader),
+        }
+    }
+
+    pub fn from_path_immutable_with(
+        path: String,
+        translater: Option<&'a Translater>,
+        break_on_missing: bool,
+    ) -> Result<Self> {
+        let handle = match_input(Some(path))?;
+        Self::from_reader_immutable(handle, translater, break_on_missing)
+    }
+
+    pub fn from_opt_path_immutable_with(
+        path: Option<String>,
+        translater: Option<&'a Translater>,
+        break_on_missing: bool,
+    ) -> Result<Option<Self>> {
+        if let Some(path) = path {
+            Self::from_path_immutable_with(path, translater, break_on_missing).map(Some)
+        } else {
+            Ok(None)
         }
     }
 
