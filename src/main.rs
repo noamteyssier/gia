@@ -9,7 +9,7 @@ use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
     closest, complement, extend, flank, get_fasta, intersect, merge, name_map, random, sample,
-    shift, sort, subtract,
+    shift, sort, subtract, window,
 };
 
 fn main() -> Result<()> {
@@ -254,6 +254,25 @@ fn main() -> Result<()> {
                 cli.compression_level,
             )?;
         }
+        Command::Window {
+            a,
+            b,
+            output,
+            both,
+            left,
+            right,
+            inverse,
+        } => window(
+            a,
+            b,
+            output,
+            both,
+            left,
+            right,
+            inverse,
+            cli.compression_threads,
+            cli.compression_level,
+        )?,
     }
     Ok(())
 }
