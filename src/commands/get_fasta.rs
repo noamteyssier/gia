@@ -24,17 +24,17 @@ fn get_fasta_bed3<R: Read, W: Write>(
         let record: NamedBed3 = byterecord.deserialize(None)?;
         match fasta.query_buffer(record.chr(), record.start(), record.end()) {
             Ok(buffer) => {
-                write!(
+                writeln!(
                     output,
-                    ">{}:{}-{}\n",
+                    ">{}:{}-{}",
                     record.chr(),
                     record.start(),
                     record.end()
                 )?;
                 for subseq in buffer.split_str("\n") {
-                    output.write(subseq)?;
+                    output.write_all(subseq)?;
                 }
-                output.write(b"\n")?;
+                output.write_all(b"\n")?;
             }
             Err(_) => continue,
         }
@@ -52,9 +52,9 @@ fn get_fasta_bed6<R: Read, W: Write>(
         let record: NamedBed6 = byterecord.deserialize(None)?;
         match fasta.query_buffer(record.chr(), record.start(), record.end()) {
             Ok(buffer) => {
-                write!(
+                writeln!(
                     output,
-                    ">{}:{}-{}::{}::{}::{}\n",
+                    ">{}:{}-{}::{}::{}::{}",
                     record.chr(),
                     record.start(),
                     record.end(),
@@ -63,9 +63,9 @@ fn get_fasta_bed6<R: Read, W: Write>(
                     record.strand().unwrap_or_default(),
                 )?;
                 for subseq in buffer.split_str("\n") {
-                    output.write(subseq)?;
+                    output.write_all(subseq)?;
                 }
-                output.write(b"\n")?;
+                output.write_all(b"\n")?;
             }
             Err(_) => continue,
         }
@@ -83,9 +83,9 @@ fn get_fasta_bed12<R: Read, W: Write>(
         let record: NamedBed12 = byterecord.deserialize(None)?;
         match fasta.query_buffer(record.chr(), record.start(), record.end()) {
             Ok(buffer) => {
-                write!(
+                writeln!(
                     output,
-                    ">{}:{}-{}::{}::{}::{}::{}::{}::{}::{}::{}::{}\n",
+                    ">{}:{}-{}::{}::{}::{}::{}::{}::{}::{}::{}::{}",
                     record.chr(),
                     record.start(),
                     record.end(),
@@ -100,9 +100,9 @@ fn get_fasta_bed12<R: Read, W: Write>(
                     record.block_starts(),
                 )?;
                 for subseq in buffer.split_str("\n") {
-                    output.write(subseq)?;
+                    output.write_all(subseq)?;
                 }
-                output.write(b"\n")?;
+                output.write_all(b"\n")?;
             }
             Err(_) => continue,
         }

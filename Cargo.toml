@@ -1,20 +1,23 @@
 [package]
 name = "gia"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2021"
 description = "A tool for set theoretic operations of genomic intervals"
 license = "MIT"
 homepage = "https://noamteyssier.github.io/gia"
 repository = "https://github.com/noamteyssier/gia"
-categories = [ "science", "command-line-utilities" ]
-keywords = [ "genomics", "bioinformatics", "bed", "set", "interval" ]
+categories = ["science", "command-line-utilities"]
+keywords = ["genomics", "bioinformatics", "bed", "set", "interval"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.72"
 # bedrs = { version = "0.1.11", features = ["serde", "rayon"] }
-bedrs = { git = "https://github.com/noamteyssier/bedrs", branch="bedrs-2.0", features = ["serde", "rayon"] }
+bedrs = { git = "https://github.com/noamteyssier/bedrs", branch = "bedrs-2.0", features = [
+  "serde",
+  "rayon",
+] }
 bstr = "1.6.0"
 clap = { version = "4.3.19", features = ["derive"] }
 csv = "1.2.2"
@@ -26,8 +29,10 @@ memmap2 = "0.7.1"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
 serde = { version = "1.0.183", features = ["derive"] }
-niffler = {version = "2.5.0", default-features = false, features = ["gz"]}
-gzp = { version="0.11.3", features=["deflate_rust"], default-features = false }
+niffler = { version = "2.5.0", default-features = false, features = ["gz"] }
+gzp = { version = "0.11.3", features = [
+  "deflate_rust",
+], default-features = false }
 rayon = "1.8.0"
 flate2 = "1.0.28"
 
