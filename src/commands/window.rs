@@ -20,7 +20,7 @@ fn windowed_set_overlaps<'a, Ia, Ib, Na, Nb, W>(
     left: usize,
     right: usize,
     inverse: bool,
-    mut output: W,
+    output: W,
 ) -> Result<()>
 where
     Ia: IntervalBounds<usize, usize> + Serialize + Copy,
@@ -42,7 +42,7 @@ where
                 (iv, w_iv)
             })
             .filter(|(_iv, w_iv)| {
-                let overlaps = set_b.find_iter(w_iv).count();
+                let overlaps = set_b.find_iter_sorted_unchecked(w_iv).count();
                 overlaps == 0
             })
             .map(|(iv, _w_iv)| *iv);
@@ -54,11 +54,11 @@ where
             w_iv.extend_right(&right, None);
             (iv, w_iv)
         });
-        for (iv, w_iv) in windows_iter {
-            let overlaps = set_b.find_iter(&w_iv);
-            let pairs = overlaps.map(|ov| IntervalPair::new(*iv, *ov, translater));
-            write_pairs_iter_with(pairs, &mut output, translater)?;
-        }
+        let pairs_iter = windows_iter.flat_map(|(iv, w_iv)| {
+            let overlaps = set_b.find_iter_sorted_owned_unchecked(w_iv);
+            overlaps.map(|ov| IntervalPair::new(*iv, *ov, translater))
+        });
+        write_pairs_iter_with(pairs_iter, output, translater)?;
     }
     Ok(())
 }
