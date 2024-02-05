@@ -10,26 +10,15 @@ use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
 use serde::Serialize;
 
 fn extend_left(iv: &mut impl Coordinates<usize, usize>, val: usize) {
-    if iv.start() < val {
-        iv.update_start(&0);
-    } else {
-        iv.extend_left(&val);
-    }
+    iv.extend_left(&val);
 }
 
 fn extend_right(iv: &mut impl Coordinates<usize, usize>, val: usize, genome: Option<&Genome>) {
     if let Some(ref genome) = genome {
-        if let Some(end) = genome.chr_size(*iv.chr()) {
-            if iv.end() + val > *end {
-                iv.update_end(end);
-            } else {
-                iv.extend_right(&val);
-            }
-        } else {
-            panic!("Chromosome {} not found in genome", iv.chr());
-        }
+        let end = genome.chr_size(*iv.chr()).map(|x| *x);
+        iv.extend_right(&val, end);
     } else {
-        iv.extend_right(&val);
+        iv.extend_right(&val, None);
     }
 }
 
