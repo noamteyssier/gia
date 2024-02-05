@@ -486,7 +486,7 @@ pub enum Command {
 
         /// Only report the intervals in the query that do not overlap with the target
         /// (i.e. the inverse of the intersection)
-        #[clap(short = 'v', long, conflicts_with_all = &["with_query", "with_target", "unique"])]
+        #[clap(short = 'v', long)]
         inverse: bool,
     },
 }
