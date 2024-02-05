@@ -7,19 +7,11 @@ use bedrs::{traits::IntervalBounds, IntervalContainer};
 use serde::Serialize;
 use std::io::Write;
 
-fn calculate_percentage<I>(iv: I, val: f32) -> usize
-where
-    I: IntervalBounds<usize, usize>,
-{
-    let size = iv.len();
-    (size as f32 * val) as usize
-}
-
 /// Dispatch the left and right flanking functions
 fn flank_interval<'a, I>(
     iv: I,
-    val_left: f32,
-    val_right: f32,
+    val_left: f64,
+    val_right: f64,
     percent: bool,
     genome: Option<&Genome>,
 ) -> impl Iterator<Item = I> + 'a
@@ -27,10 +19,7 @@ where
     I: IntervalBounds<usize, usize> + Copy + 'a,
 {
     let (left, right) = if percent {
-        (
-            calculate_percentage(iv, val_left),
-            calculate_percentage(iv, val_right),
-        )
+        (iv.f_len(val_left), iv.f_len(val_right))
     } else {
         (val_left as usize, val_right as usize)
     };
@@ -101,9 +90,9 @@ fn flank_set<I, W>(
     set: &IntervalContainer<I, usize, usize>,
     genome_path: Option<String>,
     translater: Option<&Translater>,
-    both: Option<f32>,
-    left: Option<f32>,
-    right: Option<f32>,
+    both: Option<f64>,
+    left: Option<f64>,
+    right: Option<f64>,
     percent: bool,
     output: W,
 ) -> Result<()>
@@ -129,9 +118,9 @@ where
 pub fn dispatch_flank<W: Write>(
     bed: BedReader,
     genome_path: Option<String>,
-    both: Option<f32>,
-    left: Option<f32>,
-    right: Option<f32>,
+    both: Option<f64>,
+    left: Option<f64>,
+    right: Option<f64>,
     percent: bool,
     output: W,
 ) -> Result<()> {
@@ -183,9 +172,9 @@ pub fn flank(
     input: Option<String>,
     output: Option<String>,
     genome_path: Option<String>,
-    both: Option<f32>,
-    left: Option<f32>,
-    right: Option<f32>,
+    both: Option<f64>,
+    left: Option<f64>,
+    right: Option<f64>,
     percent: bool,
     input_format: Option<InputFormat>,
     field_format: Option<FieldFormat>,
@@ -349,14 +338,14 @@ mod testing {
     #[test]
     fn test_pc_calculation_shrink() {
         let iv = Bed3::new(1, 100, 400);
-        let pc = calculate_percentage(iv, 0.5);
+        let pc = iv.f_len(0.5);
         assert_eq!(pc, 150);
     }
 
     #[test]
     fn test_pc_calculation_grow() {
         let iv = Bed3::new(1, 100, 400);
-        let pc = calculate_percentage(iv, 1.5);
+        let pc = iv.f_len(1.5);
         assert_eq!(pc, 450);
     }
 

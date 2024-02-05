@@ -125,15 +125,15 @@ pub enum Command {
 
         /// flanks intervals on both sides by the same provided amount
         #[clap(short, long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
-        both: Option<f32>,
+        both: Option<f64>,
 
         /// Flank intervals on the left side by the provided amount
         #[clap(short, long, required_unless_present_any(["both", "right"]))]
-        left: Option<f32>,
+        left: Option<f64>,
 
         /// Flank intervals on the right side by the provided amount
         #[clap(short, long, required_unless_present_any(["both", "left"]))]
-        right: Option<f32>,
+        right: Option<f64>,
 
         /// Convert values provided to percentages of the interval length
         #[clap(short, long)]
@@ -369,7 +369,7 @@ pub enum Command {
 
         /// Amount to shift intervals by (negative values shift to the left)
         #[clap(short, long, allow_hyphen_values = true)]
-        amount: f32,
+        amount: f64,
 
         /// Interprets the amount as a fraction of the interval length
         ///
