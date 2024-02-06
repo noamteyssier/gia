@@ -1,5 +1,6 @@
 mod closest;
 mod complement;
+mod coverage;
 mod extend;
 mod flank;
 mod get_fasta;
@@ -14,6 +15,7 @@ mod subtract;
 mod window;
 pub use closest::closest;
 pub use complement::complement;
+pub use coverage::coverage;
 pub use extend::extend;
 pub use flank::flank;
 pub use get_fasta::get_fasta;

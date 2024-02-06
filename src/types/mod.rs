@@ -1,6 +1,8 @@
+mod depth;
 mod formats;
 mod pairs;
 mod translater;
+pub use depth::IntervalDepth;
 pub use formats::{
     Bed12Set, Bed3Set, Bed6Set, FieldFormat, Genome, InputFormat, NamedBed12, NamedBed3, NamedBed6,
     NumericBed12, NumericBed3, NumericBed6,

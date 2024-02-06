@@ -72,6 +72,48 @@ pub enum Command {
         stream: bool,
     },
 
+    /// Calculates the coverage of intervals in Set A by intervals in Set B
+    Coverage {
+        /// Input BED file to intersect (default=stdin)
+        #[clap(short, long)]
+        a: Option<String>,
+
+        /// Secondary BED file to intersect
+        #[clap(short, long)]
+        b: String,
+
+        /// Output BED file to write to (default=stdout)
+        #[clap(short, long)]
+        output: Option<String>,
+
+        /// Minimum fraction of a's interval that must be covered by b's interval
+        #[clap(short = 'f', long)]
+        fraction_query: Option<f64>,
+
+        /// Minimum fraction of b's interval that must be covered by a's interval
+        #[clap(short = 'F', long)]
+        fraction_target: Option<f64>,
+
+        /// Require that the fraction provided with `-f` is reciprocal to both
+        /// query and target
+        #[clap(
+            short,
+            long,
+            requires = "fraction_query",
+            conflicts_with = "fraction_target"
+        )]
+        reciprocal: bool,
+
+        /// Requires that either fraction provided with `-f` or `-F` is met
+        #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
+        either: bool,
+
+        /// Assert that the intervals are presorted in BOTH files (unexpected behavior if they are
+        /// not)
+        #[clap(short, long)]
+        sorted: bool,
+    },
+
     /// Extends the intervals of a BED file
     ///
     /// The extension is either done on both sides at once

@@ -8,8 +8,8 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    closest, complement, extend, flank, get_fasta, intersect, merge, name_map, random, sample,
-    shift, sort, subtract, window,
+    closest, complement, coverage, extend, flank, get_fasta, intersect, merge, name_map, random,
+    sample, shift, sort, subtract, window,
 };
 
 fn main() -> Result<()> {
@@ -42,6 +42,27 @@ fn main() -> Result<()> {
             output,
             named,
             stream,
+            cli.compression_threads,
+            cli.compression_level,
+        )?,
+        Command::Coverage {
+            a,
+            b,
+            output,
+            fraction_query,
+            fraction_target,
+            reciprocal,
+            either,
+            sorted,
+        } => coverage(
+            a,
+            b,
+            output,
+            fraction_query,
+            fraction_target,
+            reciprocal,
+            either,
+            sorted,
             cli.compression_threads,
             cli.compression_level,
         )?,
