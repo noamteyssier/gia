@@ -9,9 +9,9 @@ pub use read::{
 };
 use serde::{Deserialize, Serialize};
 pub use write::{
-    build_writer, write_3col_iter_with, write_named_pairs_iter, write_named_records_iter_dashmap,
-    write_pairs_iter, write_pairs_iter_with, write_records_iter, write_records_iter_with,
-    WriteIter, WriteIterImpl, WriteNamedIter, WriteNamedIterImpl,
+    build_writer, write_3col_iter_with, write_depth_iter_with, write_named_pairs_iter,
+    write_named_records_iter_dashmap, write_pairs_iter, write_pairs_iter_with, write_records_iter,
+    write_records_iter_with, WriteIter, WriteIterImpl, WriteNamedIter, WriteNamedIterImpl,
 };
 
 #[derive(Deserialize, Serialize)]

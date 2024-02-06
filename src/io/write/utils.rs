@@ -1,4 +1,6 @@
-use crate::types::{IntervalPair, NumericBed3, Rename, Renamer, StreamTranslater, Translater};
+use crate::types::{
+    IntervalDepth, IntervalPair, NumericBed3, Rename, Renamer, StreamTranslater, Translater,
+};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
 use serde::Serialize;
@@ -20,6 +22,57 @@ where
     let mut wtr = build_writer(writer);
     for record in records {
         wtr.serialize(record)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_depth_iter_with<'a, W, I, N, It>(
+    records: It,
+    writer: W,
+    translater: Option<&Translater>,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    if translater.is_some() {
+        write_named_depth_iter(records, writer)
+    } else {
+        write_depth_iter(records, writer)
+    }
+}
+
+fn write_depth_iter<'a, W, I, N, It>(records: It, writer: W) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    let mut wtr = build_writer(writer);
+    for record in records {
+        wtr.serialize(record.get_tuple())?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_named_depth_iter<'a, W, I, N, It>(records: It, writer: W) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    let mut wtr = build_writer(writer);
+    for record in records {
+        wtr.serialize(record.get_named_tuple())?;
     }
     wtr.flush()?;
     Ok(())
