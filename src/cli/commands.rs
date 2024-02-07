@@ -1,7 +1,7 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
-use super::{ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs};
+use super::{ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs};
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -28,43 +28,7 @@ pub enum Command {
     ///
     /// This will crefate two new flanking intervals for each interval
     /// in the input file, one on the left and one on the right side.
-    Flank {
-        /// Input BED file to extend (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// flanks intervals on both sides by the same provided amount
-        #[clap(short, long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
-        both: Option<f64>,
-
-        /// Flank intervals on the left side by the provided amount
-        #[clap(short, long, required_unless_present_any(["both", "right"]))]
-        left: Option<f64>,
-
-        /// Flank intervals on the right side by the provided amount
-        #[clap(short, long, required_unless_present_any(["both", "left"]))]
-        right: Option<f64>,
-
-        /// Convert values provided to percentages of the interval length
-        #[clap(short, long)]
-        percent: bool,
-
-        /// Genome file to validate extensions against
-        #[clap(short, long)]
-        genome: Option<String>,
-
-        /// Format of input file
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        field_format: Option<FieldFormat>,
-    },
+    Flank(FlankArgs),
 
     /// Extracts FASTA sequences using intervals from a BED file
     GetFasta {

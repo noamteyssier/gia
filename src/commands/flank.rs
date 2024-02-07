@@ -1,6 +1,7 @@
 use crate::{
-    io::{match_output, write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
-    types::{FieldFormat, Genome, InputFormat, Translater},
+    cli::{FlankArgs, Growth},
+    io::{write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
+    types::{Genome, InputFormat, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -10,22 +11,15 @@ use std::io::Write;
 /// Dispatch the left and right flanking functions
 fn flank_interval<'a, I>(
     iv: I,
-    val_left: f64,
-    val_right: f64,
-    percent: bool,
+    val_left: usize,
+    val_right: usize,
     genome: Option<&Genome>,
 ) -> impl Iterator<Item = I> + 'a
 where
     I: IntervalBounds<usize, usize> + Copy + 'a,
 {
-    let (left, right) = if percent {
-        (iv.f_len(val_left), iv.f_len(val_right))
-    } else {
-        (val_left as usize, val_right as usize)
-    };
-
-    let left = left_flank(iv, left);
-    let right = right_flank(iv, right, genome);
+    let left = left_flank(iv, val_left);
+    let right = right_flank(iv, val_right, genome);
     flank_iterator(left, right)
 }
 
@@ -34,14 +28,11 @@ fn flank_iterator<'a, I>(left: Option<I>, right: Option<I>) -> Box<dyn Iterator<
 where
     I: IntervalBounds<usize, usize> + Copy + 'a,
 {
-    if left.is_some() && right.is_some() {
-        Box::new([left.unwrap(), right.unwrap()].into_iter())
-    } else if left.is_some() {
-        Box::new(std::iter::once(left.unwrap()))
-    } else if right.is_some() {
-        Box::new(std::iter::once(right.unwrap()))
-    } else {
-        Box::new(std::iter::empty())
+    match (left, right) {
+        (Some(left), Some(right)) => Box::new([left, right].into_iter()),
+        (Some(left), None) => Box::new(std::iter::once(left)),
+        (None, Some(right)) => Box::new(std::iter::once(right)),
+        (None, None) => Box::new(std::iter::empty()),
     }
 }
 
@@ -53,8 +44,8 @@ where
     if val == 0 {
         return None;
     }
-    let mut left = iv.clone();
-    let left_pos = iv.start().saturating_sub(val).max(1); // 1-based coordinates
+    let mut left = iv;
+    let left_pos = iv.start().saturating_sub(val).max(0);
     left.update_start(&left_pos);
     left.update_end(&iv.start());
     Some(left)
@@ -68,7 +59,7 @@ where
     if val == 0 {
         return None;
     }
-    let mut right = iv.clone();
+    let mut right = iv;
     right.update_start(&iv.end());
     let end = if let Some(genome) = genome {
         let max = if let Some(max) = genome.chr_size(*iv.chr()) {
@@ -88,12 +79,8 @@ where
 /// Flank the intervals in the set
 fn flank_set<I, W>(
     set: &IntervalContainer<I, usize, usize>,
-    genome_path: Option<String>,
     translater: Option<&Translater>,
-    both: Option<f64>,
-    left: Option<f64>,
-    right: Option<f64>,
-    percent: bool,
+    growth: &Growth,
     output: W,
 ) -> Result<()>
 where
@@ -101,89 +88,37 @@ where
     W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    let genome = Genome::from_opt_path_immutable_with(genome_path, translater, false)?;
+    let genome = growth.get_genome(translater)?;
     let flank_iter = set.iter().flat_map(|iv| {
-        if let Some(ref val) = both {
-            flank_interval(*iv, *val, *val, percent, genome.as_ref())
-        } else {
-            let left = left.unwrap_or(0.0);
-            let right = right.unwrap_or(0.0);
-            flank_interval(*iv, left, right, percent, genome.as_ref())
-        }
+        let (left, right) = growth.get_values(iv);
+        flank_interval(*iv, left, right, genome.as_ref())
     });
     write_records_iter_with(flank_iter, output, translater)
 }
 
 /// Flank the intervals in the set but first match the input formats
-pub fn dispatch_flank<W: Write>(
-    bed: BedReader,
-    genome_path: Option<String>,
-    both: Option<f64>,
-    left: Option<f64>,
-    right: Option<f64>,
-    percent: bool,
-    output: W,
-) -> Result<()> {
-    let mut translater = bed.is_named().then_some(Translater::new());
-    match bed.input_format() {
+pub fn dispatch_flank<W: Write>(reader: BedReader, writer: W, growth: &Growth) -> Result<()> {
+    let mut translater = reader.is_named().then_some(Translater::new());
+    match reader.input_format() {
         InputFormat::Bed3 => {
-            let set = bed.bed3_set_with(translater.as_mut())?;
-            flank_set(
-                &set,
-                genome_path,
-                translater.as_ref(),
-                both,
-                left,
-                right,
-                percent,
-                output,
-            )
+            let set = reader.bed3_set_with(translater.as_mut())?;
+            flank_set(&set, translater.as_ref(), growth, writer)
         }
         InputFormat::Bed6 => {
-            let set = bed.bed6_set_with(translater.as_mut())?;
-            flank_set(
-                &set,
-                genome_path,
-                translater.as_ref(),
-                both,
-                left,
-                right,
-                percent,
-                output,
-            )
+            let set = reader.bed6_set_with(translater.as_mut())?;
+            flank_set(&set, translater.as_ref(), growth, writer)
         }
         InputFormat::Bed12 => {
-            let set = bed.bed12_set_with(translater.as_mut())?;
-            flank_set(
-                &set,
-                genome_path,
-                translater.as_ref(),
-                both,
-                left,
-                right,
-                percent,
-                output,
-            )
+            let set = reader.bed12_set_with(translater.as_mut())?;
+            flank_set(&set, translater.as_ref(), growth, writer)
         }
     }
 }
 
-pub fn flank(
-    input: Option<String>,
-    output: Option<String>,
-    genome_path: Option<String>,
-    both: Option<f64>,
-    left: Option<f64>,
-    right: Option<f64>,
-    percent: bool,
-    input_format: Option<InputFormat>,
-    field_format: Option<FieldFormat>,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed = BedReader::from_path(input, input_format, field_format)?;
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    dispatch_flank(bed, genome_path, both, left, right, percent, output_handle)
+pub fn flank(args: FlankArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_handle()?;
+    dispatch_flank(reader, writer, &args.growth)
 }
 
 #[cfg(test)]
@@ -298,7 +233,7 @@ mod testing {
     #[test]
     fn test_flank_both() {
         let iv = Bed3::new(1, 100, 400);
-        let mut it = flank_interval(iv, 50.0, 50.0, false, None);
+        let mut it = flank_interval(iv, 50, 50, None);
         let left = it.next().unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -311,7 +246,7 @@ mod testing {
     #[test]
     fn test_flank_both_no_left() {
         let iv = Bed3::new(1, 100, 400);
-        let mut it = flank_interval(iv, 0.0, 50.0, false, None);
+        let mut it = flank_interval(iv, 0, 50, None);
         let right = it.next().unwrap();
         assert_eq!(right.start(), 400);
         assert_eq!(right.end(), 450);
@@ -321,7 +256,7 @@ mod testing {
     #[test]
     fn test_flank_both_no_right() {
         let iv = Bed3::new(1, 100, 400);
-        let mut it = flank_interval(iv, 50.0, 0.0, false, None);
+        let mut it = flank_interval(iv, 50, 0, None);
         let left = it.next().unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -331,7 +266,7 @@ mod testing {
     #[test]
     fn test_flank_none() {
         let iv = Bed3::new(1, 100, 400);
-        let mut it = flank_interval(iv, 0.0, 0.0, false, None);
+        let mut it = flank_interval(iv, 0, 0, None);
         assert!(it.next().is_none());
     }
 
@@ -347,31 +282,5 @@ mod testing {
         let iv = Bed3::new(1, 100, 400);
         let pc = iv.f_len(1.5);
         assert_eq!(pc, 450);
-    }
-
-    #[test]
-    fn test_flank_both_percentage() {
-        let iv = Bed3::new(1, 100, 400);
-        let mut it = flank_interval(iv, 0.25, 0.25, true, None);
-        let left = it.next().unwrap();
-        assert_eq!(left.start(), 25);
-        assert_eq!(left.end(), 100);
-        let right = it.next().unwrap();
-        assert_eq!(right.start(), 400);
-        assert_eq!(right.end(), 475);
-        assert!(it.next().is_none());
-    }
-
-    #[test]
-    fn test_flank_both_percentage_lt_gt() {
-        let iv = Bed3::new(1, 100, 400);
-        let mut it = flank_interval(iv, 0.25, 1.25, true, None);
-        let left = it.next().unwrap();
-        assert_eq!(left.start(), 25);
-        assert_eq!(left.end(), 100);
-        let right = it.next().unwrap();
-        assert_eq!(right.start(), 400);
-        assert_eq!(right.end(), 775);
-        assert!(it.next().is_none());
     }
 }
