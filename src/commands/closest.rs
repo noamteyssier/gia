@@ -131,11 +131,7 @@ fn dispatch_closest<W: Write>(
 }
 
 pub fn closest(args: ClosestArgs) -> Result<()> {
-    let bed_a = BedReader::from_path(args.inputs.a, None, None)?;
-    let bed_b = BedReader::from_path(Some(args.inputs.b), None, None)?;
-    if bed_a.is_named() != bed_b.is_named() {
-        bail!("Input files must both be named or both be unnamed")
-    }
+    let (bed_a, bed_b) = args.inputs.get_readers()?;
     let method = ClosestType::new(args.upstream, args.downstream);
     let output = args.output.get_handle()?;
     dispatch_closest(bed_a, bed_b, method, args.sorted, output)
