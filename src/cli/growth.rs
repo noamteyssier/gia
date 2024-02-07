@@ -26,6 +26,27 @@ pub struct Growth {
     pub genome: Option<String>,
 }
 impl Growth {
+    #[allow(clippy::option_map_unit_fn)]
+    pub fn warn_args(&self) {
+        if !self.percent {
+            self.both.map(|val| {
+                if val < 1.0 {
+                    eprintln!("Warning: Growth value less than 1.0 without --percent will be rounded to closest integer");
+                }
+            });
+            self.left.map(|val| {
+                if val < 1.0 {
+                    eprintln!("Warning: Growth value less than 1.0 without --percent will be rounded to closest integer");
+                }
+            });
+            self.right.map(|val| {
+                if val < 1.0 {
+                    eprintln!("Warning: Growth value less than 1.0 without --percent will be rounded to closest integer");
+                }
+            });
+        }
+    }
+
     pub fn get_values<I>(&self, iv: &I) -> (usize, usize)
     where
         I: IntervalBounds<usize, usize>,

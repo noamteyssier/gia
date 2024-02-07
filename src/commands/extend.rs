@@ -26,16 +26,17 @@ where
 }
 
 fn extend_set<I, W>(
-    output: W,
     set: IntervalContainer<I, usize, usize>,
     translater: Option<&Translater>,
     growth: &Growth,
+    output: W,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Copy,
     W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
+    growth.warn_args();
     let genome = growth.get_genome(translater)?;
     let extend_iter = set.into_iter().map(|mut iv| {
         let (left, right) = growth.get_values(&iv);
@@ -49,15 +50,15 @@ fn dispatch_extend<W: Write>(bed_reader: BedReader, output: W, growth: &Growth) 
     match bed_reader.input_format() {
         InputFormat::Bed3 => {
             let (iset, translater) = bed_reader.bed3_set()?;
-            extend_set(output, iset, translater.as_ref(), growth)
+            extend_set(iset, translater.as_ref(), growth, output)
         }
         InputFormat::Bed6 => {
             let (iset, translater) = bed_reader.bed6_set()?;
-            extend_set(output, iset, translater.as_ref(), growth)
+            extend_set(iset, translater.as_ref(), growth, output)
         }
         InputFormat::Bed12 => {
             let (iset, translater) = bed_reader.bed12_set()?;
-            extend_set(output, iset, translater.as_ref(), growth)
+            extend_set(iset, translater.as_ref(), growth, output)
         }
     }
 }
