@@ -15,23 +15,7 @@ use commands::{
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Command::Closest {
-            a,
-            b,
-            output,
-            upstream,
-            downstream,
-            sorted,
-        } => closest(
-            a,
-            b,
-            output,
-            upstream,
-            downstream,
-            sorted,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
+        Command::Closest(args) => closest(args)?,
         Command::Complement {
             input,
             output,

@@ -1,5 +1,6 @@
 use crate::{
-    io::{match_output, write_pairs_iter_with, BedReader},
+    cli::ClosestArgs,
+    io::{write_pairs_iter_with, BedReader},
     types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
     utils::sort_pairs,
 };
@@ -57,11 +58,7 @@ where
             (query, target)
         })
         .filter_map(|(query, target)| {
-            if let Some(target) = target {
-                Some(IntervalPair::new(*query, *target, translater))
-            } else {
-                None
-            }
+            target.map(|target| IntervalPair::new(*query, *target, translater))
         });
     write_pairs_iter_with(pairs_iter, output, translater)
 }
@@ -133,24 +130,15 @@ fn dispatch_closest<W: Write>(
     }
 }
 
-pub fn closest(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    upstream: bool,
-    downstream: bool,
-    presorted: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed_a = BedReader::from_path(a, None, None)?;
-    let bed_b = BedReader::from_path(Some(b), None, None)?;
+pub fn closest(args: ClosestArgs) -> Result<()> {
+    let bed_a = BedReader::from_path(args.inputs.a, None, None)?;
+    let bed_b = BedReader::from_path(Some(args.inputs.b), None, None)?;
     if bed_a.is_named() != bed_b.is_named() {
         bail!("Input files must both be named or both be unnamed")
     }
-    let method = ClosestType::new(upstream, downstream);
-    let output = match_output(output, compression_threads, compression_level)?;
-    dispatch_closest(bed_a, bed_b, method, presorted, output)
+    let method = ClosestType::new(args.upstream, args.downstream);
+    let output = args.output.get_handle()?;
+    dispatch_closest(bed_a, bed_b, method, args.sorted, output)
 }
 
 #[cfg(test)]

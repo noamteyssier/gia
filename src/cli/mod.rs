@@ -1,5 +1,10 @@
+mod closest;
 mod commands;
+mod inputs;
+mod outputs;
+pub use closest::ClosestArgs;
 pub use commands::Command;
+pub use inputs::{DualInput, SingleInput};
 
 use clap::Parser;
 

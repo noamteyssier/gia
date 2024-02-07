@@ -1,34 +1,12 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
+use super::ClosestArgs;
+
 #[derive(Subcommand)]
 pub enum Command {
     /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
-    Closest {
-        /// Input BED file to find closest intervals for (default=stdin)
-        #[clap(short, long)]
-        a: Option<String>,
-
-        /// Secondary BED file to find closest intervals in
-        #[clap(short, long)]
-        b: String,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Report only the closest upstream interval
-        #[clap(short = 'u', long, conflicts_with = "downstream")]
-        upstream: bool,
-
-        /// Report only the closest downstream interval
-        #[clap(short = 'd', long, conflicts_with = "upstream")]
-        downstream: bool,
-
-        /// Specify that the input files are already presorted
-        #[clap(short, long)]
-        sorted: bool,
-    },
+    Closest(ClosestArgs),
 
     /// Generates the complement of a BED file
     ///
