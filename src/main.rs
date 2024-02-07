@@ -20,19 +20,7 @@ fn main() -> Result<()> {
         Command::Coverage(args) => coverage(args)?,
         Command::Extend(args) => extend(args)?,
         Command::Flank(args) => flank(args)?,
-        Command::GetFasta {
-            bed,
-            fasta,
-            output,
-            input_format,
-        } => get_fasta(
-            bed,
-            &fasta,
-            output,
-            input_format,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
+        Command::GetFasta(args) => get_fasta(args)?,
         Command::Intersect {
             a,
             b,

@@ -1,7 +1,7 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
-use super::{ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs};
+use super::{ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs};
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -31,23 +31,7 @@ pub enum Command {
     Flank(FlankArgs),
 
     /// Extracts FASTA sequences using intervals from a BED file
-    GetFasta {
-        /// BED file containing intervals to extract
-        #[clap(short, long)]
-        bed: Option<String>,
-
-        /// FASTA file to extract sequences from (assumes <fasta>.fai exists)
-        #[clap(short, long)]
-        fasta: String,
-
-        /// Output FASTA file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Format of input file
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-    },
+    GetFasta(GetFastaArgs),
 
     /// Intersects two BED files
     Intersect {
