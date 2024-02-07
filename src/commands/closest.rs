@@ -1,5 +1,5 @@
 use crate::{
-    cli::ClosestArgs,
+    cli::{ClosestArgs, ClosestParams},
     io::{write_pairs_iter_with, BedReader},
     types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
     utils::sort_pairs,
@@ -28,13 +28,17 @@ impl ClosestType {
         }
     }
 }
+impl From<ClosestParams> for ClosestType {
+    fn from(params: ClosestParams) -> Self {
+        ClosestType::new(params.upstream, params.downstream)
+    }
+}
 
 fn run_closest<'a, Ia, Ib, Na, Nb, W>(
     mut a_set: IntervalContainer<Ia, usize, usize>,
     mut b_set: IntervalContainer<Ib, usize, usize>,
     translater: Option<&'a Translater>,
-    method: ClosestType,
-    presorted: bool,
+    params: ClosestParams,
     output: W,
 ) -> Result<()>
 where
@@ -45,7 +49,8 @@ where
     W: Write,
     Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
-    sort_pairs(&mut a_set, &mut b_set, presorted);
+    sort_pairs(&mut a_set, &mut b_set, params.sorted);
+    let method = params.into();
     let pairs_iter = a_set
         .iter()
         .map(|query| {
@@ -66,30 +71,25 @@ where
 fn dispatch_closest<W: Write>(
     bed_a: BedReader,
     bed_b: BedReader,
-    method: ClosestType,
-    presorted: bool,
+    params: ClosestParams,
     output: W,
 ) -> Result<()> {
-    let mut translater = if bed_a.is_named() {
-        Some(Translater::new())
-    } else {
-        None
-    };
+    let mut translater = bed_a.is_named().then_some(Translater::new());
     match bed_a.input_format() {
         InputFormat::Bed3 => {
             let set_a = bed_a.bed3_set_with(translater.as_mut())?;
             match bed_b.input_format() {
                 InputFormat::Bed3 => {
                     let set_b = bed_b.bed3_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
                 InputFormat::Bed6 => {
                     let set_b = bed_b.bed6_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
                 InputFormat::Bed12 => {
                     let set_b = bed_b.bed12_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
             }
         }
@@ -98,15 +98,15 @@ fn dispatch_closest<W: Write>(
             match bed_b.input_format() {
                 InputFormat::Bed3 => {
                     let set_b = bed_b.bed3_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
                 InputFormat::Bed6 => {
                     let set_b = bed_b.bed6_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
                 InputFormat::Bed12 => {
                     let set_b = bed_b.bed12_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
             }
         }
@@ -115,15 +115,15 @@ fn dispatch_closest<W: Write>(
             match bed_b.input_format() {
                 InputFormat::Bed3 => {
                     let set_b = bed_b.bed3_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
                 InputFormat::Bed6 => {
                     let set_b = bed_b.bed6_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
                 InputFormat::Bed12 => {
                     let set_b = bed_b.bed12_set_with(translater.as_mut())?;
-                    run_closest(set_a, set_b, translater.as_ref(), method, presorted, output)
+                    run_closest(set_a, set_b, translater.as_ref(), params, output)
                 }
             }
         }
@@ -132,9 +132,8 @@ fn dispatch_closest<W: Write>(
 
 pub fn closest(args: ClosestArgs) -> Result<()> {
     let (bed_a, bed_b) = args.inputs.get_readers()?;
-    let method = ClosestType::new(args.upstream, args.downstream);
-    let output = args.output.get_handle()?;
-    dispatch_closest(bed_a, bed_b, method, args.sorted, output)
+    let writer = args.output.get_handle()?;
+    dispatch_closest(bed_a, bed_b, args.params, writer)
 }
 
 #[cfg(test)]

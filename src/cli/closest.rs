@@ -11,6 +11,12 @@ pub struct ClosestArgs {
     #[clap(flatten)]
     pub output: Output,
 
+    #[clap(flatten)]
+    pub params: ClosestParams,
+}
+
+#[derive(Parser, Debug, Clone, Copy)]
+pub struct ClosestParams {
     /// Report only the closest upstream interval
     #[clap(short = 'u', long, conflicts_with = "downstream")]
     pub upstream: bool,

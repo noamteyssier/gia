@@ -17,7 +17,7 @@ mod shift;
 mod sort;
 mod subtract;
 mod window;
-pub use closest::ClosestArgs;
+pub use closest::{ClosestArgs, ClosestParams};
 pub use commands::Command;
 pub use complement::ComplementArgs;
 pub use coverage::CoverageArgs;
