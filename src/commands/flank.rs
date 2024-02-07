@@ -131,7 +131,7 @@ mod testing {
     fn test_flank_left_bounds() {
         let iv = Bed3::new(1, 10, 400);
         let left = left_flank(iv, 50).unwrap();
-        assert_eq!(left.start(), 1);
+        assert_eq!(left.start(), 0);
         assert_eq!(left.end(), 10);
     }
 
