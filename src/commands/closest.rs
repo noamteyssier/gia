@@ -4,7 +4,7 @@ use crate::{
     types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
     utils::sort_pairs,
 };
-use anyhow::{bail, Result};
+use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
 use serde::Serialize;
 use std::io::Write;

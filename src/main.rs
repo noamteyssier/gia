@@ -16,19 +16,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Command::Closest(args) => closest(args)?,
-        Command::Complement {
-            input,
-            output,
-            named,
-            stream,
-        } => complement(
-            input,
-            output,
-            named,
-            stream,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
+        Command::Complement(args) => complement(args)?,
         Command::Coverage {
             a,
             b,

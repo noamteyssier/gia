@@ -40,7 +40,7 @@ impl DualInput {
         BedReader::from_path(self.a.clone(), None, None)
     }
     pub fn reader_from_b(&self) -> Result<BedReader> {
-        BedReader::from_path(Some(self.b), None, None)
+        BedReader::from_path(Some(self.b.clone()), None, None)
     }
     pub fn get_readers(self) -> Result<(BedReader, BedReader)> {
         let bed_a = self.reader_from_a()?;

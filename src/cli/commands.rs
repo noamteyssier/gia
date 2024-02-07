@@ -1,7 +1,7 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
-use super::ClosestArgs;
+use super::{ClosestArgs, ComplementArgs};
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -13,27 +13,27 @@ pub enum Command {
     /// This reports the regions that are not covered by the input
     /// BED file but excludes regions preceding the first interval
     /// and following the last interval.
-    Complement {
-        /// Input BED file to complement (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        named: bool,
-
-        /// Stream the input file instead of loading it into memory
-        ///
-        /// Note that this requires the input file to be sorted
-        /// and will result in undefined behavior if it is not.
-        #[clap(short = 'S', long, conflicts_with = "named")]
-        stream: bool,
-    },
-
+    Complement(ComplementArgs),
+    // Complement {
+    //     /// Input BED file to complement (default=stdin)
+    //     #[clap(short, long)]
+    //     input: Option<String>,
+    //
+    //     /// Output BED file to write to (default=stdout)
+    //     #[clap(short, long)]
+    //     output: Option<String>,
+    //
+    //     /// Allow for non-integer chromosome names
+    //     #[clap(short = 'N', long)]
+    //     named: bool,
+    //
+    //     /// Stream the input file instead of loading it into memory
+    //     ///
+    //     /// Note that this requires the input file to be sorted
+    //     /// and will result in undefined behavior if it is not.
+    //     #[clap(short = 'S', long, conflicts_with = "named")]
+    //     stream: bool,
+    // },
     /// Calculates the coverage of intervals in Set A by intervals in Set B
     Coverage {
         /// Input BED file to intersect (default=stdin)

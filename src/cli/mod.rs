@@ -1,9 +1,11 @@
 mod closest;
 mod commands;
+mod complement;
 mod inputs;
 mod outputs;
 pub use closest::ClosestArgs;
 pub use commands::Command;
+pub use complement::ComplementArgs;
 pub use inputs::{DualInput, SingleInput};
 
 use clap::Parser;
