@@ -1,12 +1,17 @@
 mod closest;
 mod commands;
 mod complement;
+mod coverage;
 mod inputs;
 mod outputs;
+mod overlap_predicates;
 pub use closest::ClosestArgs;
 pub use commands::Command;
 pub use complement::ComplementArgs;
+pub use coverage::CoverageArgs;
 pub use inputs::{DualInput, SingleInput};
+pub use outputs::Output;
+pub use overlap_predicates::OverlapPredicates;
 
 use clap::Parser;
 

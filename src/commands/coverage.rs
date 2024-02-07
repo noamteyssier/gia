@@ -5,9 +5,10 @@ use bedrs::{traits::IntervalBounds, types::QueryMethod, IntervalContainer};
 use serde::Serialize;
 
 use crate::{
-    io::{match_output, write_depth_iter_with, BedReader},
+    cli::CoverageArgs,
+    io::{write_depth_iter_with, BedReader},
     types::{InputFormat, IntervalDepth, Rename, Renamer, Translater},
-    utils::{assign_query_method, sort_pairs},
+    utils::sort_pairs,
 };
 
 fn run_coverage<'a, Ia, Ib, Na, W>(
@@ -169,21 +170,9 @@ fn dispatch_coverage<W: Write>(
     }
 }
 
-pub fn coverage(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    fraction_query: Option<f64>,
-    fraction_target: Option<f64>,
-    reciprocal: bool,
-    either: bool,
-    presorted: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed_a = BedReader::from_path(a, None, None)?;
-    let bed_b = BedReader::from_path(Some(b), None, None)?;
-    let query_method = assign_query_method(fraction_query, fraction_target, reciprocal, either);
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    dispatch_coverage(bed_a, bed_b, output_handle, query_method, presorted)
+pub fn coverage(args: CoverageArgs) -> Result<()> {
+    let (bed_a, bed_b) = args.inputs.get_readers()?;
+    let query_method = args.overlap_predicates.into();
+    let output = args.output.get_handle()?;
+    dispatch_coverage(bed_a, bed_b, output, query_method, args.sorted)
 }

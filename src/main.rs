@@ -17,27 +17,7 @@ fn main() -> Result<()> {
     match cli.command {
         Command::Closest(args) => closest(args)?,
         Command::Complement(args) => complement(args)?,
-        Command::Coverage {
-            a,
-            b,
-            output,
-            fraction_query,
-            fraction_target,
-            reciprocal,
-            either,
-            sorted,
-        } => coverage(
-            a,
-            b,
-            output,
-            fraction_query,
-            fraction_target,
-            reciprocal,
-            either,
-            sorted,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
+        Command::Coverage(args) => coverage(args)?,
         Command::Extend {
             input,
             output,

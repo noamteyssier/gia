@@ -1,7 +1,7 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
-use super::{ClosestArgs, ComplementArgs};
+use super::{ClosestArgs, ComplementArgs, CoverageArgs};
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -14,67 +14,8 @@ pub enum Command {
     /// BED file but excludes regions preceding the first interval
     /// and following the last interval.
     Complement(ComplementArgs),
-    // Complement {
-    //     /// Input BED file to complement (default=stdin)
-    //     #[clap(short, long)]
-    //     input: Option<String>,
-    //
-    //     /// Output BED file to write to (default=stdout)
-    //     #[clap(short, long)]
-    //     output: Option<String>,
-    //
-    //     /// Allow for non-integer chromosome names
-    //     #[clap(short = 'N', long)]
-    //     named: bool,
-    //
-    //     /// Stream the input file instead of loading it into memory
-    //     ///
-    //     /// Note that this requires the input file to be sorted
-    //     /// and will result in undefined behavior if it is not.
-    //     #[clap(short = 'S', long, conflicts_with = "named")]
-    //     stream: bool,
-    // },
     /// Calculates the coverage of intervals in Set A by intervals in Set B
-    Coverage {
-        /// Input BED file to intersect (default=stdin)
-        #[clap(short, long)]
-        a: Option<String>,
-
-        /// Secondary BED file to intersect
-        #[clap(short, long)]
-        b: String,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Minimum fraction of a's interval that must be covered by b's interval
-        #[clap(short = 'f', long)]
-        fraction_query: Option<f64>,
-
-        /// Minimum fraction of b's interval that must be covered by a's interval
-        #[clap(short = 'F', long)]
-        fraction_target: Option<f64>,
-
-        /// Require that the fraction provided with `-f` is reciprocal to both
-        /// query and target
-        #[clap(
-            short,
-            long,
-            requires = "fraction_query",
-            conflicts_with = "fraction_target"
-        )]
-        reciprocal: bool,
-
-        /// Requires that either fraction provided with `-f` or `-F` is met
-        #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
-        either: bool,
-
-        /// Assert that the intervals are presorted in BOTH files (unexpected behavior if they are
-        /// not)
-        #[clap(short, long)]
-        sorted: bool,
-    },
+    Coverage(CoverageArgs),
 
     /// Extends the intervals of a BED file
     ///
