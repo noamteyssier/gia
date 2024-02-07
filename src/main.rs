@@ -50,25 +50,7 @@ fn main() -> Result<()> {
                 cli.compression_level,
             )?;
         }
-        Command::Window {
-            a,
-            b,
-            output,
-            both,
-            left,
-            right,
-            inverse,
-        } => window(
-            a,
-            b,
-            output,
-            both,
-            left,
-            right,
-            inverse,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
+        Command::Window(args) => window(args)?,
     }
     Ok(())
 }

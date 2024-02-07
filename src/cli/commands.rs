@@ -1,6 +1,6 @@
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs,
+    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs, WindowArgs,
 };
 use clap::Subcommand;
 
@@ -100,34 +100,5 @@ pub enum Command {
 
     /// Finds all the overlapping intervals in Set B after adding a window around all
     /// intervals in Set A
-    Window {
-        /// Input BED file to subtract from (default=stdin)
-        #[clap(short, long)]
-        a: Option<String>,
-
-        /// Secondary BED file to subtract with
-        #[clap(short, long)]
-        b: String,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// windows intervals on both sides by the same provided amount
-        #[clap(short = 'w', long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
-        both: Option<usize>,
-
-        /// windows intervals on the left side by the provided amount
-        #[clap(short, long, required_unless_present_any(["both", "right"]))]
-        left: Option<usize>,
-
-        /// windows intervals on the right side by the provided amount
-        #[clap(short, long, required_unless_present_any(["both", "left"]))]
-        right: Option<usize>,
-
-        /// Only report the intervals in the query that do not overlap with the target
-        /// (i.e. the inverse of the intersection)
-        #[clap(short = 'v', long)]
-        inverse: bool,
-    },
+    Window(WindowArgs),
 }

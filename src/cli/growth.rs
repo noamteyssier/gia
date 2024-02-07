@@ -6,7 +6,7 @@ use clap::Parser;
 #[derive(Parser, Debug, Clone)]
 pub struct Growth {
     /// Amount to apply to function on both sides of intervals
-    #[clap(short, long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
+    #[clap(short = 't', long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
     pub both: Option<f64>,
 
     /// Amount to apply to function on the left side of intervals
