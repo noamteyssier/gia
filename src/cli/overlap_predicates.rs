@@ -1,7 +1,7 @@
 use bedrs::{traits::ValueBounds, types::QueryMethod};
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone, Copy)]
 pub struct OverlapPredicates {
     /// Minimum fraction of a's interval that must be covered by b's interval
     #[clap(short = 'f', long)]

@@ -15,6 +15,7 @@ mod random;
 mod sample;
 mod shift;
 mod sort;
+mod subtract;
 mod window;
 pub use closest::ClosestArgs;
 pub use commands::Command;
@@ -33,6 +34,7 @@ pub use random::RandomArgs;
 pub use sample::{SampleArgs, SampleParams};
 pub use shift::{ShiftArgs, ShiftParams};
 pub use sort::{SortArgs, SortParams};
+pub use subtract::{SubtractArgs, SubtractParams};
 pub use window::{WindowArgs, WindowParams};
 
 use clap::Parser;

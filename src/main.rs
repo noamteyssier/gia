@@ -27,29 +27,7 @@ fn main() -> Result<()> {
         Command::Sample(args) => sample(args)?,
         Command::Shift(args) => shift(args)?,
         Command::Sort(args) => sort(args)?,
-        Command::Subtract {
-            a,
-            b,
-            output,
-            fraction_query,
-            fraction_target,
-            reciprocal,
-            either,
-            unmerged,
-        } => {
-            subtract(
-                a,
-                b,
-                output,
-                fraction_query,
-                fraction_target,
-                reciprocal,
-                either,
-                unmerged,
-                cli.compression_threads,
-                cli.compression_level,
-            )?;
-        }
+        Command::Subtract(args) => subtract(args)?,
         Command::Window(args) => window(args)?,
     }
     Ok(())

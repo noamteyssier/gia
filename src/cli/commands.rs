@@ -1,6 +1,6 @@
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs, WindowArgs,
+    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs, SubtractArgs, WindowArgs,
 };
 use clap::Subcommand;
 
@@ -54,49 +54,8 @@ pub enum Command {
 
     /// Subtracts two BED files
     ///
-    /// Will remove subtract `b` from `a`
-    Subtract {
-        /// Input BED file to subtract from (default=stdin)
-        #[clap(short, long)]
-        a: Option<String>,
-
-        /// Secondary BED file to subtract with
-        #[clap(short, long)]
-        b: String,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Minimum fraction of a's interval that must be covered by b's interval
-        #[clap(short = 'f', long)]
-        fraction_query: Option<f64>,
-
-        /// Minimum fraction of b's interval that must be covered by a's interval
-        #[clap(short = 'F', long)]
-        fraction_target: Option<f64>,
-
-        /// Require that the fraction provided with `-f` is reciprocal to both
-        /// query and target
-        #[clap(
-            short,
-            long,
-            requires = "fraction_query",
-            conflicts_with = "fraction_target"
-        )]
-        reciprocal: bool,
-
-        /// Requires that either fraction provided with `-f` or `-F` is met
-        #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
-        either: bool,
-
-        /// Keep the query records unmerged (i.e. report all subtractions)
-        ///
-        /// By default, the query records are merged to remove overlapping
-        /// regions.
-        #[clap(short, long)]
-        unmerged: bool,
-    },
+    /// Will subtract `b` from `a`
+    Subtract(SubtractArgs),
 
     /// Finds all the overlapping intervals in Set B after adding a window around all
     /// intervals in Set A

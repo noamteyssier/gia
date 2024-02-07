@@ -1,6 +1,5 @@
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    types::QueryMethod,
     IntervalContainer,
 };
 
@@ -21,37 +20,5 @@ pub fn sort_pairs<Ia, Ib, C, T>(
     } else {
         set_a.set_sorted();
         set_b.set_sorted();
-    }
-}
-
-pub fn assign_query_method(
-    fraction_query: Option<f64>,
-    fraction_target: Option<f64>,
-    reciprocal: bool,
-    either: bool,
-) -> QueryMethod<usize> {
-    let fraction_target = if reciprocal {
-        fraction_query
-    } else {
-        fraction_target
-    };
-    if fraction_query.is_some() && fraction_target.is_some() {
-        if either {
-            QueryMethod::CompareReciprocalFractionOr(
-                fraction_query.unwrap(),
-                fraction_target.unwrap(),
-            )
-        } else {
-            QueryMethod::CompareReciprocalFractionAnd(
-                fraction_query.unwrap(),
-                fraction_target.unwrap(),
-            )
-        }
-    } else if fraction_query.is_some() {
-        QueryMethod::CompareByQueryFraction(fraction_query.unwrap())
-    } else if fraction_target.is_some() {
-        QueryMethod::CompareByTargetFraction(fraction_target.unwrap())
-    } else {
-        QueryMethod::Compare
     }
 }
