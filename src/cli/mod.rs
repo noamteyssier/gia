@@ -13,6 +13,7 @@ mod outputs;
 mod overlap_predicates;
 mod random;
 mod sample;
+mod shift;
 pub use closest::ClosestArgs;
 pub use commands::Command;
 pub use complement::ComplementArgs;
@@ -28,6 +29,7 @@ pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
 pub use random::RandomArgs;
 pub use sample::{SampleArgs, SampleParams};
+pub use shift::{ShiftArgs, ShiftParams};
 
 use clap::Parser;
 

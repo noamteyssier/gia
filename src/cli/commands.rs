@@ -3,7 +3,7 @@ use clap::Subcommand;
 
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs,
+    MergeArgs, RandomArgs, SampleArgs, ShiftArgs,
 };
 
 #[derive(Subcommand)]
@@ -49,39 +49,7 @@ pub enum Command {
     Sample(SampleArgs),
 
     /// Shifts the intervals of a BED file by a specified amount
-    Shift {
-        /// Input BED file to shift (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Path to genome file to use for bounds when shifting
-        #[clap(short, long)]
-        genome: Option<String>,
-
-        /// Amount to shift intervals by (negative values shift to the left)
-        #[clap(short, long, allow_hyphen_values = true)]
-        amount: f64,
-
-        /// Interprets the amount as a fraction of the interval length
-        ///
-        /// i.e. if the amount is 0.5, the interval will be shifted
-        /// by half of its length. if the amount is 2, the interval
-        /// will be shifted by twice its length.
-        #[clap(short, long)]
-        percent: bool,
-
-        /// Input file format
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        field_format: Option<FieldFormat>,
-    },
+    Shift(ShiftArgs),
 
     /// Sorts a BED file by chromosome, start, and end
     Sort {
