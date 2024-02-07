@@ -140,27 +140,6 @@ pub enum Command {
         field_format: Option<FieldFormat>,
     },
 
-    /// Builds a two column map of chromosome names to integers
-    /// and writes the map and BED file with integer chromosome names
-    /// to disk
-    ///
-    /// The map file is a two column file with the first column
-    /// containing the integer chromosome index and the second column
-    /// containing the original chromosome name
-    NameMap {
-        /// Input BED file to map chromosome names (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Output map file to write to (default=name_map.tsv)
-        #[clap(short, long)]
-        map: Option<String>,
-    },
-
     /// Generates a random BED file given some parameterizations
     Random {
         /// Number of intervals to generate (default = 10_000)

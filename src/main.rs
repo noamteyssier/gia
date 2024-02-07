@@ -8,8 +8,8 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    closest, complement, coverage, extend, flank, get_fasta, intersect, merge, name_map, random,
-    sample, shift, sort, subtract, window,
+    closest, complement, coverage, extend, flank, get_fasta, intersect, merge, random, sample,
+    shift, sort, subtract, window,
 };
 
 fn main() -> Result<()> {
@@ -76,13 +76,6 @@ fn main() -> Result<()> {
             stream,
             input_format,
             field_format,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
-        Command::NameMap { input, output, map } => name_map(
-            input,
-            output,
-            map,
             cli.compression_threads,
             cli.compression_level,
         )?,
