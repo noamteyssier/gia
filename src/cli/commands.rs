@@ -1,7 +1,7 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
-use super::{ClosestArgs, ComplementArgs, CoverageArgs};
+use super::{ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs};
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -14,6 +14,7 @@ pub enum Command {
     /// BED file but excludes regions preceding the first interval
     /// and following the last interval.
     Complement(ComplementArgs),
+
     /// Calculates the coverage of intervals in Set A by intervals in Set B
     Coverage(CoverageArgs),
 
@@ -21,39 +22,7 @@ pub enum Command {
     ///
     /// The extension is either done on both sides at once
     /// or on the left and right side separately
-    Extend {
-        /// Input BED file to extend (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Extend intervals on both sides by the same provided amount
-        #[clap(short, long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]
-        both: Option<usize>,
-
-        /// Extend intervals on the left side by the provided amount
-        #[clap(short, long, required_unless_present_any(["both", "right"]))]
-        left: Option<usize>,
-
-        /// Extend intervals on the right side by the provided amount
-        #[clap(short, long, required_unless_present_any(["both", "left"]))]
-        right: Option<usize>,
-
-        /// Genome file to validate extensions against
-        #[clap(short, long)]
-        genome: Option<String>,
-
-        /// Format of input file
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        field_format: Option<FieldFormat>,
-    },
+    Extend(ExtendArgs),
 
     /// Flanks the intervals of a BED file
     ///
