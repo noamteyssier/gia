@@ -5,7 +5,7 @@ use crate::{
 use anyhow::{bail, Result};
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct SingleInput {
     /// Input BED file to process (default=stdin)
     #[clap(short, long)]
@@ -25,7 +25,7 @@ impl SingleInput {
     }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct DualInput {
     /// Primary BED file to use (default=stdin)
     #[clap(short, long)]

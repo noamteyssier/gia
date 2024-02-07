@@ -11,6 +11,7 @@ mod intersect;
 mod merge;
 mod outputs;
 mod overlap_predicates;
+mod random;
 pub use closest::ClosestArgs;
 pub use commands::Command;
 pub use complement::ComplementArgs;
@@ -24,6 +25,7 @@ pub use intersect::{IntersectArgs, OutputMethod, OutputPredicates};
 pub use merge::MergeArgs;
 pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
+pub use random::RandomArgs;
 
 use clap::Parser;
 
