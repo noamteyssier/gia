@@ -3,7 +3,7 @@ use clap::Subcommand;
 
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs,
+    MergeArgs, RandomArgs, SampleArgs,
 };
 
 #[derive(Subcommand)]
@@ -46,35 +46,7 @@ pub enum Command {
     Random(RandomArgs),
 
     /// Randomly sample a BED file
-    Sample {
-        /// Input BED file to sample (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Number of intervals to sample (choose one of n or f)
-        #[clap(short, long, required_unless_present_any(&["fraction"]), conflicts_with_all(&["fraction"]))]
-        number: Option<usize>,
-
-        /// Fraction of intervals to sample (choose one of n or f)
-        #[clap(short, long, required_unless_present_any(&["number"]), conflicts_with_all(&["number"]))]
-        fraction: Option<f64>,
-
-        /// Seed to use for random number generation (no default)
-        #[clap(short, long)]
-        seed: Option<usize>,
-
-        /// Input file format
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        field_format: Option<FieldFormat>,
-    },
+    Sample(SampleArgs),
 
     /// Shifts the intervals of a BED file by a specified amount
     Shift {

@@ -12,6 +12,7 @@ mod merge;
 mod outputs;
 mod overlap_predicates;
 mod random;
+mod sample;
 pub use closest::ClosestArgs;
 pub use commands::Command;
 pub use complement::ComplementArgs;
@@ -26,6 +27,7 @@ pub use merge::MergeArgs;
 pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
 pub use random::RandomArgs;
+pub use sample::{SampleArgs, SampleParams};
 
 use clap::Parser;
 

@@ -1,37 +1,31 @@
+use crate::{
+    cli::{SampleArgs, SampleParams},
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
+    types::{InputFormat, Translater},
+};
 use anyhow::{bail, Result};
 use bedrs::{traits::IntervalBounds, IntervalContainer};
 use serde::Serialize;
+use std::io::Write;
 
-use crate::{
-    io::{
-        match_output, read_bed12_set, read_bed3_set, read_bed6_set, write_records_iter_with,
-        BedReader, WriteNamedIter, WriteNamedIterImpl,
-    },
-    types::{FieldFormat, InputFormat, Translater},
-    utils::build_rng,
-};
-
-fn sample_from_set<I>(
+fn sample_from_set<I, W>(
     set: &mut IntervalContainer<I, usize, usize>,
-    number: Option<usize>,
-    fraction: Option<f64>,
-    seed: Option<usize>,
     translater: Option<&Translater>,
-    output: Option<String>,
-    compression_threads: usize,
-    compression_level: u32,
+    params: SampleParams,
+    writer: W,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Copy,
+    W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     // build rng
-    let mut rng = build_rng(seed);
+    let mut rng = params.build_rng();
 
     // calculate number of intervals to sample
-    let num = if let Some(n) = number {
+    let num = if let Some(n) = params.number {
         n
-    } else if let Some(f) = fraction {
+    } else if let Some(f) = params.fraction {
         if f > 1.0 {
             bail!(
                 "Fraction must be less than or equal to 1.0:\n\ninput: {}",
@@ -48,70 +42,30 @@ where
     // sample intervals as iterator
     let subset = set.sample_iter_rng(num, &mut rng)?.copied();
 
-    // build output handle
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-
     // write intervals to output
-    write_records_iter_with(subset, output_handle, translater)?;
-
-    Ok(())
+    write_records_iter_with(subset, writer, translater)
 }
 
-pub fn sample(
-    input: Option<String>,
-    output: Option<String>,
-    number: Option<usize>,
-    fraction: Option<f64>,
-    seed: Option<usize>,
-    input_format: Option<InputFormat>,
-    field_format: Option<FieldFormat>,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
+pub fn sample(args: SampleArgs) -> Result<()> {
     // read input
-    let bed_reader = BedReader::from_path(input, input_format, field_format)?;
-    let named = bed_reader.is_named();
+    let reader = args.input.get_reader()?;
+
+    // open output
+    let writer = args.output.get_handle()?;
 
     // handle input format
-    match bed_reader.input_format() {
+    match reader.input_format() {
         InputFormat::Bed3 => {
-            let (mut set, translater) = read_bed3_set(bed_reader.reader(), named)?;
-            sample_from_set(
-                &mut set,
-                number,
-                fraction,
-                seed,
-                translater.as_ref(),
-                output,
-                compression_threads,
-                compression_level,
-            )
+            let (mut set, translater) = reader.bed3_set()?;
+            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
         }
         InputFormat::Bed6 => {
-            let (mut set, translater) = read_bed6_set(bed_reader.reader(), named)?;
-            sample_from_set(
-                &mut set,
-                number,
-                fraction,
-                seed,
-                translater.as_ref(),
-                output,
-                compression_threads,
-                compression_level,
-            )
+            let (mut set, translater) = reader.bed6_set()?;
+            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
         }
         InputFormat::Bed12 => {
-            let (mut set, translater) = read_bed12_set(bed_reader.reader(), named)?;
-            sample_from_set(
-                &mut set,
-                number,
-                fraction,
-                seed,
-                translater.as_ref(),
-                output,
-                compression_threads,
-                compression_level,
-            )
+            let (mut set, translater) = reader.bed12_set()?;
+            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
         }
     }
 }
