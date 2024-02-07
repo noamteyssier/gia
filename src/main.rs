@@ -26,21 +26,7 @@ fn main() -> Result<()> {
         Command::Random(args) => random(args)?,
         Command::Sample(args) => sample(args)?,
         Command::Shift(args) => shift(args)?,
-        Command::Sort {
-            input,
-            output,
-            input_format,
-            field_format,
-            threads,
-        } => sort(
-            input,
-            output,
-            input_format,
-            field_format,
-            threads,
-            cli.compression_threads,
-            cli.compression_level,
-        )?,
+        Command::Sort(args) => sort(args)?,
         Command::Subtract {
             a,
             b,

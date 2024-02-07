@@ -14,6 +14,7 @@ mod overlap_predicates;
 mod random;
 mod sample;
 mod shift;
+mod sort;
 pub use closest::ClosestArgs;
 pub use commands::Command;
 pub use complement::ComplementArgs;
@@ -30,6 +31,7 @@ pub use overlap_predicates::OverlapPredicates;
 pub use random::RandomArgs;
 pub use sample::{SampleArgs, SampleParams};
 pub use shift::{ShiftArgs, ShiftParams};
+pub use sort::{SortArgs, SortParams};
 
 use clap::Parser;
 

@@ -1,10 +1,8 @@
-use crate::types::{FieldFormat, InputFormat};
-use clap::Subcommand;
-
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs, ShiftArgs,
+    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs,
 };
+use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -52,27 +50,7 @@ pub enum Command {
     Shift(ShiftArgs),
 
     /// Sorts a BED file by chromosome, start, and end
-    Sort {
-        /// Input GIA file to sort (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output GIA file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Input file format
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        field_format: Option<FieldFormat>,
-
-        /// Number of threads to use for sorting (default=1)
-        #[clap(short = 't', long, default_value = "1")]
-        threads: usize,
-    },
+    Sort(SortArgs),
 
     /// Subtracts two BED files
     ///
