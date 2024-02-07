@@ -1,11 +1,11 @@
-use super::iter::{run_function_query, run_function_target, OutputMethod};
+use super::iter::{run_function_query, run_function_target};
 use crate::{
+    cli::{IntersectArgs, OutputMethod},
     io::{
-        build_reader, match_output, write_named_records_iter_dashmap, write_records_iter_with,
-        BedReader, NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
+        build_reader, write_named_records_iter_dashmap, write_records_iter_with, BedReader,
+        NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, NumericBed3, StreamTranslater, Translater},
-    utils::assign_query_method,
 };
 use anyhow::{bail, Result};
 use bedrs::{
@@ -192,67 +192,27 @@ fn match_and_intersect_sets<W: Write>(
     Ok(())
 }
 
-pub fn intersect(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    fraction_query: Option<f64>,
-    fraction_target: Option<f64>,
-    reciprocal: bool,
-    either: bool,
-    with_query: bool,
-    with_target: bool,
-    unique: bool,
-    inverse: bool,
-    stream: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    if stream {
-        intersect_stream(
-            a,
-            b,
-            output,
-            fraction_query,
-            fraction_target,
-            reciprocal,
-            either,
-            compression_threads,
-            compression_level,
-        )
+pub fn intersect(args: IntersectArgs) -> Result<()> {
+    if args.stream {
+        intersect_stream(args)
     } else {
-        let bed_a = BedReader::from_path(a, None, None)?;
-        let bed_b = BedReader::from_path(Some(b), None, None)?;
-        let query_method = assign_query_method(fraction_query, fraction_target, reciprocal, either);
-        let output_method = OutputMethod::from_inputs(with_query, with_target, unique, inverse);
-        let output_handle = match_output(output, compression_threads, compression_level)?;
-        match_and_intersect_sets(bed_a, bed_b, output_handle, query_method, output_method)
+        let (bed_a, bed_b) = args.inputs.get_readers()?;
+        let query_method = args.overlap_predicates.into();
+        let output_method = args.output_predicates.try_into()?;
+        let writer = args.output.get_handle()?;
+        match_and_intersect_sets(bed_a, bed_b, writer, query_method, output_method)
     }
 }
 
-fn intersect_stream(
-    a: Option<String>,
-    b: String,
-    output: Option<String>,
-    fraction_query: Option<f64>,
-    fraction_target: Option<f64>,
-    reciprocal: bool,
-    either: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed_a = BedReader::from_path(a, None, None)?;
-    let bed_b = BedReader::from_path(Some(b), None, None)?;
-    if bed_a.is_named() != bed_b.is_named() {
-        bail!("Input files must both be named or both be unnamed");
-    }
+fn intersect_stream(args: IntersectArgs) -> Result<()> {
+    let (bed_a, bed_b) = args.inputs.get_readers()?;
     let named = bed_a.is_named();
     let query_handle = bed_a.reader();
     let target_handle = bed_b.reader();
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    let method = assign_query_method(fraction_query, fraction_target, reciprocal, either);
+    let output_handle = args.output.get_handle()?;
+    let method = args.overlap_predicates.into();
 
     if named {
         let translater = StreamTranslater::new();

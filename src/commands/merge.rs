@@ -1,9 +1,10 @@
 use crate::{
+    cli::MergeArgs,
     io::{
-        build_reader, iter_unnamed, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
+        build_reader, iter_unnamed, read_bed12_set, read_bed3_set, read_bed6_set,
         write_3col_iter_with, write_records_iter, BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{FieldFormat, InputFormat, NumericBed3, Translater},
+    types::{InputFormat, NumericBed3, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer, MergeIter};
@@ -86,21 +87,12 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, output_handle: W) -
     }
 }
 
-pub fn merge(
-    input: Option<String>,
-    output: Option<String>,
-    sorted: bool,
-    stream: bool,
-    input_format: Option<InputFormat>,
-    field_format: Option<FieldFormat>,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed_reader = BedReader::from_path(input, input_format, field_format)?;
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    if stream {
-        merge_streamed_by_format(bed_reader, output_handle)
+pub fn merge(args: MergeArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_handle()?;
+    if args.stream {
+        merge_streamed_by_format(reader, writer)
     } else {
-        merge_by_format(bed_reader, output_handle, sorted)
+        merge_by_format(reader, writer, args.sorted)
     }
 }

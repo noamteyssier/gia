@@ -7,6 +7,8 @@ mod flank;
 mod get_fasta;
 mod growth;
 mod inputs;
+mod intersect;
+mod merge;
 mod outputs;
 mod overlap_predicates;
 pub use closest::ClosestArgs;
@@ -18,6 +20,8 @@ pub use flank::FlankArgs;
 pub use get_fasta::GetFastaArgs;
 pub use growth::Growth;
 pub use inputs::{DualInput, SingleInput};
+pub use intersect::{IntersectArgs, OutputMethod, OutputPredicates};
+pub use merge::MergeArgs;
 pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
 

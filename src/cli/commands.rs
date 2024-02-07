@@ -1,7 +1,10 @@
 use crate::types::{FieldFormat, InputFormat};
 use clap::Subcommand;
 
-use super::{ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs};
+use super::{
+    ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
+    MergeArgs,
+};
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -34,95 +37,10 @@ pub enum Command {
     GetFasta(GetFastaArgs),
 
     /// Intersects two BED files
-    Intersect {
-        /// Input BED file to intersect (default=stdin)
-        #[clap(short, long)]
-        a: Option<String>,
-
-        /// Secondary BED file to intersect
-        #[clap(short, long)]
-        b: String,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Minimum fraction of a's interval that must be covered by b's interval
-        #[clap(short = 'f', long)]
-        fraction_query: Option<f64>,
-
-        /// Minimum fraction of b's interval that must be covered by a's interval
-        #[clap(short = 'F', long)]
-        fraction_target: Option<f64>,
-
-        /// Require that the fraction provided with `-f` is reciprocal to both
-        /// query and target
-        #[clap(
-            short,
-            long,
-            requires = "fraction_query",
-            conflicts_with = "fraction_target"
-        )]
-        reciprocal: bool,
-
-        /// Requires that either fraction provided with `-f` or `-F` is met
-        #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
-        either: bool,
-
-        /// Return the records from a that overlap with b instead of the intersection
-        #[clap(short = 'q', long, conflicts_with = "with_target")]
-        with_query: bool,
-
-        /// Return the records from b that overlap with a instead of the intersection
-        #[clap(short = 't', long, conflicts_with = "with_query")]
-        with_target: bool,
-
-        /// Only write the query record once if it overlaps with multiple target records
-        #[clap(short, long, requires = "with_query", conflicts_with = "with_target")]
-        unique: bool,
-
-        /// Only report the intervals in the query that do not overlap with the target
-        /// (i.e. the inverse of the intersection)
-        #[clap(short = 'v', long, conflicts_with_all = &["with_query", "with_target", "unique"])]
-        inverse: bool,
-
-        /// Stream the input files instead of loading them into memory
-        /// (only works if both files are sorted)
-        #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
-        stream: bool,
-    },
+    Intersect(IntersectArgs),
 
     /// Merges intervals of a BED file with overlapping regions
-    Merge {
-        /// Input BED file to merge (default=stdin)
-        #[clap(short, long)]
-        input: Option<String>,
-
-        /// Output BED file to write to (default=stdout)
-        #[clap(short, long)]
-        output: Option<String>,
-
-        /// Assume input is sorted (default=false)
-        #[clap(short, long)]
-        sorted: bool,
-
-        /// Stream the input file instead of loading it into memory
-        ///
-        /// Note that this requires the input file to be sorted
-        /// and will result in undefined behavior if it is not.
-        ///
-        /// Currently does not support non-integer chromosome names.
-        #[clap(short = 'S', long)]
-        stream: bool,
-
-        /// Input file format
-        #[clap(short = 'T', long)]
-        input_format: Option<InputFormat>,
-
-        /// Allow for non-integer chromosome names
-        #[clap(short = 'N', long)]
-        field_format: Option<FieldFormat>,
-    },
+    Merge(MergeArgs),
 
     /// Generates a random BED file given some parameterizations
     Random {
