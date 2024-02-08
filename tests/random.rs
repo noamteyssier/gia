@@ -13,7 +13,7 @@ mod testing {
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
         let rows = string_out.split('\n');
         for row in rows {
-            let cols = row.split('\n').collect::<Vec<&str>>();
+            let cols = row.split('\t').collect::<Vec<&str>>();
             let chr = cols[0].parse::<i32>()?;
             let x = cols[1].parse::<i32>()?;
             let y = cols[2].parse::<i32>()?;
