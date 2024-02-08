@@ -33,17 +33,17 @@ where
     Ok(())
 }
 
-fn merge_streamed<Iv, W>(record_iter: impl Iterator<Item = Iv>, output_handle: W) -> Result<()>
+fn merge_streamed<Iv, W>(record_iter: impl Iterator<Item = Iv>, writer: W) -> Result<()>
 where
     W: Write,
     Iv: IntervalBounds<usize, usize> + Serialize,
 {
     let merged_iter = MergeIter::new(record_iter);
-    write_records_iter(merged_iter, output_handle)?;
+    write_records_iter(merged_iter, writer)?;
     Ok(())
 }
 
-fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, output_handle: W) -> Result<()> {
+fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Result<()> {
     if bed_reader.is_named() {
         return Err(anyhow::anyhow!(
             "Named input is not supported for streaming"
@@ -54,15 +54,15 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, output_handle: W) -
     match input_format {
         InputFormat::Bed3 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, output_handle)
+            merge_streamed(record_iter, writer)
         }
         InputFormat::Bed6 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, output_handle)
+            merge_streamed(record_iter, writer)
         }
         InputFormat::Bed12 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, output_handle)
+            merge_streamed(record_iter, writer)
         }
     }
 }

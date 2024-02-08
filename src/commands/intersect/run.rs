@@ -73,7 +73,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
     let target_handle = bed_b.reader();
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
-    let output_handle = args.output.get_writer()?;
+    let writer = args.output.get_writer()?;
     let method = args.params.overlap_predicates.into();
 
     if named {
@@ -85,7 +85,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
-        write_named_records_iter_dashmap(intersect_iter, output_handle, &translater)?;
+        write_named_records_iter_dashmap(intersect_iter, writer, &translater)?;
     } else {
         let query_iter: UnnamedIter<'_, _, NumericBed3> = UnnamedIter::new(&mut query_csv);
         let target_iter = UnnamedIter::new(&mut target_csv);
@@ -93,7 +93,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
-        write_records_iter_with(intersect_iter, output_handle, None::<&Translater>)?;
+        write_records_iter_with(intersect_iter, writer, None::<&Translater>)?;
     }
     Ok(())
 }
