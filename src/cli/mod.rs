@@ -27,7 +27,7 @@ pub use get_fasta::GetFastaArgs;
 pub use growth::Growth;
 pub use inputs::{DualInput, SingleInput};
 pub use intersect::{IntersectArgs, OutputMethod, OutputPredicates};
-pub use merge::MergeArgs;
+pub use merge::{MergeArgs, MergeParams};
 pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
 pub use random::RandomArgs;
@@ -45,12 +45,4 @@ pub struct Cli {
     /// Subcommand to run
     #[clap(subcommand)]
     pub command: Command,
-
-    /// Compression threads to use for output files if applicable
-    #[clap(global = true, short = 'j', long, default_value = "1")]
-    pub compression_threads: usize,
-
-    /// Compression level to use for output files if applicable
-    #[clap(global = true, long, default_value = "6")]
-    pub compression_level: u32,
 }

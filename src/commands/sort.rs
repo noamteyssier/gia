@@ -1,6 +1,7 @@
 use crate::{
     cli::{SortArgs, SortParams},
-    io::{write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
+    dispatch_single,
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, Reorder, Retranslater, Translater},
 };
 use anyhow::Result;
@@ -46,25 +47,8 @@ where
     write_records_iter_with(set.into_iter(), writer, translater.as_ref())
 }
 
-fn dispatch_sort<W: Write>(reader: BedReader, writer: W, params: SortParams) -> Result<()> {
-    match reader.input_format() {
-        InputFormat::Bed3 => {
-            let (set, translater) = reader.bed3_set()?;
-            sort_and_write(set, translater, params, writer)
-        }
-        InputFormat::Bed6 => {
-            let (set, translater) = reader.bed6_set()?;
-            sort_and_write(set, translater, params, writer)
-        }
-        InputFormat::Bed12 => {
-            let (set, translater) = reader.bed12_set()?;
-            sort_and_write(set, translater, params, writer)
-        }
-    }
-}
-
 pub fn sort(args: SortArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
     let writer = args.output.get_handle()?;
-    dispatch_sort(reader, writer, args.params)
+    dispatch_single!(reader, writer, args.params, sort_and_write)
 }

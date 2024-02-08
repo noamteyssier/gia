@@ -1,5 +1,6 @@
 mod cli;
 mod commands;
+mod dispatch;
 mod io;
 mod types;
 mod utils;

@@ -122,7 +122,6 @@ where
 }
 impl Reorder<NumericBed3> for NumericBed3 {
     fn reorder_translater(
-        // set: &mut impl Container<usize, usize, Self>,
         set: &mut IntervalContainer<Self, usize, usize>,
         translater: Translater,
     ) -> Retranslater {

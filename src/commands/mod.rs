@@ -12,6 +12,7 @@ mod shift;
 mod sort;
 mod subtract;
 mod window;
+
 pub use closest::closest;
 pub use complement::complement;
 pub use coverage::coverage;

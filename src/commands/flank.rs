@@ -1,6 +1,7 @@
 use crate::{
     cli::{FlankArgs, Growth},
-    io::{write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
+    dispatch_single,
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{Genome, InputFormat, Translater},
 };
 use anyhow::Result;
@@ -78,9 +79,9 @@ where
 
 /// Flank the intervals in the set
 fn flank_set<I, W>(
-    set: &IntervalContainer<I, usize, usize>,
-    translater: Option<&Translater>,
-    growth: &Growth,
+    set: IntervalContainer<I, usize, usize>,
+    translater: Option<Translater>,
+    growth: Growth,
     output: W,
 ) -> Result<()>
 where
@@ -88,37 +89,19 @@ where
     W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    let genome = growth.get_genome(translater)?;
+    growth.warn_args();
+    let genome = growth.get_genome(translater.as_ref())?;
     let flank_iter = set.iter().flat_map(|iv| {
         let (left, right) = growth.get_values(iv);
         flank_interval(*iv, left, right, genome.as_ref())
     });
-    write_records_iter_with(flank_iter, output, translater)
-}
-
-/// Flank the intervals in the set but first match the input formats
-pub fn dispatch_flank<W: Write>(reader: BedReader, writer: W, growth: &Growth) -> Result<()> {
-    let mut translater = reader.is_named().then_some(Translater::new());
-    match reader.input_format() {
-        InputFormat::Bed3 => {
-            let set = reader.bed3_set_with(translater.as_mut())?;
-            flank_set(&set, translater.as_ref(), growth, writer)
-        }
-        InputFormat::Bed6 => {
-            let set = reader.bed6_set_with(translater.as_mut())?;
-            flank_set(&set, translater.as_ref(), growth, writer)
-        }
-        InputFormat::Bed12 => {
-            let set = reader.bed12_set_with(translater.as_mut())?;
-            flank_set(&set, translater.as_ref(), growth, writer)
-        }
-    }
+    write_records_iter_with(flank_iter, output, translater.as_ref())
 }
 
 pub fn flank(args: FlankArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
     let writer = args.output.get_handle()?;
-    dispatch_flank(reader, writer, &args.growth)
+    dispatch_single!(reader, writer, args.growth, flank_set)
 }
 
 #[cfg(test)]

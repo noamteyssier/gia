@@ -1,6 +1,7 @@
 use crate::{
     cli::{ShiftArgs, ShiftParams},
-    io::{write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
+    dispatch_single,
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{Genome, InputFormat, Translater},
 };
 use anyhow::Result;
@@ -53,8 +54,8 @@ where
 }
 
 fn shift_set<I, W>(
-    set: &IntervalContainer<I, usize, usize>,
-    translater: Option<&Translater>,
+    set: IntervalContainer<I, usize, usize>,
+    translater: Option<Translater>,
     params: ShiftParams,
     output: W,
 ) -> Result<()>
@@ -63,36 +64,18 @@ where
     W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    let genome = Genome::from_opt_path_immutable_with(params.genome, translater, false)?;
+    params.warn_args();
+    let genome = Genome::from_opt_path_immutable_with(params.genome, translater.as_ref(), false)?;
     let shift_iter = set
-        .iter()
-        .map(|iv| shift_interval(*iv, params.amount, params.percent, genome.as_ref()));
-    write_records_iter_with(shift_iter, output, translater)
-}
-
-fn dispatch_shift<W: Write>(bed: BedReader, output: W, params: ShiftParams) -> Result<()> {
-    let mut translater = bed.is_named().then_some(Translater::new());
-    match bed.input_format() {
-        InputFormat::Bed3 => {
-            let set = bed.bed3_set_with(translater.as_mut())?;
-            shift_set(&set, translater.as_ref(), params, output)
-        }
-        InputFormat::Bed6 => {
-            let set = bed.bed6_set_with(translater.as_mut())?;
-            shift_set(&set, translater.as_ref(), params, output)
-        }
-        InputFormat::Bed12 => {
-            let set = bed.bed12_set_with(translater.as_mut())?;
-            shift_set(&set, translater.as_ref(), params, output)
-        }
-    }
+        .into_iter()
+        .map(|iv| shift_interval(iv, params.amount, params.percent, genome.as_ref()));
+    write_records_iter_with(shift_iter, output, translater.as_ref())
 }
 
 pub fn shift(args: ShiftArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
     let writer = args.output.get_handle()?;
-    args.params.warn_args();
-    dispatch_shift(reader, writer, args.params)
+    dispatch_single!(reader, writer, args.params, shift_set)
 }
 
 #[cfg(test)]

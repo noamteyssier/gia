@@ -1,8 +1,9 @@
 use crate::{
-    cli::MergeArgs,
+    cli::{MergeArgs, MergeParams},
+    dispatch_single,
     io::{
-        build_reader, iter_unnamed, read_bed12_set, read_bed3_set, read_bed6_set,
-        write_3col_iter_with, write_records_iter, BedReader, WriteNamedIter, WriteNamedIterImpl,
+        build_reader, iter_unnamed, write_3col_iter_with, write_records_iter, BedReader,
+        WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, NumericBed3, Translater},
 };
@@ -14,43 +15,22 @@ use std::io::Write;
 fn merge_in_memory<I, W>(
     mut set: IntervalContainer<I, usize, usize>,
     translater: Option<Translater>,
-    output_handle: W,
-    sorted: bool,
+    params: MergeParams,
+    writer: W,
 ) -> Result<()>
 where
     W: Write,
     I: IntervalBounds<usize, usize> + Serialize,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    if !sorted {
+    if !params.sorted {
         set.sort();
     } else {
         set.set_sorted();
     }
     let merged = set.merge()?;
-    write_3col_iter_with(merged.into_iter(), output_handle, translater.as_ref())?;
+    write_3col_iter_with(merged.into_iter(), writer, translater.as_ref())?;
     Ok(())
-}
-
-fn merge_by_format<W>(bed_reader: BedReader, output_handle: W, sorted: bool) -> Result<()>
-where
-    W: Write,
-{
-    let named = bed_reader.is_named();
-    match bed_reader.input_format() {
-        InputFormat::Bed3 => {
-            let (set, translater) = read_bed3_set(bed_reader.reader(), named)?;
-            merge_in_memory(set, translater, output_handle, sorted)
-        }
-        InputFormat::Bed6 => {
-            let (set, translater) = read_bed6_set(bed_reader.reader(), named)?;
-            merge_in_memory(set, translater, output_handle, sorted)
-        }
-        InputFormat::Bed12 => {
-            let (set, translater) = read_bed12_set(bed_reader.reader(), named)?;
-            merge_in_memory(set, translater, output_handle, sorted)
-        }
-    }
 }
 
 fn merge_streamed<Iv, W>(record_iter: impl Iterator<Item = Iv>, output_handle: W) -> Result<()>
@@ -90,9 +70,9 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, output_handle: W) -
 pub fn merge(args: MergeArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
     let writer = args.output.get_handle()?;
-    if args.stream {
+    if args.params.stream {
         merge_streamed_by_format(reader, writer)
     } else {
-        merge_by_format(reader, writer, args.sorted)
+        dispatch_single!(reader, writer, args.params, merge_in_memory)
     }
 }

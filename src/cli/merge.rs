@@ -9,6 +9,12 @@ pub struct MergeArgs {
     #[clap(flatten)]
     pub output: Output,
 
+    #[clap(flatten)]
+    pub params: MergeParams,
+}
+
+#[derive(Parser, Debug)]
+pub struct MergeParams {
     /// Assume input is sorted (default=false)
     #[clap(short, long)]
     pub sorted: bool,

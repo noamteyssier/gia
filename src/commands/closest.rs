@@ -50,11 +50,10 @@ where
     Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
     sort_pairs(&mut a_set, &mut b_set, params.sorted);
-    let method = params.into();
     let pairs_iter = a_set
         .iter()
         .map(|query| {
-            let target = match method {
+            let target = match params.into() {
                 ClosestType::Both => b_set.closest(query),
                 ClosestType::Upstream => b_set.closest_upstream(query),
                 ClosestType::Downstream => b_set.closest_downstream(query),
