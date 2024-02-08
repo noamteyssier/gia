@@ -1,7 +1,7 @@
 use super::iter::{run_function_query, run_function_target};
 use crate::{
     cli::{IntersectArgs, IntersectParams, OutputMethod},
-    dispatch_pair, dispatch_to_lhs, dispatch_to_rhs,
+    dispatch_pair,
     io::{
         build_reader, write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
         UnnamedIter, WriteNamedIter, WriteNamedIterImpl,

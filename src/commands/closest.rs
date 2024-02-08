@@ -1,6 +1,6 @@
 use crate::{
     cli::{ClosestArgs, ClosestParams},
-    dispatch_pair, dispatch_to_lhs, dispatch_to_rhs,
+    dispatch_pair,
     io::write_pairs_iter_with,
     types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
     utils::sort_pairs,

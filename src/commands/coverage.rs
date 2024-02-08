@@ -6,7 +6,7 @@ use serde::Serialize;
 
 use crate::{
     cli::{CoverageArgs, CoverageParams},
-    dispatch_pair, dispatch_to_lhs, dispatch_to_rhs,
+    dispatch_pair,
     io::write_depth_iter_with,
     types::{InputFormat, IntervalDepth, Rename, Renamer, Translater},
     utils::sort_pairs,

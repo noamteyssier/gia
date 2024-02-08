@@ -1,6 +1,6 @@
 use crate::{
     cli::{SubtractArgs, SubtractParams},
-    dispatch_pair, dispatch_to_lhs, dispatch_to_rhs,
+    dispatch_pair,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, Translater},
     utils::sort_pairs,
