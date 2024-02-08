@@ -1,42 +1,5 @@
+use crate::cli::OutputMethod;
 use bedrs::{traits::IntervalBounds, Intersect};
-
-/// Describes the method used to aggregate and return overlapping intervals.
-#[derive(Debug, Copy, Clone)]
-pub enum OutputMethod {
-    /// Return the intersection of the query and target intervals.
-    Intersection,
-
-    /// Return the query interval for each overlapping target interval.
-    Query,
-
-    /// Return the overlapping target intervals for each query interval.
-    Target,
-
-    /// Return each query interval once if it overlaps with any target interval.
-    QueryUnique,
-
-    /// Return query intervals that do not overlap with any target interval.
-    Inverse,
-}
-impl OutputMethod {
-    pub fn from_inputs(with_query: bool, with_target: bool, unique: bool, inverse: bool) -> Self {
-        if inverse {
-            Self::Inverse
-        } else if with_query && with_target {
-            panic!("Cannot specify both query and target output")
-        } else if with_query {
-            if unique {
-                Self::QueryUnique
-            } else {
-                Self::Query
-            }
-        } else if with_target {
-            Self::Target
-        } else {
-            Self::Intersection
-        }
-    }
-}
 
 /// Run the function to find overlapping intervals between query and target intervals.
 ///

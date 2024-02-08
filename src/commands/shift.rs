@@ -1,12 +1,13 @@
-use std::io::Write;
-
 use crate::{
-    io::{match_output, write_records_iter_with, BedReader, WriteNamedIter, WriteNamedIterImpl},
-    types::{FieldFormat, Genome, InputFormat, Translater},
+    cli::{ShiftArgs, ShiftParams},
+    dispatch_single,
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
+    types::{Genome, InputFormat, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
 use serde::Serialize;
+use std::io::Write;
 
 fn bound_value<I>(iv: I, val: i32, genome: Option<&Genome>) -> usize
 where
@@ -53,11 +54,9 @@ where
 }
 
 fn shift_set<I, W>(
-    set: &IntervalContainer<I, usize, usize>,
-    genome_path: Option<String>,
-    translater: Option<&Translater>,
-    amount: f64,
-    percent: bool,
+    set: IntervalContainer<I, usize, usize>,
+    translater: Option<Translater>,
+    params: ShiftParams,
     output: W,
 ) -> Result<()>
 where
@@ -65,75 +64,18 @@ where
     W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    let genome = Genome::from_opt_path_immutable_with(genome_path, translater, false)?;
+    params.warn_args();
+    let genome = Genome::from_opt_path_immutable_with(params.genome, translater.as_ref(), false)?;
     let shift_iter = set
-        .iter()
-        .map(|iv| shift_interval(*iv, amount, percent, genome.as_ref()));
-    write_records_iter_with(shift_iter, output, translater)
+        .into_iter()
+        .map(|iv| shift_interval(iv, params.amount, params.percent, genome.as_ref()));
+    write_records_iter_with(shift_iter, output, translater.as_ref())
 }
 
-fn dispatch_shift<W: Write>(
-    bed: BedReader,
-    genome_path: Option<String>,
-    amount: f64,
-    percent: bool,
-    output: W,
-) -> Result<()> {
-    let mut translater = bed.is_named().then_some(Translater::new());
-    match bed.input_format() {
-        InputFormat::Bed3 => {
-            let set = bed.bed3_set_with(translater.as_mut())?;
-            shift_set(
-                &set,
-                genome_path,
-                translater.as_ref(),
-                amount,
-                percent,
-                output,
-            )
-        }
-        InputFormat::Bed6 => {
-            let set = bed.bed6_set_with(translater.as_mut())?;
-            shift_set(
-                &set,
-                genome_path,
-                translater.as_ref(),
-                amount,
-                percent,
-                output,
-            )
-        }
-        InputFormat::Bed12 => {
-            let set = bed.bed12_set_with(translater.as_mut())?;
-            shift_set(
-                &set,
-                genome_path,
-                translater.as_ref(),
-                amount,
-                percent,
-                output,
-            )
-        }
-    }
-}
-
-pub fn shift(
-    input: Option<String>,
-    output: Option<String>,
-    genome_path: Option<String>,
-    amount: f64,
-    percent: bool,
-    input_format: Option<InputFormat>,
-    field_format: Option<FieldFormat>,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed = BedReader::from_path(input, input_format, field_format)?;
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    if !percent && amount < 1.0 {
-        eprintln!("Warning: Provided shift amount is less than 1.0 and percent is not set. This will shift intervals by the rounded integer value, which may not be the intended behavior. If you want to shift by a percentage, set the percent flag.");
-    }
-    dispatch_shift(bed, genome_path, amount, percent, output_handle)
+pub fn shift(args: ShiftArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_writer()?;
+    dispatch_single!(reader, writer, args.params, shift_set)
 }
 
 #[cfg(test)]

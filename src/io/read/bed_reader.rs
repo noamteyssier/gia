@@ -1,4 +1,7 @@
-use super::{read_bed12_set_with, read_bed3_set_with, read_bed6_set_with};
+use super::{
+    read_bed12_set, read_bed12_set_with, read_bed3_set, read_bed3_set_with, read_bed6_set,
+    read_bed6_set_with,
+};
 use crate::types::{Bed12Set, Bed3Set, Bed6Set, FieldFormat, InputFormat, Translater};
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
@@ -94,6 +97,24 @@ impl BedReader {
             DEFAULT_BUFFER_SIZE,
             Box::new(handle),
         ))
+    }
+
+    /// Returns a Bed3Set from the reader with an Option<Translater>
+    pub fn bed3_set(self) -> Result<(Bed3Set, Option<Translater>)> {
+        let is_named = self.is_named();
+        read_bed3_set(self.reader(), is_named)
+    }
+
+    /// Returns a Bed6Set from the reader with an Option<Translater>
+    pub fn bed6_set(self) -> Result<(Bed6Set, Option<Translater>)> {
+        let is_named = self.is_named();
+        read_bed6_set(self.reader(), is_named)
+    }
+
+    /// Returns a Bed6Set from the reader with an Option<Translater>
+    pub fn bed12_set(self) -> Result<(Bed12Set, Option<Translater>)> {
+        let is_named = self.is_named();
+        read_bed12_set(self.reader(), is_named)
     }
 
     /// Returns a Bed3Set from the reader

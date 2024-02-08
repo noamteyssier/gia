@@ -115,7 +115,7 @@ mod testing {
             .arg("extend")
             .arg("-i")
             .arg(input)
-            .arg("-b")
+            .arg("-t")
             .arg("20")
             .output()?;
         let expected = vec![(1, 0, 40), (1, 10, 60), (2, 10, 60)];
@@ -133,7 +133,7 @@ mod testing {
             .arg("extend")
             .arg("-i")
             .arg(input)
-            .arg("-b")
+            .arg("-t")
             .arg("20")
             .arg("-g")
             .arg(genome)

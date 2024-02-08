@@ -16,7 +16,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("100")
             .output()?;
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
@@ -45,7 +45,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("100")
             .arg("-v")
             .output()?;
@@ -75,7 +75,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("100")
             .arg("-v")
             .output()?;
@@ -105,7 +105,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("100")
             .arg("-v")
             .output()?;
@@ -135,7 +135,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("0")
             .output()?;
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
@@ -164,7 +164,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("0")
             .output()?;
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
@@ -193,7 +193,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-w")
+            .arg("-t")
             .arg("0")
             .output()?;
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;

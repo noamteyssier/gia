@@ -112,13 +112,11 @@ impl<'a> Genome<'a> {
             let record: (&str, usize) = raw_record.deserialize(None)?;
             if let Some(chr_int) = translater.get_idx(record.0) {
                 map.insert(chr_int, record.1);
-            } else {
-                if break_on_missing {
-                    anyhow::bail!(
-                        "Genome file contains chromosome name not in BED file: {}",
-                        record.0
-                    );
-                }
+            } else if break_on_missing {
+                anyhow::bail!(
+                    "Genome file contains chromosome name not in BED file: {}",
+                    record.0
+                );
             }
         }
 
@@ -182,6 +180,6 @@ mod testing {
         let mut rng = rand::thread_rng();
         let genome = Genome::from_reader_unnamed(GENOME_UNNAMED).unwrap();
         let chr = genome.sample_chr(&mut rng);
-        assert!(chr >= 1 && chr <= 3);
+        (1..=3).contains(&chr);
     }
 }

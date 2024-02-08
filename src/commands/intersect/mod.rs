@@ -1,3 +1,3 @@
-mod intersect;
 mod iter;
-pub use intersect::intersect;
+mod run;
+pub use run::intersect;

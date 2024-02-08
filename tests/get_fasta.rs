@@ -11,7 +11,7 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
-            .arg("-b")
+            .arg("-i")
             .arg(input)
             .arg("-f")
             .arg(fasta)
@@ -28,7 +28,7 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
-            .arg("-b")
+            .arg("-i")
             .arg(input)
             .arg("-f")
             .arg(fasta)
@@ -45,7 +45,7 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
-            .arg("-b")
+            .arg("-i")
             .arg(input)
             .arg("-f")
             .arg(fasta)
@@ -62,7 +62,7 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
-            .arg("-b")
+            .arg("-i")
             .arg(input)
             .arg("-f")
             .arg(fasta)
@@ -79,7 +79,7 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
-            .arg("-b")
+            .arg("-i")
             .arg(input)
             .arg("-f")
             .arg(fasta)
@@ -96,7 +96,7 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("get-fasta")
-            .arg("-b")
+            .arg("-i")
             .arg(input)
             .arg("-f")
             .arg(fasta)

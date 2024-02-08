@@ -1,5 +1,6 @@
 use crate::{
-    io::{build_reader, match_output, BedReader},
+    cli::GetFastaArgs,
+    io::build_reader,
     types::{InputFormat, NamedBed12, NamedBed3, NamedBed6},
 };
 use anyhow::Result;
@@ -18,7 +19,7 @@ fn get_fasta_bed3<R: Read, W: Write>(
     csv_reader: &mut csv::Reader<R>,
     byterecord: &mut ByteRecord,
     fasta: IndexedFasta,
-    output: &mut W,
+    mut output: W,
 ) -> Result<()> {
     while csv_reader.read_byte_record(byterecord)? {
         let record: NamedBed3 = byterecord.deserialize(None)?;
@@ -46,7 +47,7 @@ fn get_fasta_bed6<R: Read, W: Write>(
     csv_reader: &mut csv::Reader<R>,
     byterecord: &mut ByteRecord,
     fasta: IndexedFasta,
-    output: &mut W,
+    mut output: W,
 ) -> Result<()> {
     while csv_reader.read_byte_record(byterecord)? {
         let record: NamedBed6 = byterecord.deserialize(None)?;
@@ -77,7 +78,7 @@ fn get_fasta_bed12<R: Read, W: Write>(
     csv_reader: &mut csv::Reader<R>,
     byterecord: &mut ByteRecord,
     fasta: IndexedFasta,
-    output: &mut W,
+    mut output: W,
 ) -> Result<()> {
     while csv_reader.read_byte_record(byterecord)? {
         let record: NamedBed12 = byterecord.deserialize(None)?;
@@ -110,24 +111,17 @@ fn get_fasta_bed12<R: Read, W: Write>(
     Ok(())
 }
 
-pub fn get_fasta(
-    bed: Option<String>,
-    fasta: &str,
-    output: Option<String>,
-    input_format: Option<InputFormat>,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let bed_reader = BedReader::from_path(bed, input_format, None)?;
-    let fasta_index = build_fasta_index(fasta)?;
-    let fasta = IndexedFasta::new(fasta_index, fasta)?;
-    let input_format = bed_reader.input_format();
-    let mut csv_reader = build_reader(bed_reader.reader());
+pub fn get_fasta(args: GetFastaArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_writer()?;
+    let fasta_index = build_fasta_index(&args.fasta)?;
+    let fasta = IndexedFasta::new(fasta_index, &args.fasta)?;
+    let format = reader.input_format();
+    let mut csv_reader = build_reader(reader.reader());
     let mut byterecord = ByteRecord::new();
-    let mut output = match_output(output, compression_threads, compression_level)?;
-    match input_format {
-        InputFormat::Bed3 => get_fasta_bed3(&mut csv_reader, &mut byterecord, fasta, &mut output),
-        InputFormat::Bed6 => get_fasta_bed6(&mut csv_reader, &mut byterecord, fasta, &mut output),
-        InputFormat::Bed12 => get_fasta_bed12(&mut csv_reader, &mut byterecord, fasta, &mut output),
+    match format {
+        InputFormat::Bed3 => get_fasta_bed3(&mut csv_reader, &mut byterecord, fasta, writer),
+        InputFormat::Bed6 => get_fasta_bed6(&mut csv_reader, &mut byterecord, fasta, writer),
+        InputFormat::Bed12 => get_fasta_bed12(&mut csv_reader, &mut byterecord, fasta, writer),
     }
 }
