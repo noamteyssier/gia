@@ -8,6 +8,10 @@ macro_rules! dispatch_single {
                 let (set, translater) = $reader.bed3_set()?;
                 $func(set, translater, $params, $writer)
             }
+            InputFormat::Bed4 => {
+                let (set, translater) = $reader.bed4_set()?;
+                $func(set, translater, $params, $writer)
+            }
             InputFormat::Bed6 => {
                 let (set, translater) = $reader.bed6_set()?;
                 $func(set, translater, $params, $writer)
@@ -39,6 +43,10 @@ macro_rules! dispatch_to_lhs {
                 let set_a = $reader_a.bed3_set_with($translater.as_mut())?;
                 $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
             }
+            InputFormat::Bed4 => {
+                let set_a = $reader_a.bed4_set_with($translater.as_mut())?;
+                $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
+            }
             InputFormat::Bed6 => {
                 let set_a = $reader_a.bed6_set_with($translater.as_mut())?;
                 $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
@@ -59,6 +67,10 @@ macro_rules! dispatch_to_rhs {
         match $reader_b.input_format() {
             InputFormat::Bed3 => {
                 let set_b = $reader_b.bed3_set_with($translater.as_mut())?;
+                $func($set_a, set_b, $translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed4 => {
+                let set_b = $reader_b.bed4_set_with($translater.as_mut())?;
                 $func($set_a, set_b, $translater.as_ref(), $params, $writer)
             }
             InputFormat::Bed6 => {

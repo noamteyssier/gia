@@ -2,12 +2,27 @@ mod depth;
 mod formats;
 mod pairs;
 mod translater;
+use bedrs::{Bed12, Bed3, Bed4, Bed6, IntervalContainer};
 pub use depth::IntervalDepth;
-pub use formats::{
-    Bed12Set, Bed3Set, Bed6Set, FieldFormat, Genome, InputFormat, NamedBed12, NamedBed3, NamedBed6,
-    NumericBed12, NumericBed3, NumericBed6,
-};
+pub use formats::{FieldFormat, Genome, InputFormat};
 pub use pairs::IntervalPair;
 pub use translater::{
     Rename, Renamer, Reorder, Retranslater, StreamTranslater, Translate, Translater,
 };
+
+pub type NumericBed3 = Bed3<usize, usize>;
+pub type NamedBed3<'a> = Bed3<&'a str, usize>;
+pub type Bed3Set = IntervalContainer<NumericBed3, usize, usize>;
+
+pub type NumericBed4 = Bed4<usize, usize, usize>;
+pub type NamedBed4<'a> = Bed4<&'a str, usize, &'a str>;
+pub type Bed4Set = IntervalContainer<NumericBed4, usize, usize>;
+
+pub type NumericBed6 = Bed6<usize, usize, usize, f64>;
+pub type NamedBed6<'a> = Bed6<&'a str, usize, &'a str, f64>;
+pub type Bed6Set = IntervalContainer<NumericBed6, usize, usize>;
+
+pub type NumericBed12 = Bed12<usize, usize, usize, f64, usize, usize, usize, usize, usize>;
+pub type NamedBed12<'a> =
+    Bed12<&'a str, usize, &'a str, f64, usize, usize, &'a str, &'a str, &'a str>;
+pub type Bed12Set = IntervalContainer<NumericBed12, usize, usize>;

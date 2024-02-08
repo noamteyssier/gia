@@ -59,6 +59,10 @@ pub fn sample(args: SampleArgs) -> Result<()> {
             let (mut set, translater) = reader.bed3_set()?;
             sample_from_set(&mut set, translater.as_ref(), args.params, writer)
         }
+        InputFormat::Bed4 => {
+            let (mut set, translater) = reader.bed4_set()?;
+            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
+        }
         InputFormat::Bed6 => {
             let (mut set, translater) = reader.bed6_set()?;
             sample_from_set(&mut set, translater.as_ref(), args.params, writer)

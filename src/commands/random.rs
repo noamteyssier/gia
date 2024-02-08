@@ -1,7 +1,7 @@
 use crate::{
     cli::RandomArgs,
     io::{match_input, write_records_iter_with},
-    types::{Genome, InputFormat, NumericBed12, NumericBed3, NumericBed6, Translater},
+    types::{Genome, InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, Translater},
 };
 use anyhow::Result;
 use bedrs::Strand;
@@ -56,6 +56,39 @@ pub fn random_bed3<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
         .map(|(c, x, y)| NumericBed3::new(c, x, y));
 
     write_records_iter_with(interval_gen, writer, genome.translater())
+}
+
+pub fn random_bed4<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
+    let mut rng_intervals = args.build_rng();
+    let mut rng_chr = args.build_rng();
+    let mut translater = Translater::new();
+    let genome_sizes = build_chr_size(
+        args.n_chr,
+        args.max_chr_len,
+        args.genome,
+        args.named,
+        &mut translater,
+    )?;
+
+    let interval_gen = (0..args.n_intervals)
+        // draw a random chromosome
+        .map(|_| genome_sizes.sample_chr(&mut rng_chr))
+        // draw a random end position in the chromosome
+        .map(|c| {
+            let y = rng_intervals.gen_range(args.l_intervals..=genome_sizes.chr_size_unchecked(c));
+            (c, y)
+        })
+        // calculate the start position
+        .map(|(c, y)| {
+            let x = y - args.l_intervals;
+            (c, x, y)
+        })
+        // build the interval
+        .map(|(c, x, y)| NumericBed4::new(c, x, y, 0));
+
+    write_records_iter_with(interval_gen, writer, genome_sizes.translater())?;
+
+    Ok(())
 }
 
 pub fn random_bed6<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
@@ -153,6 +186,7 @@ pub fn random(args: RandomArgs) -> Result<()> {
     let writer = args.output.get_writer()?;
     match args.format {
         InputFormat::Bed3 => random_bed3(args, writer),
+        InputFormat::Bed4 => random_bed4(args, writer),
         InputFormat::Bed6 => random_bed6(args, writer),
         InputFormat::Bed12 => random_bed12(args, writer),
     }

@@ -1,4 +1,7 @@
-use super::{NamedBed12, NamedBed3, NamedBed6, NumericBed12, NumericBed3, NumericBed6};
+use super::{
+    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NumericBed12, NumericBed3, NumericBed4,
+    NumericBed6,
+};
 use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
 use dashmap::DashMap;
 use hashbrown::HashMap;
@@ -133,6 +136,21 @@ impl Reorder<NumericBed3> for NumericBed3 {
         retranslate
     }
 }
+impl Reorder<NumericBed4> for NumericBed4 {
+    fn reorder_translater(
+        set: &mut IntervalContainer<Self, usize, usize>,
+        translater: Translater,
+    ) -> Retranslater {
+        let retranslate = translater.lex_sort();
+        set.apply_mut(|iv| {
+            let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
+            let new_name = retranslate.get_rank(*iv.name()).unwrap();
+            iv.update_chr(&new_chr);
+            iv.update_name(&new_name);
+        });
+        retranslate
+    }
+}
 impl Reorder<NumericBed6> for NumericBed6 {
     fn reorder_translater(
         set: &mut IntervalContainer<Self, usize, usize>,
@@ -182,6 +200,13 @@ impl<'a> Rename<'a, NumericBed3, NamedBed3<'a>> for Renamer {
     fn rename_with(iv: &NumericBed3, translater: &'a Translater) -> NamedBed3<'a> {
         let chr = translater.get_name(*iv.chr()).unwrap();
         NamedBed3::new(chr, iv.start(), iv.end())
+    }
+}
+impl<'a> Rename<'a, NumericBed4, NamedBed4<'a>> for Renamer {
+    fn rename_with(iv: &NumericBed4, translater: &'a Translater) -> NamedBed4<'a> {
+        let chr = translater.get_name(*iv.chr()).unwrap();
+        let name = translater.get_name(*iv.name()).unwrap();
+        NamedBed4::new(chr, iv.start(), iv.end(), name)
     }
 }
 impl<'a> Rename<'a, NumericBed6, NamedBed6<'a>> for Renamer {

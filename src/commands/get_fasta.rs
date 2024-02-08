@@ -1,7 +1,7 @@
 use crate::{
     cli::GetFastaArgs,
     io::build_reader,
-    types::{InputFormat, NamedBed12, NamedBed3, NamedBed6},
+    types::{InputFormat, NamedBed12, NamedBed3, NamedBed4, NamedBed6},
 };
 use anyhow::Result;
 use bedrs::Coordinates;
@@ -31,6 +31,35 @@ fn get_fasta_bed3<R: Read, W: Write>(
                     record.chr(),
                     record.start(),
                     record.end()
+                )?;
+                for subseq in buffer.split_str("\n") {
+                    output.write_all(subseq)?;
+                }
+                output.write_all(b"\n")?;
+            }
+            Err(_) => continue,
+        }
+    }
+    Ok(())
+}
+
+fn get_fasta_bed4<R: Read, W: Write>(
+    csv_reader: &mut csv::Reader<R>,
+    byterecord: &mut ByteRecord,
+    fasta: IndexedFasta,
+    mut output: W,
+) -> Result<()> {
+    while csv_reader.read_byte_record(byterecord)? {
+        let record: NamedBed4 = byterecord.deserialize(None)?;
+        match fasta.query_buffer(record.chr(), record.start(), record.end()) {
+            Ok(buffer) => {
+                writeln!(
+                    output,
+                    ">{}:{}-{}::{}",
+                    record.chr(),
+                    record.start(),
+                    record.end(),
+                    record.name(),
                 )?;
                 for subseq in buffer.split_str("\n") {
                     output.write_all(subseq)?;
@@ -121,6 +150,7 @@ pub fn get_fasta(args: GetFastaArgs) -> Result<()> {
     let mut byterecord = ByteRecord::new();
     match format {
         InputFormat::Bed3 => get_fasta_bed3(&mut csv_reader, &mut byterecord, fasta, writer),
+        InputFormat::Bed4 => get_fasta_bed4(&mut csv_reader, &mut byterecord, fasta, writer),
         InputFormat::Bed6 => get_fasta_bed6(&mut csv_reader, &mut byterecord, fasta, writer),
         InputFormat::Bed12 => get_fasta_bed12(&mut csv_reader, &mut byterecord, fasta, writer),
     }
