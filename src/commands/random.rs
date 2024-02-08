@@ -189,5 +189,6 @@ pub fn random(args: RandomArgs) -> Result<()> {
         InputFormat::Bed4 => random_bed4(args, writer),
         InputFormat::Bed6 => random_bed6(args, writer),
         InputFormat::Bed12 => random_bed12(args, writer),
+        _ => anyhow::bail!("Unable to process ambiguous input format"),
     }
 }

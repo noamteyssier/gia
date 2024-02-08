@@ -153,5 +153,6 @@ pub fn get_fasta(args: GetFastaArgs) -> Result<()> {
         InputFormat::Bed4 => get_fasta_bed4(&mut csv_reader, &mut byterecord, fasta, writer),
         InputFormat::Bed6 => get_fasta_bed6(&mut csv_reader, &mut byterecord, fasta, writer),
         InputFormat::Bed12 => get_fasta_bed12(&mut csv_reader, &mut byterecord, fasta, writer),
+        _ => anyhow::bail!("Unable to process ambiguous input format"),
     }
 }

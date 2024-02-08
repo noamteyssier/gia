@@ -1,8 +1,11 @@
 use super::{
     read_bed12_set, read_bed12_set_with, read_bed3_set, read_bed3_set_with, read_bed4_set,
-    read_bed4_set_with, read_bed6_set, read_bed6_set_with,
+    read_bed4_set_with, read_bed6_set, read_bed6_set_with, read_meta_interval_set,
+    read_meta_interval_set_with,
 };
-use crate::types::{Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, InputFormat, Translater};
+use crate::types::{
+    Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, InputFormat, MetaIntervalSet, Translater,
+};
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
 use gzp::BgzfSyncReader;
@@ -123,6 +126,12 @@ impl BedReader {
         read_bed12_set(self.reader(), is_named)
     }
 
+    /// Returns a MetaIntervalSet from the reader with an Option<Translater>
+    pub fn meta_interval_set(self) -> Result<(MetaIntervalSet, Option<Translater>)> {
+        let is_named = self.is_named();
+        read_meta_interval_set(self.reader(), is_named)
+    }
+
     /// Returns a Bed3Set from the reader
     pub fn bed3_set_with(self, translater: Option<&mut Translater>) -> Result<Bed3Set> {
         read_bed3_set_with(self.reader(), translater)
@@ -141,5 +150,13 @@ impl BedReader {
     /// Returns a Bed6Set from the reader
     pub fn bed12_set_with(self, translater: Option<&mut Translater>) -> Result<Bed12Set> {
         read_bed12_set_with(self.reader(), translater)
+    }
+
+    /// Returns a MetaIntervalSet from the reader
+    pub fn meta_interval_set_with(
+        self,
+        translater: Option<&mut Translater>,
+    ) -> Result<MetaIntervalSet> {
+        read_meta_interval_set_with(self.reader(), translater)
     }
 }

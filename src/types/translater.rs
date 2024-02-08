@@ -1,6 +1,6 @@
 use super::{
-    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NumericBed12, NumericBed3, NumericBed4,
-    NumericBed6,
+    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NamedMetaInterval, NumericBed12, NumericBed3,
+    NumericBed4, NumericBed6, NumericMetaInterval,
 };
 use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
 use dashmap::DashMap;
@@ -187,6 +187,21 @@ impl Reorder<NumericBed12> for NumericBed12 {
         retranslate
     }
 }
+impl Reorder<NumericMetaInterval> for NumericMetaInterval {
+    fn reorder_translater(
+        set: &mut IntervalContainer<Self, usize, usize>,
+        translater: Translater,
+    ) -> Retranslater {
+        let retranslate = translater.lex_sort();
+        set.apply_mut(|iv| {
+            let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
+            let new_name = retranslate.get_rank(*iv.meta()).unwrap();
+            iv.update_chr(&new_chr);
+            iv.update_meta(&new_name);
+        });
+        retranslate
+    }
+}
 
 pub struct Renamer;
 pub trait Rename<'a, Ia, Ib>
@@ -244,5 +259,12 @@ impl<'a> Rename<'a, NumericBed12, NamedBed12<'a>> for Renamer {
             block_sizes,
             block_starts,
         )
+    }
+}
+impl<'a> Rename<'a, NumericMetaInterval, NamedMetaInterval<'a>> for Renamer {
+    fn rename_with(iv: &NumericMetaInterval, translater: &'a Translater) -> NamedMetaInterval<'a> {
+        let chr = translater.get_name(*iv.chr()).unwrap();
+        let meta = translater.get_name(*iv.meta()).unwrap();
+        NamedMetaInterval::new(chr, iv.start(), iv.end(), meta)
     }
 }

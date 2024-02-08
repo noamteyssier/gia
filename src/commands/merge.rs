@@ -52,7 +52,7 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Resul
     let input_format = bed_reader.input_format();
     let mut csv_reader = build_reader(bed_reader.reader());
     match input_format {
-        InputFormat::Bed3 => {
+        InputFormat::Bed3 | InputFormat::Ambiguous => {
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
             merge_streamed(record_iter, writer)
         }

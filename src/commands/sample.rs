@@ -71,5 +71,9 @@ pub fn sample(args: SampleArgs) -> Result<()> {
             let (mut set, translater) = reader.bed12_set()?;
             sample_from_set(&mut set, translater.as_ref(), args.params, writer)
         }
+        InputFormat::Ambiguous => {
+            let (mut set, translater) = reader.meta_interval_set()?;
+            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
+        }
     }
 }

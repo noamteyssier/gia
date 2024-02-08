@@ -3,6 +3,7 @@ use crate::types::{
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
+use csv::QuoteStyle;
 use serde::Serialize;
 use std::io::Write;
 
@@ -10,6 +11,7 @@ pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
     csv::WriterBuilder::new()
         .delimiter(b'\t')
         .has_headers(false)
+        .quote_style(QuoteStyle::Never)
         .from_writer(writer)
 }
 

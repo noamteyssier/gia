@@ -2,7 +2,7 @@ mod depth;
 mod formats;
 mod pairs;
 mod translater;
-use bedrs::{Bed12, Bed3, Bed4, Bed6, IntervalContainer};
+use bedrs::{Bed12, Bed3, Bed4, Bed6, IntervalContainer, MetaInterval};
 pub use depth::IntervalDepth;
 pub use formats::{FieldFormat, Genome, InputFormat};
 pub use pairs::IntervalPair;
@@ -26,3 +26,7 @@ pub type NumericBed12 = Bed12<usize, usize, usize, f64, usize, usize, usize, usi
 pub type NamedBed12<'a> =
     Bed12<&'a str, usize, &'a str, f64, usize, usize, &'a str, &'a str, &'a str>;
 pub type Bed12Set = IntervalContainer<NumericBed12, usize, usize>;
+
+pub type NumericMetaInterval = MetaInterval<usize, usize, usize>;
+pub type NamedMetaInterval<'a> = MetaInterval<&'a str, usize, &'a str>;
+pub type MetaIntervalSet = IntervalContainer<NumericMetaInterval, usize, usize>;
