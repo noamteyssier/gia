@@ -10,6 +10,12 @@ pub struct CoverageArgs {
     pub output: Output,
 
     #[clap(flatten)]
+    pub params: CoverageParams,
+}
+
+#[derive(Parser, Debug)]
+pub struct CoverageParams {
+    #[clap(flatten)]
     pub overlap_predicates: OverlapPredicates,
 
     /// Assert that the intervals are presorted in BOTH files (unexpected behavior if they are

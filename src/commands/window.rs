@@ -5,17 +5,15 @@ use std::io::Write;
 
 use crate::{
     cli::{WindowArgs, WindowParams},
-    io::{
-        write_pairs_iter_with, write_records_iter_with, BedReader, WriteNamedIter,
-        WriteNamedIterImpl,
-    },
+    dispatch_pair, dispatch_to_lhs, dispatch_to_rhs,
+    io::{write_pairs_iter_with, write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
     utils::sort_pairs,
 };
 
 fn windowed_set_overlaps<'a, Ia, Ib, Na, Nb, W>(
-    set_a: &'a mut IntervalContainer<Ia, usize, usize>,
-    set_b: &'a mut IntervalContainer<Ib, usize, usize>,
+    mut set_a: IntervalContainer<Ia, usize, usize>,
+    mut set_b: IntervalContainer<Ib, usize, usize>,
     translater: Option<&'a Translater>,
     params: WindowParams,
     output: W,
@@ -29,7 +27,7 @@ where
     WriteNamedIterImpl: WriteNamedIter<Ia> + WriteNamedIter<Ib>,
     Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
-    sort_pairs(set_a, set_b, false);
+    sort_pairs(&mut set_a, &mut set_b, false);
     if params.inverse {
         let iv_iter = set_a
             .iter()
@@ -63,124 +61,8 @@ where
     Ok(())
 }
 
-fn dispatch_window<W: Write>(
-    reader_a: BedReader,
-    reader_b: BedReader,
-    params: WindowParams,
-    output: W,
-) -> Result<()> {
-    let mut translater = reader_a.is_named().then_some(Translater::new());
-    match reader_a.input_format() {
-        InputFormat::Bed3 => {
-            let mut set_a = reader_a.bed3_set_with(translater.as_mut())?;
-            match reader_b.input_format() {
-                InputFormat::Bed3 => {
-                    let mut set_b = reader_b.bed3_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-                InputFormat::Bed6 => {
-                    let mut set_b = reader_b.bed6_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-                InputFormat::Bed12 => {
-                    let mut set_b = reader_b.bed12_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-            }
-        }
-        InputFormat::Bed6 => {
-            let mut set_a = reader_a.bed6_set_with(translater.as_mut())?;
-            match reader_b.input_format() {
-                InputFormat::Bed3 => {
-                    let mut set_b = reader_b.bed3_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-                InputFormat::Bed6 => {
-                    let mut set_b = reader_b.bed6_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-                InputFormat::Bed12 => {
-                    let mut set_b = reader_b.bed12_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-            }
-        }
-        InputFormat::Bed12 => {
-            let mut set_a = reader_a.bed12_set_with(translater.as_mut())?;
-            match reader_b.input_format() {
-                InputFormat::Bed3 => {
-                    let mut set_b = reader_b.bed3_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-                InputFormat::Bed6 => {
-                    let mut set_b = reader_b.bed6_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-                InputFormat::Bed12 => {
-                    let mut set_b = reader_b.bed12_set_with(translater.as_mut())?;
-                    windowed_set_overlaps(
-                        &mut set_a,
-                        &mut set_b,
-                        translater.as_ref(),
-                        params,
-                        output,
-                    )
-                }
-            }
-        }
-    }
-}
-
 pub fn window(args: WindowArgs) -> Result<()> {
     let (bed_a, bed_b) = args.inputs.get_readers()?;
     let writer = args.output.get_handle()?;
-    dispatch_window(bed_a, bed_b, args.params, writer)
+    dispatch_pair!(bed_a, bed_b, writer, args.params, windowed_set_overlaps)
 }

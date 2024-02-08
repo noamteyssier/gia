@@ -11,6 +11,12 @@ pub struct IntersectArgs {
     pub output: Output,
 
     #[clap(flatten)]
+    pub params: IntersectParams,
+}
+
+#[derive(Parser, Debug)]
+pub struct IntersectParams {
+    #[clap(flatten)]
     pub overlap_predicates: OverlapPredicates,
 
     #[clap(flatten)]

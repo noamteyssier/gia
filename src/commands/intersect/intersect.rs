@@ -1,26 +1,24 @@
 use super::iter::{run_function_query, run_function_target};
 use crate::{
-    cli::{IntersectArgs, OutputMethod},
+    cli::{IntersectArgs, IntersectParams, OutputMethod},
+    dispatch_pair, dispatch_to_lhs, dispatch_to_rhs,
     io::{
-        build_reader, write_named_records_iter_dashmap, write_records_iter_with, BedReader,
-        NamedIter, UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
+        build_reader, write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
+        UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, NumericBed3, StreamTranslater, Translater},
 };
-use anyhow::{bail, Result};
-use bedrs::{
-    traits::IntervalBounds, types::QueryMethod, IntersectIter, IntervalContainer, MergeIter,
-};
+use anyhow::Result;
+use bedrs::{traits::IntervalBounds, IntersectIter, IntervalContainer, MergeIter};
 use serde::Serialize;
 use std::io::Write;
 
-pub fn intersect_sets<'a, Ia, Ib, W>(
-    set_a: &'a IntervalContainer<Ia, usize, usize>,
-    set_b: &'a IntervalContainer<Ib, usize, usize>,
+pub fn intersect_sets<Ia, Ib, W>(
+    set_a: IntervalContainer<Ia, usize, usize>,
+    set_b: IntervalContainer<Ib, usize, usize>,
     translater: Option<&Translater>,
-    query_method: QueryMethod<usize>,
-    output_method: OutputMethod,
-    output_handle: W,
+    params: IntersectParams,
+    writer: W,
 ) -> Result<()>
 where
     Ia: IntervalBounds<usize, usize> + Copy + Serialize,
@@ -28,6 +26,8 @@ where
     W: Write,
     WriteNamedIterImpl: WriteNamedIter<Ia> + WriteNamedIter<Ib>,
 {
+    let query_method = params.overlap_predicates.into();
+    let output_method = params.output_predicates.try_into()?;
     match output_method {
         // Output the target intervals
         OutputMethod::Target => {
@@ -39,7 +39,7 @@ where
                 let intersections = run_function_target(overlaps, output_method);
                 intersections
             });
-            write_records_iter_with(ix_iter, output_handle, translater)?;
+            write_records_iter_with(ix_iter, writer, translater)
         }
         // Output the query intervals with various formats
         _ => {
@@ -51,156 +51,18 @@ where
                 let intersections = run_function_query(iv, overlaps, output_method);
                 intersections
             });
-            write_records_iter_with(ix_iter, output_handle, translater)?;
+            write_records_iter_with(ix_iter, writer, translater)
         }
     }
-    Ok(())
-}
-
-fn match_and_intersect_sets<W: Write>(
-    reader_a: BedReader,
-    reader_b: BedReader,
-    output_handle: W,
-    query_method: QueryMethod<usize>,
-    output_method: OutputMethod,
-) -> Result<()> {
-    if reader_a.is_named() != reader_b.is_named() {
-        bail!("Input files must both be named or both be unnamed");
-    }
-    let mut translater = if reader_a.is_named() {
-        Some(Translater::new())
-    } else {
-        None
-    };
-    match reader_a.input_format() {
-        InputFormat::Bed3 => {
-            let set_a = reader_a.bed3_set_with(translater.as_mut())?;
-            match reader_b.input_format() {
-                InputFormat::Bed3 => {
-                    let set_b = reader_b.bed3_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-                InputFormat::Bed6 => {
-                    let set_b = reader_b.bed6_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-                InputFormat::Bed12 => {
-                    let set_b = reader_b.bed12_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-            }
-        }
-        InputFormat::Bed6 => {
-            let set_a = reader_a.bed6_set_with(translater.as_mut())?;
-            match reader_b.input_format() {
-                InputFormat::Bed3 => {
-                    let set_b = reader_b.bed3_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-                InputFormat::Bed6 => {
-                    let set_b = reader_b.bed6_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-                InputFormat::Bed12 => {
-                    let set_b = reader_b.bed12_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-            }
-        }
-        InputFormat::Bed12 => {
-            let set_a = reader_a.bed12_set_with(translater.as_mut())?;
-            match reader_b.input_format() {
-                InputFormat::Bed3 => {
-                    let set_b = reader_b.bed3_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-                InputFormat::Bed6 => {
-                    let set_b = reader_b.bed6_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-                InputFormat::Bed12 => {
-                    let set_b = reader_b.bed12_set_with(translater.as_mut())?;
-                    intersect_sets(
-                        &set_a,
-                        &set_b,
-                        translater.as_ref(),
-                        query_method,
-                        output_method,
-                        output_handle,
-                    )?;
-                }
-            }
-        }
-    }
-
-    Ok(())
 }
 
 pub fn intersect(args: IntersectArgs) -> Result<()> {
-    if args.stream {
+    if args.params.stream {
         intersect_stream(args)
     } else {
         let (bed_a, bed_b) = args.inputs.get_readers()?;
-        let query_method = args.overlap_predicates.into();
-        let output_method = args.output_predicates.try_into()?;
         let writer = args.output.get_handle()?;
-        match_and_intersect_sets(bed_a, bed_b, writer, query_method, output_method)
+        dispatch_pair!(bed_a, bed_b, writer, args.params, intersect_sets)
     }
 }
 
@@ -212,7 +74,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
     let output_handle = args.output.get_handle()?;
-    let method = args.overlap_predicates.into();
+    let method = args.params.overlap_predicates.into();
 
     if named {
         let translater = StreamTranslater::new();
