@@ -11,6 +11,7 @@ use std::{io::BufReader, str::from_utf8};
 pub enum InputFormat {
     #[default]
     Bed3,
+    Bed4,
     Bed6,
     Bed12,
 }
@@ -28,6 +29,7 @@ impl InputFormat {
         let num_fields = first.split(|b| *b == b'\t').count();
         match num_fields {
             3 => Ok(InputFormat::Bed3),
+            4 => Ok(InputFormat::Bed4),
             6 => Ok(InputFormat::Bed6),
             12 => Ok(InputFormat::Bed12),
             _ => bail!(
@@ -68,7 +70,7 @@ impl FieldFormat {
                     Ok(FieldFormat::IntegerBased)
                 }
             }
-            InputFormat::Bed6 | InputFormat::Bed12 => {
+            InputFormat::Bed4 | InputFormat::Bed6 | InputFormat::Bed12 => {
                 let chr = from_utf8(fields[0])?;
                 let name = from_utf8(fields[3])?;
                 if chr.parse::<u32>().is_err() || name.parse::<u32>().is_err() {

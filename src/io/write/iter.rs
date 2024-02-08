@@ -1,5 +1,5 @@
 use super::build_writer;
-use crate::types::{NumericBed12, NumericBed3, NumericBed6, Translate};
+use crate::types::{NumericBed12, NumericBed3, NumericBed4, NumericBed6, Translate};
 use anyhow::Result;
 use bedrs::Coordinates;
 use serde::Serialize;
@@ -138,6 +138,40 @@ impl<'a> WriteNamedIter<&'a NumericBed3> for WriteNamedIterImpl {
         for interval in iterator {
             let chr = translater.get_name(*interval.chr()).unwrap();
             let named_interval = (chr, interval.start(), interval.end());
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
+}
+impl WriteNamedIter<NumericBed4> for WriteNamedIterImpl {
+    fn write_named_iter<W: Write, It: Iterator<Item = NumericBed4>, Tr: Translate>(
+        writer: W,
+        iterator: It,
+        translater: &Tr,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_name(*interval.chr()).unwrap();
+            let name = translater.get_name(*interval.name()).unwrap();
+            let named_interval = (chr, interval.start(), interval.end(), name);
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
+}
+impl<'a> WriteNamedIter<&'a NumericBed4> for WriteNamedIterImpl {
+    fn write_named_iter<W: Write, It: Iterator<Item = &'a NumericBed4>, Tr: Translate>(
+        writer: W,
+        iterator: It,
+        translater: &Tr,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_name(*interval.chr()).unwrap();
+            let name = translater.get_name(*interval.name()).unwrap();
+            let named_interval = (chr, interval.start(), interval.end(), name);
             wtr.serialize(named_interval)?;
         }
         wtr.flush()?;

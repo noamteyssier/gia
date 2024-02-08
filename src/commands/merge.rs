@@ -5,7 +5,7 @@ use crate::{
         build_reader, iter_unnamed, write_3col_iter_with, write_records_iter, BedReader,
         WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, NumericBed3, Translater},
+    types::{InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, Translater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer, MergeIter};
@@ -56,12 +56,16 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Resul
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
             merge_streamed(record_iter, writer)
         }
+        InputFormat::Bed4 => {
+            let record_iter: Box<dyn Iterator<Item = NumericBed4>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer)
+        }
         InputFormat::Bed6 => {
-            let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
+            let record_iter: Box<dyn Iterator<Item = NumericBed6>> = iter_unnamed(&mut csv_reader);
             merge_streamed(record_iter, writer)
         }
         InputFormat::Bed12 => {
-            let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
+            let record_iter: Box<dyn Iterator<Item = NumericBed12>> = iter_unnamed(&mut csv_reader);
             merge_streamed(record_iter, writer)
         }
     }
