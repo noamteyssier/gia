@@ -6,9 +6,10 @@ use crate::{
         build_reader, iter_unnamed, read_bed3_set, write_records_iter, write_records_iter_with,
         BedReader,
     },
+    types::NumericBed3,
 };
 use anyhow::{bail, Result};
-use bedrs::{types::iterator::ComplementIter, GenomicInterval, MergeIter};
+use bedrs::{types::iterator::ComplementIter, MergeIter};
 
 fn complement_inplace<W: Write>(reader: BedReader, output: W) -> Result<()> {
     // Check if the input is named
@@ -37,8 +38,7 @@ fn complement_stream<W: Write>(reader: BedReader, output: W) -> Result<()> {
     let mut csv_reader = build_reader(reader.reader());
 
     // Build the record iterator
-    let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> =
-        iter_unnamed(&mut csv_reader);
+    let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
 
     // Pipe the record iterator into the merge iterator
     let merged_iter = MergeIter::new(record_iter);

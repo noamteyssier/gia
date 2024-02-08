@@ -26,7 +26,7 @@ pub use flank::FlankArgs;
 pub use get_fasta::GetFastaArgs;
 pub use growth::Growth;
 pub use inputs::{DualInput, SingleInput};
-pub use intersect::{IntersectArgs, IntersectParams, OutputMethod, OutputPredicates};
+pub use intersect::{IntersectArgs, IntersectParams, OutputMethod};
 pub use merge::{MergeArgs, MergeParams};
 pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
