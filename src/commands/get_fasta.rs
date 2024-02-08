@@ -113,7 +113,7 @@ fn get_fasta_bed12<R: Read, W: Write>(
 
 pub fn get_fasta(args: GetFastaArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     let fasta_index = build_fasta_index(&args.fasta)?;
     let fasta = IndexedFasta::new(fasta_index, &args.fasta)?;
     let format = reader.input_format();

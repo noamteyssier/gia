@@ -53,7 +53,7 @@ fn complement_stream<W: Write>(reader: BedReader, output: W) -> Result<()> {
 
 pub fn complement(args: ComplementArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
-    let output = args.output.get_handle()?;
+    let output = args.output.get_writer()?;
     if args.stream {
         if reader.is_named() {
             bail!("Cannot currently stream named records in complement - in development");

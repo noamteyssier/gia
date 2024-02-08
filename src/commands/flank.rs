@@ -100,7 +100,7 @@ where
 
 pub fn flank(args: FlankArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     dispatch_single!(reader, writer, args.growth, flank_set)
 }
 

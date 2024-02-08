@@ -61,7 +61,7 @@ pub fn intersect(args: IntersectArgs) -> Result<()> {
         intersect_stream(args)
     } else {
         let (bed_a, bed_b) = args.inputs.get_readers()?;
-        let writer = args.output.get_handle()?;
+        let writer = args.output.get_writer()?;
         dispatch_pair!(bed_a, bed_b, writer, args.params, intersect_sets)
     }
 }
@@ -73,7 +73,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
     let target_handle = bed_b.reader();
     let mut query_csv = build_reader(query_handle);
     let mut target_csv = build_reader(target_handle);
-    let output_handle = args.output.get_handle()?;
+    let output_handle = args.output.get_writer()?;
     let method = args.params.overlap_predicates.into();
 
     if named {

@@ -51,7 +51,7 @@ pub fn sample(args: SampleArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
 
     // open output
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
 
     // handle input format
     match reader.input_format() {

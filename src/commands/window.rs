@@ -63,6 +63,6 @@ where
 
 pub fn window(args: WindowArgs) -> Result<()> {
     let (bed_a, bed_b) = args.inputs.get_readers()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     dispatch_pair!(bed_a, bed_b, writer, args.params, windowed_set_overlaps)
 }

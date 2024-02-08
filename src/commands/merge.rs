@@ -69,7 +69,7 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, output_handle: W) -
 
 pub fn merge(args: MergeArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     if args.params.stream {
         merge_streamed_by_format(reader, writer)
     } else {

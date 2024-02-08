@@ -20,7 +20,7 @@ pub struct Output {
     pub compression_level: u32,
 }
 impl Output {
-    pub fn get_handle(&self) -> Result<Box<dyn Write>> {
+    pub fn get_writer(&self) -> Result<Box<dyn Write>> {
         match_output(
             self.output.clone(),
             self.compression_threads,

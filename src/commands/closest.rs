@@ -70,7 +70,7 @@ where
 
 pub fn closest(args: ClosestArgs) -> Result<()> {
     let (bed_a, bed_b) = args.inputs.get_readers()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     dispatch_pair!(bed_a, bed_b, writer, args.params, run_closest)
 }
 

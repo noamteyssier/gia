@@ -74,7 +74,7 @@ where
 
 pub fn shift(args: ShiftArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     dispatch_single!(reader, writer, args.params, shift_set)
 }
 

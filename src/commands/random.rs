@@ -150,7 +150,7 @@ pub fn random_bed12<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
 }
 
 pub fn random(args: RandomArgs) -> Result<()> {
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     match args.format {
         InputFormat::Bed3 => random_bed3(args, writer),
         InputFormat::Bed6 => random_bed6(args, writer),

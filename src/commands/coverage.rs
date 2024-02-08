@@ -40,6 +40,6 @@ where
 
 pub fn coverage(args: CoverageArgs) -> Result<()> {
     let (reader_a, reader_b) = args.inputs.get_readers()?;
-    let writer = args.output.get_handle()?;
+    let writer = args.output.get_writer()?;
     dispatch_pair!(reader_a, reader_b, writer, args.params, run_coverage)
 }
