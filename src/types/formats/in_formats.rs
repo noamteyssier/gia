@@ -92,7 +92,7 @@ mod testing {
         let lines = "1\t1\t2\n1\t3\t4\n1\t5\t6\n".as_bytes();
         let mut reader = BufReader::new(lines);
         reader.fill_buf().unwrap();
-        let _input_format = InputFormat::predict(&mut reader).unwrap();
+        let _input_format = InputFormat::predict(&reader).unwrap();
         let num_lines = reader.lines().count();
         assert_eq!(num_lines, 3);
     }
@@ -100,8 +100,8 @@ mod testing {
     #[test]
     fn no_consumption_field_format() {
         let lines = "1\t1\t2\n1\t3\t4\n1\t5\t6\n".as_bytes();
-        let mut reader = BufReader::new(lines);
-        let _field_format = FieldFormat::predict(&mut reader, InputFormat::Bed3).unwrap();
+        let reader = BufReader::new(lines);
+        let _field_format = FieldFormat::predict(&reader, InputFormat::Bed3).unwrap();
         let num_lines = reader.lines().count();
         assert_eq!(num_lines, 3);
     }
