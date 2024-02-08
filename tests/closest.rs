@@ -4,16 +4,16 @@ mod testing {
     use assert_cmd::prelude::*;
     use std::process::Command;
 
-    fn build_expected_str(
-        expected: &Vec<(u32, u32, u32, Option<u32>, Option<u32>, Option<u32>)>,
-    ) -> String {
+    type Expected = Vec<(u32, u32, u32, Option<u32>, Option<u32>, Option<u32>)>;
+
+    fn build_expected_str(expected: &Expected) -> String {
         expected
             .iter()
             .map(|(c1, s1, e1, c2, s2, e2)| {
-                if c2 == &None || s2 == &None || e2 == &None {
-                    return format!("{}\t{}\t{}\t\t\t\n", c1, s1, e1);
+                if c2.is_none() || s2.is_none() || e2.is_none() {
+                    format!("{}\t{}\t{}\t\t\t\n", c1, s1, e1)
                 } else {
-                    return format!(
+                    format!(
                         "{}\t{}\t{}\t{}\t{}\t{}\n",
                         c1,
                         s1,
@@ -21,7 +21,7 @@ mod testing {
                         c2.unwrap(),
                         s2.unwrap(),
                         e2.unwrap()
-                    );
+                    )
                 }
             })
             .collect::<Vec<String>>()

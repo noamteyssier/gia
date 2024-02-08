@@ -4,7 +4,11 @@ mod testing {
     use assert_cmd::prelude::*;
     use std::{fmt::Display, process::Command};
 
-    fn build_expected_str<T: Display>(expected: &Vec<(T, u32, u32)>) -> String {
+    type Expected3<T> = Vec<(T, u32, u32)>;
+    type Expected6<T, S, F, C> = Vec<(S, T, T, S, F, C)>;
+    type Expected12<T, S, F, C> = Vec<(S, T, T, S, F, C, T, T, T, T, T, T)>;
+
+    fn build_expected_str<T: Display>(expected: &Expected3<T>) -> String {
         expected
             .iter()
             .map(|(chr, start, end)| format!("{}\t{}\t{}\n", chr, start, end))
@@ -13,7 +17,7 @@ mod testing {
     }
 
     fn build_expected_str_bed6<T: Display, S: Display, F: Display, C: Display>(
-        expected: &Vec<(S, T, T, S, F, C)>,
+        expected: &Expected6<T, S, F, C>,
     ) -> String {
         expected
             .iter()
@@ -28,7 +32,7 @@ mod testing {
     }
 
     fn build_expected_str_bed12<T: Display, S: Display, F: Display, C: Display>(
-        expected: &Vec<(S, T, T, S, F, C, T, T, T, T, T, T)>,
+        expected: &Expected12<T, S, F, C>,
     ) -> String {
         expected
             .iter()

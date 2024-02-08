@@ -11,9 +11,9 @@ mod testing {
         let num_intervals = output.stdout.iter().filter(|&&c| c == b'\n').count();
 
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
-        let rows = string_out.split("\n");
+        let rows = string_out.split('\n');
         for row in rows {
-            let cols = row.split("\t").collect::<Vec<&str>>();
+            let cols = row.split('\n').collect::<Vec<&str>>();
             let chr = cols[0].parse::<i32>()?;
             let x = cols[1].parse::<i32>()?;
             let y = cols[2].parse::<i32>()?;
@@ -51,9 +51,9 @@ mod testing {
         let obs_intervals = output.stdout.iter().filter(|&&c| c == b'\n').count();
 
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
-        let rows = string_out.split("\n");
+        let rows = string_out.split('\n');
         for row in rows {
-            let cols = row.split("\t").collect::<Vec<&str>>();
+            let cols = row.split('\t').collect::<Vec<&str>>();
             let chr = cols[0].parse::<i32>()?;
             let x = cols[1].parse::<i32>()?;
             let y = cols[2].parse::<i32>()?;
@@ -77,9 +77,9 @@ mod testing {
         let num_intervals = output.stdout.iter().filter(|&&c| c == b'\n').count();
 
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
-        let rows = string_out.split("\n");
+        let rows = string_out.split('\n');
         for row in rows {
-            let cols = row.split("\t").collect::<Vec<&str>>();
+            let cols = row.split('\t').collect::<Vec<&str>>();
             let chr = cols[0].parse::<i32>()?;
             let x = cols[1].parse::<i32>()?;
             let y = cols[2].parse::<i32>()?;
@@ -118,9 +118,9 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd.arg("random").arg("--format").arg("bed6").output()?;
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
-        let rows = string_out.split("\n");
+        let rows = string_out.split('\n');
         for row in rows {
-            let cols = row.split("\t").collect::<Vec<&str>>();
+            let cols = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(cols.len(), 6);
         }
         Ok(())
@@ -131,9 +131,9 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd.arg("random").arg("--format").arg("bed12").output()?;
         let string_out = String::from_utf8(output.stdout)?.trim().to_string();
-        let rows = string_out.split("\n");
+        let rows = string_out.split('\n');
         for row in rows {
-            let cols = row.split("\t").collect::<Vec<&str>>();
+            let cols = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(cols.len(), 12);
         }
         Ok(())
