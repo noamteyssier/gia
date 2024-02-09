@@ -48,7 +48,10 @@ impl Translater {
     }
 }
 impl Translate for Translater {
-    fn get_name(&self, idx: usize) -> Option<&str> {
+    fn get_chr_name(&self, idx: usize) -> Option<&str> {
         self.idx_to_name.get(&idx).map(|s| s.as_str())
+    }
+    fn get_meta_name(&self, idx: usize) -> Option<&str> {
+        self.get_chr_name(idx)
     }
 }

@@ -7,7 +7,8 @@ pub use depth::IntervalDepth;
 pub use formats::{FieldFormat, Genome, InputFormat};
 pub use pairs::IntervalPair;
 pub use translate::{
-    Rename, Renamer, Reorder, Retranslater, StreamTranslater, Translate, Translater,
+    Rename, Renamer, Reorder, Retranslater, SplitTranslater, StreamTranslater, Translate,
+    Translater,
 };
 
 pub type NumericBed3 = Bed3<usize, usize>;

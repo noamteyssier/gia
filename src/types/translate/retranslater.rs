@@ -20,7 +20,10 @@ impl Retranslater {
     }
 }
 impl Translate for Retranslater {
-    fn get_name(&self, rank: usize) -> Option<&str> {
+    fn get_chr_name(&self, rank: usize) -> Option<&str> {
         self.rank_to_name.get(&rank).map(|s| s.as_str())
+    }
+    fn get_meta_name(&self, rank: usize) -> Option<&str> {
+        self.get_chr_name(rank)
     }
 }

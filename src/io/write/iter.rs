@@ -105,7 +105,7 @@ where
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
             let named_interval = (chr, interval.start(), interval.end());
             wtr.serialize(named_interval)?;
         }
@@ -122,7 +122,7 @@ impl WriteNamedIter<NumericBed3> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
             let named_interval = (chr, interval.start(), interval.end());
             wtr.serialize(named_interval)?;
         }
@@ -138,7 +138,7 @@ impl<'a> WriteNamedIter<&'a NumericBed3> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
             let named_interval = (chr, interval.start(), interval.end());
             wtr.serialize(named_interval)?;
         }
@@ -154,8 +154,8 @@ impl WriteNamedIter<NumericBed4> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.name()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.name()).unwrap();
             let named_interval = (chr, interval.start(), interval.end(), name);
             wtr.serialize(named_interval)?;
         }
@@ -171,8 +171,8 @@ impl<'a> WriteNamedIter<&'a NumericBed4> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.name()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.name()).unwrap();
             let named_interval = (chr, interval.start(), interval.end(), name);
             wtr.serialize(named_interval)?;
         }
@@ -188,8 +188,8 @@ impl WriteNamedIter<NumericBed6> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.name()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.name()).unwrap();
             let named_interval = (
                 chr,
                 interval.start(),
@@ -212,8 +212,8 @@ impl<'a> WriteNamedIter<&'a NumericBed6> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.name()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.name()).unwrap();
             let named_interval = (
                 chr,
                 interval.start(),
@@ -236,12 +236,12 @@ impl WriteNamedIter<NumericBed12> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.name()).unwrap();
-            let item_rgb = translater.get_name(*interval.item_rgb()).unwrap();
-            let block_count = translater.get_name(interval.block_count()).unwrap();
-            let block_sizes = translater.get_name(*interval.block_sizes()).unwrap();
-            let block_starts = translater.get_name(*interval.block_starts()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.name()).unwrap();
+            let item_rgb = translater.get_meta_name(*interval.item_rgb()).unwrap();
+            let block_count = translater.get_meta_name(interval.block_count()).unwrap();
+            let block_sizes = translater.get_meta_name(*interval.block_sizes()).unwrap();
+            let block_starts = translater.get_meta_name(*interval.block_starts()).unwrap();
             let named_interval = (
                 chr,
                 interval.start(),
@@ -270,12 +270,12 @@ impl<'a> WriteNamedIter<&'a NumericBed12> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.name()).unwrap();
-            let item_rgb = translater.get_name(*interval.item_rgb()).unwrap();
-            let block_count = translater.get_name(interval.block_count()).unwrap();
-            let block_sizes = translater.get_name(*interval.block_sizes()).unwrap();
-            let block_starts = translater.get_name(*interval.block_starts()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.name()).unwrap();
+            let item_rgb = translater.get_meta_name(*interval.item_rgb()).unwrap();
+            let block_count = translater.get_meta_name(interval.block_count()).unwrap();
+            let block_sizes = translater.get_meta_name(*interval.block_sizes()).unwrap();
+            let block_starts = translater.get_meta_name(*interval.block_starts()).unwrap();
             let named_interval = (
                 chr,
                 interval.start(),
@@ -304,8 +304,8 @@ impl WriteNamedIter<NumericMetaInterval> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.meta()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.meta()).unwrap();
             let named_interval = (chr, interval.start(), interval.end(), name);
             wtr.serialize(named_interval)?;
         }
@@ -321,8 +321,8 @@ impl<'a> WriteNamedIter<&'a NumericMetaInterval> for WriteNamedIterImpl {
     ) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let chr = translater.get_name(*interval.chr()).unwrap();
-            let name = translater.get_name(*interval.meta()).unwrap();
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let name = translater.get_meta_name(*interval.meta()).unwrap();
             let named_interval = (chr, interval.start(), interval.end(), name);
             wtr.serialize(named_interval)?;
         }
