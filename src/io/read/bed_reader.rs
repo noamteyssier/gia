@@ -128,8 +128,7 @@ impl BedReader {
 
     /// Returns a MetaIntervalSet from the reader with an Option<SplitTranslater>
     pub fn meta_interval_set(self) -> Result<(MetaIntervalSet, Option<SplitTranslater>)> {
-        let is_named = self.is_named();
-        read_meta_interval_set(self.reader(), is_named)
+        read_meta_interval_set(self.reader(), true) // meta intervals are always named
     }
 
     /// Returns a Bed3Set from the reader
