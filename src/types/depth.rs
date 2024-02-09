@@ -1,7 +1,4 @@
-use super::{
-    translater::{Rename, Renamer},
-    Translater,
-};
+use super::{Rename, Renamer, SplitTranslater};
 use bedrs::traits::IntervalBounds;
 
 pub struct IntervalDepth<'a, I, N>
@@ -11,7 +8,7 @@ where
 {
     pub iv: I,
     pub n_overlaps: usize,
-    pub translater: Option<&'a Translater>,
+    pub translater: Option<&'a SplitTranslater>,
     phantom: std::marker::PhantomData<N>,
 }
 impl<'a, I, N> IntervalDepth<'a, I, N>
@@ -20,7 +17,7 @@ where
     N: IntervalBounds<&'a str, usize>,
     Renamer: Rename<'a, I, N>,
 {
-    pub fn new(iv: I, n_overlaps: usize, translater: Option<&'a Translater>) -> Self {
+    pub fn new(iv: I, n_overlaps: usize, translater: Option<&'a SplitTranslater>) -> Self {
         Self {
             iv,
             n_overlaps,
@@ -36,7 +33,7 @@ where
             let n = Renamer::rename_with(&self.iv, translater);
             (n, self.n_overlaps)
         } else {
-            panic!("Translater was not provided but get_named_tuple was called - there is a bug somewhere!")
+            panic!("SplitTranslater was not provided but get_named_tuple was called - there is a bug somewhere!")
         }
     }
 }

@@ -6,7 +6,8 @@ use crate::{
         build_reader, write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
         UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, NumericBed3, StreamTranslater, Translater},
+    types::{InputFormat, NumericBed3, SplitTranslater, StreamTranslater},
+    utils::sort_pairs,
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntersectIter, IntervalContainer, MergeIter};
@@ -14,9 +15,9 @@ use serde::Serialize;
 use std::io::Write;
 
 pub fn intersect_sets<Ia, Ib, W>(
-    set_a: IntervalContainer<Ia, usize, usize>,
-    set_b: IntervalContainer<Ib, usize, usize>,
-    translater: Option<&Translater>,
+    mut set_a: IntervalContainer<Ia, usize, usize>,
+    mut set_b: IntervalContainer<Ib, usize, usize>,
+    translater: Option<&SplitTranslater>,
     params: IntersectParams,
     writer: W,
 ) -> Result<()>
@@ -28,6 +29,7 @@ where
 {
     let query_method = params.overlap_predicates.into();
     let output_method = params.output_predicates.try_into()?;
+    sort_pairs(&mut set_a, &mut set_b, params.sorted);
     match output_method {
         // Output the target intervals
         OutputMethod::Target => {
@@ -93,7 +95,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
-        write_records_iter_with(intersect_iter, writer, None::<&Translater>)?;
+        write_records_iter_with(intersect_iter, writer, None::<&SplitTranslater>)?;
     }
     Ok(())
 }

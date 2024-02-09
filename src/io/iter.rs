@@ -77,7 +77,7 @@ impl<'a, 'b, R: Read> Iterator for NamedIter<'a, 'b, R, NumericBed6> {
             record.start(),
             record.end(),
             *name_idx,
-            *record.score(),
+            record.score(),
             record.strand().unwrap_or_default(),
         );
         Some(iv)

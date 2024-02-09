@@ -26,6 +26,10 @@ pub struct IntersectParams {
     /// (only works if both files are sorted)
     #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
     pub stream: bool,
+
+    /// Assert the inputs are pre-sorted
+    #[clap(short, long)]
+    pub sorted: bool,
 }
 
 #[derive(Parser, Debug)]

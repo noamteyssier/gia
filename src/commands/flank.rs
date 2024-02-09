@@ -2,7 +2,7 @@ use crate::{
     cli::{FlankArgs, Growth},
     dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{Genome, InputFormat, Translater},
+    types::{Genome, InputFormat, SplitTranslater, TranslateGroup},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -80,7 +80,7 @@ where
 /// Flank the intervals in the set
 fn flank_set<I, W>(
     set: IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<&SplitTranslater>,
     growth: Growth,
     output: W,
 ) -> Result<()>
@@ -90,12 +90,12 @@ where
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     growth.warn_args();
-    let genome = growth.get_genome(translater.as_ref())?;
+    let genome = growth.get_genome(translater.map(|x| x.get_translater(TranslateGroup::Chr)))?;
     let flank_iter = set.iter().flat_map(|iv| {
         let (left, right) = growth.get_values(iv);
         flank_interval(*iv, left, right, genome.as_ref())
     });
-    write_records_iter_with(flank_iter, output, translater.as_ref())
+    write_records_iter_with(flank_iter, output, translater)
 }
 
 pub fn flank(args: FlankArgs) -> Result<()> {
@@ -135,7 +135,7 @@ mod testing {
 
     #[test]
     fn test_flank_left_bed6() {
-        let iv = Bed6::new(1, 100, 400, 1, 2, Strand::default());
+        let iv = Bed6::new(1, 100, 400, 1, 2.into(), Strand::default());
         let left = left_flank(iv, 50).unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -146,7 +146,20 @@ mod testing {
 
     #[test]
     fn test_flank_left_bed12() {
-        let iv = Bed12::new(1, 100, 400, 1, 2, Strand::default(), 3, 4, 5, 6, 7, 8);
+        let iv = Bed12::new(
+            1,
+            100,
+            400,
+            1,
+            2.into(),
+            Strand::default(),
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+        );
         let left = left_flank(iv, 50).unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -187,7 +200,7 @@ mod testing {
 
     #[test]
     fn test_flank_right_bed6() {
-        let iv = Bed6::new(1, 100, 400, 1, 2, Strand::default());
+        let iv = Bed6::new(1, 100, 400, 1, 2.into(), Strand::default());
         let right = right_flank(iv, 50, None).unwrap();
         assert_eq!(right.start(), 400);
         assert_eq!(right.end(), 450);
@@ -198,7 +211,20 @@ mod testing {
 
     #[test]
     fn test_flank_right_bed12() {
-        let iv = Bed12::new(1, 100, 400, 1, 2, Strand::default(), 3, 4, 5, 6, 7, 8);
+        let iv = Bed12::new(
+            1,
+            100,
+            400,
+            1,
+            2.into(),
+            Strand::default(),
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+        );
         let right = right_flank(iv, 50, None).unwrap();
         assert_eq!(right.start(), 400);
         assert_eq!(right.end(), 450);

@@ -5,7 +5,7 @@ use crate::{
         build_reader, iter_unnamed, write_3col_iter_with, write_records_iter, BedReader,
         WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, Translater},
+    types::{InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, SplitTranslater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer, MergeIter};
@@ -14,7 +14,7 @@ use std::io::Write;
 
 fn merge_in_memory<I, W>(
     mut set: IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<&SplitTranslater>,
     params: MergeParams,
     writer: W,
 ) -> Result<()>
@@ -29,7 +29,7 @@ where
         set.set_sorted();
     }
     let merged = set.merge()?;
-    write_3col_iter_with(merged.into_iter(), writer, translater.as_ref())?;
+    write_3col_iter_with(merged.into_iter(), writer, translater)?;
     Ok(())
 }
 
@@ -52,7 +52,7 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Resul
     let input_format = bed_reader.input_format();
     let mut csv_reader = build_reader(bed_reader.reader());
     match input_format {
-        InputFormat::Bed3 => {
+        InputFormat::Bed3 | InputFormat::Ambiguous => {
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
             merge_streamed(record_iter, writer)
         }

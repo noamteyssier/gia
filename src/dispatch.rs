@@ -6,6 +6,35 @@ macro_rules! dispatch_single {
         match $reader.input_format() {
             InputFormat::Bed3 => {
                 let (set, translater) = $reader.bed3_set()?;
+                $func(set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed4 => {
+                let (set, translater) = $reader.bed4_set()?;
+                $func(set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed6 => {
+                let (set, translater) = $reader.bed6_set()?;
+                $func(set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed12 => {
+                let (set, translater) = $reader.bed12_set()?;
+                $func(set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Ambiguous => {
+                let (set, translater) = $reader.meta_interval_set()?;
+                $func(set, translater.as_ref(), $params, $writer)
+            }
+        }
+    };
+}
+/// This is a macro to match the input format and dispatch to some function with some parameters and
+/// a writer.
+#[macro_export]
+macro_rules! dispatch_single_owned_tl {
+    ($reader:expr, $writer:expr, $params:expr, $func:expr) => {
+        match $reader.input_format() {
+            InputFormat::Bed3 => {
+                let (set, translater) = $reader.bed3_set()?;
                 $func(set, translater, $params, $writer)
             }
             InputFormat::Bed4 => {
@@ -20,6 +49,10 @@ macro_rules! dispatch_single {
                 let (set, translater) = $reader.bed12_set()?;
                 $func(set, translater, $params, $writer)
             }
+            InputFormat::Ambiguous => {
+                let (set, translater) = $reader.meta_interval_set()?;
+                $func(set, translater, $params, $writer)
+            }
         }
     };
 }
@@ -29,7 +62,9 @@ macro_rules! dispatch_single {
 #[macro_export]
 macro_rules! dispatch_pair {
     ($reader_a:expr, $reader_b:expr, $writer:expr, $params:expr, $func:expr) => {{
-        let mut translater = $reader_a.is_named().then_some(Translater::new());
+        let mut translater = $reader_a
+            .is_named()
+            .then_some($crate::types::SplitTranslater::new());
         $crate::dispatch_to_lhs!($reader_a, $reader_b, translater, $writer, $params, $func)
     }};
 }
@@ -53,6 +88,10 @@ macro_rules! dispatch_to_lhs {
             }
             InputFormat::Bed12 => {
                 let set_a = $reader_a.bed12_set_with($translater.as_mut())?;
+                $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
+            }
+            InputFormat::Ambiguous => {
+                let set_a = $reader_a.meta_interval_set_with($translater.as_mut())?;
                 $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
             }
         }
@@ -79,6 +118,10 @@ macro_rules! dispatch_to_rhs {
             }
             InputFormat::Bed12 => {
                 let set_b = $reader_b.bed12_set_with($translater.as_mut())?;
+                $func($set_a, set_b, $translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Ambiguous => {
+                let set_b = $reader_b.meta_interval_set_with($translater.as_mut())?;
                 $func($set_a, set_b, $translater.as_ref(), $params, $writer)
             }
         }

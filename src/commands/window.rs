@@ -7,14 +7,14 @@ use crate::{
     cli::{WindowArgs, WindowParams},
     dispatch_pair,
     io::{write_pairs_iter_with, write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
+    types::{InputFormat, IntervalPair, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 
 fn windowed_set_overlaps<'a, Ia, Ib, Na, Nb, W>(
     mut set_a: IntervalContainer<Ia, usize, usize>,
     mut set_b: IntervalContainer<Ib, usize, usize>,
-    translater: Option<&'a Translater>,
+    translater: Option<&'a SplitTranslater>,
     params: WindowParams,
     output: W,
 ) -> Result<()>

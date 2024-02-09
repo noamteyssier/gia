@@ -2,7 +2,7 @@ use crate::{
     cli::{ShiftArgs, ShiftParams},
     dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{Genome, InputFormat, Translater},
+    types::{Genome, InputFormat, SplitTranslater, TranslateGroup},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -55,7 +55,7 @@ where
 
 fn shift_set<I, W>(
     set: IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<&SplitTranslater>,
     params: ShiftParams,
     output: W,
 ) -> Result<()>
@@ -65,11 +65,15 @@ where
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     params.warn_args();
-    let genome = Genome::from_opt_path_immutable_with(params.genome, translater.as_ref(), false)?;
+    let genome = Genome::from_opt_path_immutable_with(
+        params.genome,
+        translater.map(|x| x.get_translater(TranslateGroup::Chr)),
+        false,
+    )?;
     let shift_iter = set
         .into_iter()
         .map(|iv| shift_interval(iv, params.amount, params.percent, genome.as_ref()));
-    write_records_iter_with(shift_iter, output, translater.as_ref())
+    write_records_iter_with(shift_iter, output, translater)
 }
 
 pub fn shift(args: ShiftArgs) -> Result<()> {
@@ -158,7 +162,7 @@ mod testing {
 
     #[test]
     fn test_shift_bed6() {
-        let iv = Bed6::new(1, 100, 200, 1, 2, Strand::default());
+        let iv = Bed6::new(1, 100, 200, 1, 2.into(), Strand::default());
         let si = shift_interval(iv, 50.0, false, None);
         assert_eq!(si.start(), 150);
         assert_eq!(si.end(), 250);
@@ -169,7 +173,20 @@ mod testing {
 
     #[test]
     fn test_shift_bed12() {
-        let iv = Bed12::new(1, 100, 400, 1, 2, Strand::default(), 3, 4, 5, 6, 7, 8);
+        let iv = Bed12::new(
+            1,
+            100,
+            400,
+            1,
+            2.into(),
+            Strand::default(),
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+        );
         let si = shift_interval(iv, 50.0, false, None);
         assert_eq!(si.start(), 150);
         assert_eq!(si.end(), 450);

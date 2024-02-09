@@ -1,8 +1,9 @@
 use crate::types::{
-    IntervalDepth, IntervalPair, NumericBed3, Rename, Renamer, StreamTranslater, Translater,
+    IntervalDepth, IntervalPair, NumericBed3, Rename, Renamer, SplitTranslater, StreamTranslater,
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
+use csv::QuoteStyle;
 use serde::Serialize;
 use std::io::Write;
 
@@ -10,6 +11,7 @@ pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
     csv::WriterBuilder::new()
         .delimiter(b'\t')
         .has_headers(false)
+        .quote_style(QuoteStyle::Never)
         .from_writer(writer)
 }
 
@@ -30,7 +32,7 @@ where
 pub fn write_depth_iter_with<'a, W, I, N, It>(
     records: It,
     writer: W,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize,
@@ -81,7 +83,7 @@ where
 pub fn write_pairs_iter_with<'a, W, Ia, Ib, Na, Nb, It>(
     records: It,
     writer: W,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
 ) -> Result<()>
 where
     Ia: IntervalBounds<usize, usize> + Serialize,

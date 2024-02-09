@@ -14,6 +14,7 @@ pub enum InputFormat {
     Bed4,
     Bed6,
     Bed12,
+    Ambiguous,
 }
 impl InputFormat {
     pub fn predict<R>(bufreader: &BufReader<R>) -> Result<InputFormat> {
@@ -28,14 +29,12 @@ impl InputFormat {
         };
         let num_fields = first.split(|b| *b == b'\t').count();
         match num_fields {
+            1..=2 => bail!("Too few fields in line: {}", from_utf8(first)?),
             3 => Ok(InputFormat::Bed3),
             4 => Ok(InputFormat::Bed4),
             6 => Ok(InputFormat::Bed6),
             12 => Ok(InputFormat::Bed12),
-            _ => bail!(
-                "Cannot predict input format from line: {}",
-                std::str::from_utf8(first)?
-            ),
+            _ => Ok(InputFormat::Ambiguous),
         }
     }
 }
@@ -79,6 +78,17 @@ impl FieldFormat {
                     Ok(FieldFormat::IntegerBased)
                 }
             }
+            InputFormat::Ambiguous => {
+                let all_int = fields
+                    .iter()
+                    .filter_map(|f| from_utf8(f).ok())
+                    .all(|f| f.parse::<u32>().is_ok());
+                if all_int {
+                    Ok(FieldFormat::IntegerBased)
+                } else {
+                    Ok(FieldFormat::StringBased)
+                }
+            }
         }
     }
 }
@@ -118,6 +128,15 @@ mod testing {
     }
 
     #[test]
+    fn input_format_bed4() {
+        let line = b"chr1\t1\t2\tname";
+        let mut buffer = BufReader::new(line.as_slice());
+        buffer.fill_buf().unwrap();
+        let input_format = InputFormat::predict(&buffer).unwrap();
+        assert_eq!(input_format, InputFormat::Bed4);
+    }
+
+    #[test]
     fn input_format_bed6() {
         let line = b"chr1\t1\t2\tname\t0\t+";
         let mut buffer = BufReader::new(line.as_slice());
@@ -131,8 +150,8 @@ mod testing {
         let line = b"chr1\t1\t2\tname\t0\t+\textra";
         let mut buffer = BufReader::new(line.as_slice());
         buffer.fill_buf().unwrap();
-        let input_format = InputFormat::predict(&buffer);
-        assert!(input_format.is_err());
+        let input_format = InputFormat::predict(&buffer).unwrap();
+        assert_eq!(input_format, InputFormat::Ambiguous);
     }
 
     #[test]

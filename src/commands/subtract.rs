@@ -2,7 +2,7 @@ use crate::{
     cli::{SubtractArgs, SubtractParams},
     dispatch_pair,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, Translater},
+    types::{InputFormat, SplitTranslater},
     utils::sort_pairs,
 };
 use anyhow::Result;
@@ -64,7 +64,7 @@ where
 fn run_subtract<Ia, Ib, C, T, W>(
     mut aset: IntervalContainer<Ia, C, T>,
     mut bset: IntervalContainer<Ib, C, T>,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
     params: SubtractParams,
     writer: W,
 ) -> Result<()>

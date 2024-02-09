@@ -170,9 +170,9 @@ mod testing {
         assert_eq!(genome.chr_size_unchecked(2), 3000);
         assert!(genome.translater().is_some());
         let translater = genome.translater().unwrap();
-        assert_eq!(translater.get_name(0).unwrap(), "chr1");
-        assert_eq!(translater.get_name(1).unwrap(), "chr2");
-        assert_eq!(translater.get_name(2).unwrap(), "chr3");
+        assert_eq!(translater.get_chr_name(0).unwrap(), "chr1");
+        assert_eq!(translater.get_chr_name(1).unwrap(), "chr2");
+        assert_eq!(translater.get_chr_name(2).unwrap(), "chr3");
     }
 
     #[test]
