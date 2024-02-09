@@ -7,6 +7,7 @@ use crate::{
         UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{InputFormat, NumericBed3, SplitTranslater, StreamTranslater},
+    utils::sort_pairs,
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntersectIter, IntervalContainer, MergeIter};
@@ -14,8 +15,8 @@ use serde::Serialize;
 use std::io::Write;
 
 pub fn intersect_sets<Ia, Ib, W>(
-    set_a: IntervalContainer<Ia, usize, usize>,
-    set_b: IntervalContainer<Ib, usize, usize>,
+    mut set_a: IntervalContainer<Ia, usize, usize>,
+    mut set_b: IntervalContainer<Ib, usize, usize>,
     translater: Option<&SplitTranslater>,
     params: IntersectParams,
     writer: W,
@@ -28,6 +29,7 @@ where
 {
     let query_method = params.overlap_predicates.into();
     let output_method = params.output_predicates.try_into()?;
+    sort_pairs(&mut set_a, &mut set_b, params.sorted);
     match output_method {
         // Output the target intervals
         OutputMethod::Target => {
