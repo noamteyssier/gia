@@ -1,7 +1,4 @@
-use super::{
-    translater::{Rename, Renamer},
-    Translater,
-};
+use super::{Rename, Renamer, Translater};
 use bedrs::traits::IntervalBounds;
 
 pub struct IntervalDepth<'a, I, N>
