@@ -1,4 +1,4 @@
-use super::{Rename, Renamer, Translater};
+use super::{Rename, Renamer, SplitTranslater};
 use bedrs::traits::IntervalBounds;
 
 pub struct IntervalPair<'a, Ia, Ib, Na, Nb>
@@ -11,7 +11,7 @@ where
 {
     pub iv_a: Ia,
     pub iv_b: Ib,
-    pub translater: Option<&'a Translater>,
+    pub translater: Option<&'a SplitTranslater>,
     phantom_a: std::marker::PhantomData<Na>,
     phantom_b: std::marker::PhantomData<Nb>,
 }
@@ -23,7 +23,7 @@ where
     Nb: IntervalBounds<&'a str, usize>,
     Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
-    pub fn new(iv_a: Ia, iv_b: Ib, translater: Option<&'a Translater>) -> Self {
+    pub fn new(iv_a: Ia, iv_b: Ib, translater: Option<&'a SplitTranslater>) -> Self {
         Self {
             iv_a,
             iv_b,
@@ -41,7 +41,7 @@ where
             let named_b = Renamer::rename_with(&self.iv_b, translater);
             (named_a, named_b)
         } else {
-            panic!("Translater was not provided but get_named_tuple was called - there is a bug somewhere!")
+            panic!("SplitTranslater was not provided but get_named_tuple was called - there is a bug somewhere!")
         }
     }
 }

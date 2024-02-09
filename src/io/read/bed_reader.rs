@@ -4,7 +4,7 @@ use super::{
     read_meta_interval_set_with,
 };
 use crate::types::{
-    Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, InputFormat, MetaIntervalSet, Translater,
+    Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, InputFormat, MetaIntervalSet, SplitTranslater,
 };
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
@@ -102,60 +102,60 @@ impl BedReader {
         ))
     }
 
-    /// Returns a Bed3Set from the reader with an Option<Translater>
-    pub fn bed3_set(self) -> Result<(Bed3Set, Option<Translater>)> {
+    /// Returns a Bed3Set from the reader with an Option<SplitTranslater>
+    pub fn bed3_set(self) -> Result<(Bed3Set, Option<SplitTranslater>)> {
         let is_named = self.is_named();
         read_bed3_set(self.reader(), is_named)
     }
 
-    /// Returns a Bed4Set from the reader with an Option<Translater>
-    pub fn bed4_set(self) -> Result<(Bed4Set, Option<Translater>)> {
+    /// Returns a Bed4Set from the reader with an Option<SplitTranslater>
+    pub fn bed4_set(self) -> Result<(Bed4Set, Option<SplitTranslater>)> {
         let is_named = self.is_named();
         read_bed4_set(self.reader(), is_named)
     }
 
-    /// Returns a Bed6Set from the reader with an Option<Translater>
-    pub fn bed6_set(self) -> Result<(Bed6Set, Option<Translater>)> {
+    /// Returns a Bed6Set from the reader with an Option<SplitTranslater>
+    pub fn bed6_set(self) -> Result<(Bed6Set, Option<SplitTranslater>)> {
         let is_named = self.is_named();
         read_bed6_set(self.reader(), is_named)
     }
 
-    /// Returns a Bed6Set from the reader with an Option<Translater>
-    pub fn bed12_set(self) -> Result<(Bed12Set, Option<Translater>)> {
+    /// Returns a Bed6Set from the reader with an Option<SplitTranslater>
+    pub fn bed12_set(self) -> Result<(Bed12Set, Option<SplitTranslater>)> {
         let is_named = self.is_named();
         read_bed12_set(self.reader(), is_named)
     }
 
-    /// Returns a MetaIntervalSet from the reader with an Option<Translater>
-    pub fn meta_interval_set(self) -> Result<(MetaIntervalSet, Option<Translater>)> {
+    /// Returns a MetaIntervalSet from the reader with an Option<SplitTranslater>
+    pub fn meta_interval_set(self) -> Result<(MetaIntervalSet, Option<SplitTranslater>)> {
         let is_named = self.is_named();
         read_meta_interval_set(self.reader(), is_named)
     }
 
     /// Returns a Bed3Set from the reader
-    pub fn bed3_set_with(self, translater: Option<&mut Translater>) -> Result<Bed3Set> {
+    pub fn bed3_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed3Set> {
         read_bed3_set_with(self.reader(), translater)
     }
 
     /// Returns a Bed4Set from the reader
-    pub fn bed4_set_with(self, translater: Option<&mut Translater>) -> Result<Bed4Set> {
+    pub fn bed4_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed4Set> {
         read_bed4_set_with(self.reader(), translater)
     }
 
     /// Returns a Bed6Set from the reader
-    pub fn bed6_set_with(self, translater: Option<&mut Translater>) -> Result<Bed6Set> {
+    pub fn bed6_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed6Set> {
         read_bed6_set_with(self.reader(), translater)
     }
 
     /// Returns a Bed6Set from the reader
-    pub fn bed12_set_with(self, translater: Option<&mut Translater>) -> Result<Bed12Set> {
+    pub fn bed12_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed12Set> {
         read_bed12_set_with(self.reader(), translater)
     }
 
     /// Returns a MetaIntervalSet from the reader
     pub fn meta_interval_set_with(
         self,
-        translater: Option<&mut Translater>,
+        translater: Option<&mut SplitTranslater>,
     ) -> Result<MetaIntervalSet> {
         read_meta_interval_set_with(self.reader(), translater)
     }

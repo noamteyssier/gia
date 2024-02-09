@@ -1,11 +1,10 @@
-use hashbrown::HashMap;
-
 use super::Translate;
+use hashbrown::HashMap;
 
 #[derive(Debug)]
 pub struct Retranslater {
-    idx_to_rank: HashMap<usize, usize>,
-    rank_to_name: HashMap<usize, String>,
+    pub idx_to_rank: HashMap<usize, usize>,
+    pub rank_to_name: HashMap<usize, String>,
 }
 impl Retranslater {
     pub fn new(idx_to_rank: HashMap<usize, usize>, rank_to_name: HashMap<usize, String>) -> Self {

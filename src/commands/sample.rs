@@ -1,7 +1,7 @@
 use crate::{
     cli::{SampleArgs, SampleParams},
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, Translater},
+    types::{InputFormat, SplitTranslater},
 };
 use anyhow::{bail, Result};
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -10,7 +10,7 @@ use std::io::Write;
 
 fn sample_from_set<I, W>(
     set: &mut IntervalContainer<I, usize, usize>,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
     params: SampleParams,
     writer: W,
 ) -> Result<()>

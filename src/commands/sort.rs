@@ -1,8 +1,8 @@
 use crate::{
     cli::{SortArgs, SortParams},
-    dispatch_single,
+    dispatch_single_owned_tl,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, Reorder, Retranslater, Translater},
+    types::{InputFormat, Reorder, SplitRetranslater, SplitTranslater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -11,15 +11,16 @@ use std::io::Write;
 
 fn sort_set<I>(
     set: &mut IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<SplitTranslater>,
     parallel: bool,
-) -> Option<Retranslater>
+) -> Option<SplitRetranslater>
 where
     I: IntervalBounds<usize, usize> + Reorder<I>,
 {
     let translater = if let Some(translater) = translater {
-        let retranslater = I::reorder_translater(set, translater);
-        Some(retranslater)
+        let (chr_tl, meta_tl) = translater.disband();
+        let retranslater = I::reorder_translater(set, chr_tl);
+        Some(SplitRetranslater::new(retranslater, meta_tl))
     } else {
         None
     };
@@ -33,7 +34,7 @@ where
 
 fn sort_and_write<I, W>(
     mut set: IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<SplitTranslater>,
     params: SortParams,
     writer: W,
 ) -> Result<()>
@@ -50,5 +51,5 @@ where
 pub fn sort(args: SortArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
     let writer = args.output.get_writer()?;
-    dispatch_single!(reader, writer, args.params, sort_and_write)
+    dispatch_single_owned_tl!(reader, writer, args.params, sort_and_write)
 }

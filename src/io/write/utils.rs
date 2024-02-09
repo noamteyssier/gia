@@ -1,5 +1,5 @@
 use crate::types::{
-    IntervalDepth, IntervalPair, NumericBed3, Rename, Renamer, StreamTranslater, Translater,
+    IntervalDepth, IntervalPair, NumericBed3, Rename, Renamer, SplitTranslater, StreamTranslater,
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
@@ -32,7 +32,7 @@ where
 pub fn write_depth_iter_with<'a, W, I, N, It>(
     records: It,
     writer: W,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize,
@@ -83,7 +83,7 @@ where
 pub fn write_pairs_iter_with<'a, W, Ia, Ib, Na, Nb, It>(
     records: It,
     writer: W,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
 ) -> Result<()>
 where
     Ia: IntervalBounds<usize, usize> + Serialize,

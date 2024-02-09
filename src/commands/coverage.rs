@@ -8,14 +8,14 @@ use crate::{
     cli::{CoverageArgs, CoverageParams},
     dispatch_pair,
     io::write_depth_iter_with,
-    types::{InputFormat, IntervalDepth, Rename, Renamer, Translater},
+    types::{InputFormat, IntervalDepth, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 
 fn run_coverage<'a, Ia, Ib, Na, W>(
     mut set_a: IntervalContainer<Ia, usize, usize>,
     mut set_b: IntervalContainer<Ib, usize, usize>,
-    translater: Option<&'a Translater>,
+    translater: Option<&'a SplitTranslater>,
     params: CoverageParams,
     writer: W,
 ) -> Result<()>

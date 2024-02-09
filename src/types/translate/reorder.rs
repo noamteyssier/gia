@@ -32,9 +32,7 @@ impl Reorder<NumericBed4> for NumericBed4 {
         let retranslate = translater.lex_sort();
         set.apply_mut(|iv| {
             let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
-            let new_name = retranslate.get_rank(*iv.name()).unwrap();
             iv.update_chr(&new_chr);
-            iv.update_name(&new_name);
         });
         retranslate
     }
@@ -47,9 +45,7 @@ impl Reorder<NumericBed6> for NumericBed6 {
         let retranslate = translater.lex_sort();
         set.apply_mut(|iv| {
             let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
-            let new_name = retranslate.get_rank(*iv.name()).unwrap();
             iv.update_chr(&new_chr);
-            iv.update_name(&new_name);
         });
         retranslate
     }
@@ -62,15 +58,7 @@ impl Reorder<NumericBed12> for NumericBed12 {
         let retranslate = translater.lex_sort();
         set.apply_mut(|iv| {
             let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
-            let new_name = retranslate.get_rank(*iv.name()).unwrap();
-            let new_item_rgb = retranslate.get_rank(*iv.item_rgb()).unwrap();
-            let new_block_sizes = retranslate.get_rank(*iv.block_sizes()).unwrap();
-            let new_block_starts = retranslate.get_rank(*iv.block_starts()).unwrap();
             iv.update_chr(&new_chr);
-            iv.update_name(&new_name);
-            iv.update_item_rgb(&new_item_rgb);
-            iv.update_block_sizes(&new_block_sizes);
-            iv.update_block_starts(&new_block_starts);
         });
         retranslate
     }
@@ -83,9 +71,7 @@ impl Reorder<NumericMetaInterval> for NumericMetaInterval {
         let retranslate = translater.lex_sort();
         set.apply_mut(|iv| {
             let new_chr = retranslate.get_rank(*iv.chr()).unwrap();
-            let new_name = retranslate.get_rank(*iv.meta()).unwrap();
             iv.update_chr(&new_chr);
-            iv.update_meta(&new_name);
         });
         retranslate
     }

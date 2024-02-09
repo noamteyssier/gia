@@ -2,7 +2,7 @@ use crate::{
     cli::{ShiftArgs, ShiftParams},
     dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{Genome, InputFormat, Translater},
+    types::{Genome, InputFormat, SplitTranslater, TranslateGroup},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -55,7 +55,7 @@ where
 
 fn shift_set<I, W>(
     set: IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<&SplitTranslater>,
     params: ShiftParams,
     output: W,
 ) -> Result<()>
@@ -65,11 +65,15 @@ where
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     params.warn_args();
-    let genome = Genome::from_opt_path_immutable_with(params.genome, translater.as_ref(), false)?;
+    let genome = Genome::from_opt_path_immutable_with(
+        params.genome,
+        translater.map(|x| x.get_translater(TranslateGroup::Chr)),
+        false,
+    )?;
     let shift_iter = set
         .into_iter()
         .map(|iv| shift_interval(iv, params.amount, params.percent, genome.as_ref()));
-    write_records_iter_with(shift_iter, output, translater.as_ref())
+    write_records_iter_with(shift_iter, output, translater)
 }
 
 pub fn shift(args: ShiftArgs) -> Result<()> {

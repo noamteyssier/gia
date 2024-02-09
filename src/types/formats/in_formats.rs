@@ -128,6 +128,15 @@ mod testing {
     }
 
     #[test]
+    fn input_format_bed4() {
+        let line = b"chr1\t1\t2\tname";
+        let mut buffer = BufReader::new(line.as_slice());
+        buffer.fill_buf().unwrap();
+        let input_format = InputFormat::predict(&buffer).unwrap();
+        assert_eq!(input_format, InputFormat::Bed4);
+    }
+
+    #[test]
     fn input_format_bed6() {
         let line = b"chr1\t1\t2\tname\t0\t+";
         let mut buffer = BufReader::new(line.as_slice());
@@ -141,8 +150,8 @@ mod testing {
         let line = b"chr1\t1\t2\tname\t0\t+\textra";
         let mut buffer = BufReader::new(line.as_slice());
         buffer.fill_buf().unwrap();
-        let input_format = InputFormat::predict(&buffer);
-        assert!(input_format.is_err());
+        let input_format = InputFormat::predict(&buffer).unwrap();
+        assert_eq!(input_format, InputFormat::Ambiguous);
     }
 
     #[test]

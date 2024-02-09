@@ -1,5 +1,5 @@
 use super::build_reader;
-use crate::types::{MetaIntervalSet, NumericMetaInterval, Translater};
+use crate::types::{MetaIntervalSet, NumericMetaInterval, SplitTranslater, TranslateGroup};
 use anyhow::{bail, Result};
 use csv::ByteRecord;
 use std::{io::Read, str::from_utf8};
@@ -7,7 +7,7 @@ use std::{io::Read, str::from_utf8};
 pub fn read_meta_interval_set<R: Read>(
     reader: R,
     named: bool,
-) -> Result<(MetaIntervalSet, Option<Translater>)> {
+) -> Result<(MetaIntervalSet, Option<SplitTranslater>)> {
     if named {
         let (set, translater) = read_meta_interval_set_named(reader)?;
         Ok((set, Some(translater)))
@@ -19,7 +19,7 @@ pub fn read_meta_interval_set<R: Read>(
 
 pub fn read_meta_interval_set_with<R: Read>(
     reader: R,
-    translater: Option<&mut Translater>,
+    translater: Option<&mut SplitTranslater>,
 ) -> Result<MetaIntervalSet> {
     if let Some(translater) = translater {
         convert_meta_interval_set(reader, translater)
@@ -45,9 +45,9 @@ fn read_meta_interval_set_unnamed<R: Read>(reader: R) -> Result<MetaIntervalSet>
     Ok(set)
 }
 
-/// Reads a single file into a GenomicIntervalSet and a Translater
-fn read_meta_interval_set_named<R: Read>(reader: R) -> Result<(MetaIntervalSet, Translater)> {
-    let mut translater = Translater::new();
+/// Reads a single file into a GenomicIntervalSet and a SplitTranslater
+fn read_meta_interval_set_named<R: Read>(reader: R) -> Result<(MetaIntervalSet, SplitTranslater)> {
+    let mut translater = SplitTranslater::new();
     let set = convert_meta_interval_set(reader, &mut translater)?;
     Ok((set, translater))
 }
@@ -59,7 +59,7 @@ fn read_meta_interval_set_named<R: Read>(reader: R) -> Result<(MetaIntervalSet, 
 /// and keeping track of the same chromosome names and indices.
 fn convert_meta_interval_set<R: Read>(
     reader: R,
-    translater: &mut Translater,
+    translater: &mut SplitTranslater,
 ) -> Result<MetaIntervalSet> {
     let mut reader = build_reader(reader);
     let mut raw_record = ByteRecord::new();
@@ -94,10 +94,10 @@ fn convert_meta_interval_set<R: Read>(
         }
 
         // Add the chromosome and metadata to the translater
-        translater.add_name(chr);
-        translater.add_name(&buffer);
-        let chr_int = translater.get_idx(chr).unwrap();
-        let name_int = translater.get_idx(&buffer).unwrap();
+        translater.add_name(chr, TranslateGroup::Chr);
+        translater.add_name(&buffer, TranslateGroup::Meta);
+        let chr_int = translater.get_idx(chr, TranslateGroup::Chr).unwrap();
+        let name_int = translater.get_idx(&buffer, TranslateGroup::Meta).unwrap();
 
         // Create the interval and add it to the set
         let interval = NumericMetaInterval::new(chr_int, start, end, name_int);

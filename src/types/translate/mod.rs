@@ -1,12 +1,14 @@
 mod rename;
 mod reorder;
 mod retranslater;
+mod split_retranslater;
 mod split_translater;
 mod stream_translater;
 mod translater;
 pub use rename::{Rename, Renamer};
 pub use reorder::Reorder;
 pub use retranslater::Retranslater;
+pub use split_retranslater::SplitRetranslater;
 pub use split_translater::SplitTranslater;
 pub use stream_translater::StreamTranslater;
 pub use translater::Translater;

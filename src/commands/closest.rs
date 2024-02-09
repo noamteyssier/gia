@@ -2,7 +2,7 @@ use crate::{
     cli::{ClosestArgs, ClosestParams},
     dispatch_pair,
     io::write_pairs_iter_with,
-    types::{InputFormat, IntervalPair, Rename, Renamer, Translater},
+    types::{InputFormat, IntervalPair, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 use anyhow::Result;
@@ -38,7 +38,7 @@ impl From<ClosestParams> for ClosestType {
 fn run_closest<'a, Ia, Ib, Na, Nb, W>(
     mut a_set: IntervalContainer<Ia, usize, usize>,
     mut b_set: IntervalContainer<Ib, usize, usize>,
-    translater: Option<&'a Translater>,
+    translater: Option<&'a SplitTranslater>,
     params: ClosestParams,
     output: W,
 ) -> Result<()>

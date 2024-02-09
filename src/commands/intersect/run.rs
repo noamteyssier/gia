@@ -6,7 +6,7 @@ use crate::{
         build_reader, write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
         UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, NumericBed3, StreamTranslater, Translater},
+    types::{InputFormat, NumericBed3, SplitTranslater, StreamTranslater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntersectIter, IntervalContainer, MergeIter};
@@ -16,7 +16,7 @@ use std::io::Write;
 pub fn intersect_sets<Ia, Ib, W>(
     set_a: IntervalContainer<Ia, usize, usize>,
     set_b: IntervalContainer<Ib, usize, usize>,
-    translater: Option<&Translater>,
+    translater: Option<&SplitTranslater>,
     params: IntersectParams,
     writer: W,
 ) -> Result<()>
@@ -93,7 +93,7 @@ fn intersect_stream(args: IntersectArgs) -> Result<()> {
         let merged_target_iter = MergeIter::new(target_iter);
         let intersect_iter =
             IntersectIter::new_with_method(merged_query_iter, merged_target_iter, method);
-        write_records_iter_with(intersect_iter, writer, None::<&Translater>)?;
+        write_records_iter_with(intersect_iter, writer, None::<&SplitTranslater>)?;
     }
     Ok(())
 }

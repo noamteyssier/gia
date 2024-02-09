@@ -2,7 +2,7 @@ use crate::{
     cli::{FlankArgs, Growth},
     dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{Genome, InputFormat, Translater},
+    types::{Genome, InputFormat, SplitTranslater, TranslateGroup},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
@@ -80,7 +80,7 @@ where
 /// Flank the intervals in the set
 fn flank_set<I, W>(
     set: IntervalContainer<I, usize, usize>,
-    translater: Option<Translater>,
+    translater: Option<&SplitTranslater>,
     growth: Growth,
     output: W,
 ) -> Result<()>
@@ -90,12 +90,12 @@ where
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     growth.warn_args();
-    let genome = growth.get_genome(translater.as_ref())?;
+    let genome = growth.get_genome(translater.map(|x| x.get_translater(TranslateGroup::Chr)))?;
     let flank_iter = set.iter().flat_map(|iv| {
         let (left, right) = growth.get_values(iv);
         flank_interval(*iv, left, right, genome.as_ref())
     });
-    write_records_iter_with(flank_iter, output, translater.as_ref())
+    write_records_iter_with(flank_iter, output, translater)
 }
 
 pub fn flank(args: FlankArgs) -> Result<()> {

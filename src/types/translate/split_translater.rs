@@ -1,5 +1,4 @@
-use super::{Retranslater, Translate, TranslateGroup, Translater};
-use hashbrown::HashMap;
+use super::{Translate, TranslateGroup, Translater};
 
 pub struct SplitTranslater {
     chr_tl: Translater,
@@ -10,12 +9,6 @@ impl SplitTranslater {
         Self {
             chr_tl: Translater::new(),
             meta_tl: Translater::new(),
-        }
-    }
-    pub fn has_name(&self, name: &str, group: TranslateGroup) -> bool {
-        match group {
-            TranslateGroup::Chr => self.chr_tl.has_name(name),
-            TranslateGroup::Meta => self.meta_tl.has_name(name),
         }
     }
     pub fn add_name(&mut self, name: &str, group: TranslateGroup) {
@@ -30,17 +23,14 @@ impl SplitTranslater {
             TranslateGroup::Meta => self.meta_tl.get_idx(name),
         }
     }
-    pub fn get_name_to_idx(&self, group: TranslateGroup) -> &HashMap<String, usize> {
+    pub fn get_translater(&self, group: TranslateGroup) -> &Translater {
         match group {
-            TranslateGroup::Chr => self.chr_tl.get_name_to_idx(),
-            TranslateGroup::Meta => self.meta_tl.get_name_to_idx(),
+            TranslateGroup::Chr => &self.chr_tl,
+            TranslateGroup::Meta => &self.meta_tl,
         }
     }
-    pub fn lex_sort(self, group: TranslateGroup) -> Retranslater {
-        match group {
-            TranslateGroup::Chr => self.chr_tl.lex_sort(),
-            TranslateGroup::Meta => self.meta_tl.lex_sort(),
-        }
+    pub fn disband(self) -> (Translater, Translater) {
+        (self.chr_tl, self.meta_tl)
     }
 }
 impl Translate for SplitTranslater {
