@@ -35,7 +35,7 @@ impl<'a> Rename<'a, NumericBed6, NamedBed6<'a>> for Renamer {
             iv.start(),
             iv.end(),
             name,
-            *iv.score(),
+            iv.score(),
             iv.strand().unwrap_or_default(),
         )
     }
@@ -52,7 +52,7 @@ impl<'a> Rename<'a, NumericBed12, NamedBed12<'a>> for Renamer {
             iv.start(),
             iv.end(),
             name,
-            *iv.score(),
+            iv.score(),
             iv.strand().unwrap_or_default(),
             iv.thick_start(),
             iv.thick_end(),

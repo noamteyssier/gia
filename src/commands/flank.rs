@@ -135,7 +135,7 @@ mod testing {
 
     #[test]
     fn test_flank_left_bed6() {
-        let iv = Bed6::new(1, 100, 400, 1, 2, Strand::default());
+        let iv = Bed6::new(1, 100, 400, 1, 2.into(), Strand::default());
         let left = left_flank(iv, 50).unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -146,7 +146,20 @@ mod testing {
 
     #[test]
     fn test_flank_left_bed12() {
-        let iv = Bed12::new(1, 100, 400, 1, 2, Strand::default(), 3, 4, 5, 6, 7, 8);
+        let iv = Bed12::new(
+            1,
+            100,
+            400,
+            1,
+            2.into(),
+            Strand::default(),
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+        );
         let left = left_flank(iv, 50).unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -187,7 +200,7 @@ mod testing {
 
     #[test]
     fn test_flank_right_bed6() {
-        let iv = Bed6::new(1, 100, 400, 1, 2, Strand::default());
+        let iv = Bed6::new(1, 100, 400, 1, 2.into(), Strand::default());
         let right = right_flank(iv, 50, None).unwrap();
         assert_eq!(right.start(), 400);
         assert_eq!(right.end(), 450);
@@ -198,7 +211,20 @@ mod testing {
 
     #[test]
     fn test_flank_right_bed12() {
-        let iv = Bed12::new(1, 100, 400, 1, 2, Strand::default(), 3, 4, 5, 6, 7, 8);
+        let iv = Bed12::new(
+            1,
+            100,
+            400,
+            1,
+            2.into(),
+            Strand::default(),
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+        );
         let right = right_flank(iv, 50, None).unwrap();
         assert_eq!(right.start(), 400);
         assert_eq!(right.end(), 450);

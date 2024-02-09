@@ -90,7 +90,7 @@ fn convert_bed12_set<R: Read>(reader: R, translater: &mut SplitTranslater) -> Re
             record.start(),
             record.end(),
             name_int,
-            *record.score(),
+            record.score(),
             record.strand().unwrap_or_default(),
             record.thick_start(),
             record.thick_end(),

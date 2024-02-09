@@ -19,13 +19,12 @@ pub type NumericBed4 = Bed4<usize, usize, usize>;
 pub type NamedBed4<'a> = Bed4<&'a str, usize, &'a str>;
 pub type Bed4Set = IntervalContainer<NumericBed4, usize, usize>;
 
-pub type NumericBed6 = Bed6<usize, usize, usize, f64>;
-pub type NamedBed6<'a> = Bed6<&'a str, usize, &'a str, f64>;
+pub type NumericBed6 = Bed6<usize, usize, usize>;
+pub type NamedBed6<'a> = Bed6<&'a str, usize, &'a str>;
 pub type Bed6Set = IntervalContainer<NumericBed6, usize, usize>;
 
-pub type NumericBed12 = Bed12<usize, usize, usize, f64, usize, usize, usize, usize, usize>;
-pub type NamedBed12<'a> =
-    Bed12<&'a str, usize, &'a str, f64, usize, usize, &'a str, &'a str, &'a str>;
+pub type NumericBed12 = Bed12<usize, usize, usize, usize, usize, usize, usize, usize>;
+pub type NamedBed12<'a> = Bed12<&'a str, usize, &'a str, usize, usize, &'a str, &'a str, &'a str>;
 pub type Bed12Set = IntervalContainer<NumericBed12, usize, usize>;
 
 pub type NumericMetaInterval = MetaInterval<usize, usize, usize>;

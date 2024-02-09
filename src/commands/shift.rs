@@ -162,7 +162,7 @@ mod testing {
 
     #[test]
     fn test_shift_bed6() {
-        let iv = Bed6::new(1, 100, 200, 1, 2, Strand::default());
+        let iv = Bed6::new(1, 100, 200, 1, 2.into(), Strand::default());
         let si = shift_interval(iv, 50.0, false, None);
         assert_eq!(si.start(), 150);
         assert_eq!(si.end(), 250);
@@ -173,7 +173,20 @@ mod testing {
 
     #[test]
     fn test_shift_bed12() {
-        let iv = Bed12::new(1, 100, 400, 1, 2, Strand::default(), 3, 4, 5, 6, 7, 8);
+        let iv = Bed12::new(
+            1,
+            100,
+            400,
+            1,
+            2.into(),
+            Strand::default(),
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+        );
         let si = shift_interval(iv, 50.0, false, None);
         assert_eq!(si.start(), 150);
         assert_eq!(si.end(), 450);

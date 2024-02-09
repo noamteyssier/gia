@@ -77,7 +77,7 @@ fn convert_bed6_set<R: Read>(reader: R, translater: &mut SplitTranslater) -> Res
             record.start(),
             record.end(),
             name_int,
-            *record.score(),
+            record.score(),
             record.strand().unwrap_or_default(),
         );
         set.insert(interval);
