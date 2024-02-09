@@ -13,6 +13,7 @@ pub enum InputFormat {
     Bed3,
     Bed4,
     Bed6,
+    Gtf,
     Bed12,
     Ambiguous,
 }
@@ -22,7 +23,10 @@ impl InputFormat {
         if internal.is_empty() {
             bail!("Empty file or stream or buffer")
         }
-        let first = if let Some(first) = internal.split(|b| *b == b'\n').next() {
+        let first = if let Some(first) = internal
+            .split(|b| *b == b'\n')
+            .find(|l| !l.starts_with(b"#"))
+        {
             first
         } else {
             bail!("File missing newline, cannot predict input format")
@@ -33,6 +37,7 @@ impl InputFormat {
             3 => Ok(InputFormat::Bed3),
             4 => Ok(InputFormat::Bed4),
             6 => Ok(InputFormat::Bed6),
+            9 => Ok(InputFormat::Gtf),
             12 => Ok(InputFormat::Bed12),
             _ => Ok(InputFormat::Ambiguous),
         }
@@ -54,10 +59,13 @@ pub enum FieldFormat {
 impl FieldFormat {
     pub fn predict<R>(bufreader: &BufReader<R>, input_format: InputFormat) -> Result<FieldFormat> {
         let internal = bufreader.buffer();
-        let first = if let Some(first) = internal.split(|b| *b == b'\n').next() {
+        let first = if let Some(first) = internal
+            .split(|b| *b == b'\n')
+            .find(|l| !l.starts_with(b"#"))
+        {
             first
         } else {
-            bail!("Empty file or stream")
+            bail!("File missing newline, cannot predict input format")
         };
         let fields = first.split(|b| *b == b'\t').collect::<Vec<_>>();
         match input_format {
@@ -73,6 +81,21 @@ impl FieldFormat {
                 let chr = from_utf8(fields[0])?;
                 let name = from_utf8(fields[3])?;
                 if chr.parse::<u32>().is_err() || name.parse::<u32>().is_err() {
+                    Ok(FieldFormat::StringBased)
+                } else {
+                    Ok(FieldFormat::IntegerBased)
+                }
+            }
+            InputFormat::Gtf => {
+                let seqname = from_utf8(fields[0])?;
+                let source = from_utf8(fields[1])?;
+                let feature = from_utf8(fields[2])?;
+                let attributes = from_utf8(fields[8])?;
+                if seqname.parse::<u32>().is_err()
+                    || source.parse::<u32>().is_err()
+                    || feature.parse::<u32>().is_err()
+                    || attributes.parse::<u32>().is_err()
+                {
                     Ok(FieldFormat::StringBased)
                 } else {
                     Ok(FieldFormat::IntegerBased)
