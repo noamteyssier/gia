@@ -1,6 +1,6 @@
 use super::build_writer;
 use crate::types::{
-    NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericMetaInterval, Translate,
+    NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericGtf, NumericMetaInterval, Translate,
 };
 use anyhow::Result;
 use bedrs::Coordinates;
@@ -324,6 +324,64 @@ impl<'a> WriteNamedIter<&'a NumericMetaInterval> for WriteNamedIterImpl {
             let chr = translater.get_chr_name(*interval.chr()).unwrap();
             let name = translater.get_meta_name(*interval.meta()).unwrap();
             let named_interval = (chr, interval.start(), interval.end(), name);
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
+}
+impl WriteNamedIter<NumericGtf> for WriteNamedIterImpl {
+    fn write_named_iter<W: Write, It: Iterator<Item = NumericGtf>, Tr: Translate>(
+        writer: W,
+        iterator: It,
+        translater: &Tr,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let source = translater.get_meta_name(*interval.source()).unwrap();
+            let feature = translater.get_meta_name(*interval.feature()).unwrap();
+            let attributes = translater.get_meta_name(*interval.attributes()).unwrap();
+            let named_interval = (
+                chr,
+                source,
+                feature,
+                interval.start(),
+                interval.end(),
+                interval.score(),
+                interval.strand(),
+                interval.frame(),
+                attributes,
+            );
+            wtr.serialize(named_interval)?;
+        }
+        wtr.flush()?;
+        Ok(())
+    }
+}
+impl<'a> WriteNamedIter<&'a NumericGtf> for WriteNamedIterImpl {
+    fn write_named_iter<W: Write, It: Iterator<Item = &'a NumericGtf>, Tr: Translate>(
+        writer: W,
+        iterator: It,
+        translater: &Tr,
+    ) -> Result<()> {
+        let mut wtr = build_writer(writer);
+        for interval in iterator {
+            let chr = translater.get_chr_name(*interval.chr()).unwrap();
+            let source = translater.get_meta_name(*interval.source()).unwrap();
+            let feature = translater.get_meta_name(*interval.feature()).unwrap();
+            let attributes = translater.get_meta_name(*interval.attributes()).unwrap();
+            let named_interval = (
+                chr,
+                source,
+                feature,
+                interval.start(),
+                interval.end(),
+                interval.score(),
+                interval.strand(),
+                interval.frame(),
+                attributes,
+            );
             wtr.serialize(named_interval)?;
         }
         wtr.flush()?;

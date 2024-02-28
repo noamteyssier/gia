@@ -1,6 +1,5 @@
 use super::{Retranslater, Translater};
-use crate::types::{NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericMetaInterval};
-use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
+use bedrs::{traits::IntervalBounds, IntervalContainer};
 
 pub trait Reorder<C>
 where

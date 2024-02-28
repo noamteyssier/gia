@@ -1,7 +1,7 @@
 use super::{SplitTranslater, Translate};
 use crate::types::{
-    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NamedMetaInterval, NumericBed12, NumericBed3,
-    NumericBed4, NumericBed6, NumericMetaInterval,
+    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NamedGtf, NamedMetaInterval, NumericBed12,
+    NumericBed3, NumericBed4, NumericBed6, NumericGtf, NumericMetaInterval,
 };
 use bedrs::{traits::IntervalBounds, Coordinates};
 
@@ -69,7 +69,26 @@ impl<'a> Rename<'a, NumericMetaInterval, NamedMetaInterval<'a>> for Renamer {
         translater: &'a SplitTranslater,
     ) -> NamedMetaInterval<'a> {
         let chr = translater.get_chr_name(*iv.chr()).unwrap();
-        let meta = translater.get_chr_name(*iv.meta()).unwrap();
+        let meta = translater.get_meta_name(*iv.meta()).unwrap();
         NamedMetaInterval::new(chr, iv.start(), iv.end(), meta)
+    }
+}
+impl<'a> Rename<'a, NumericGtf, NamedGtf<'a>> for Renamer {
+    fn rename_with(iv: &NumericGtf, translater: &'a SplitTranslater) -> NamedGtf<'a> {
+        let chr = translater.get_chr_name(*iv.chr()).unwrap();
+        let source = translater.get_meta_name(*iv.source()).unwrap();
+        let feature = translater.get_meta_name(*iv.feature()).unwrap();
+        let attributes = translater.get_meta_name(*iv.attributes()).unwrap();
+        NamedGtf::new(
+            chr,
+            source,
+            feature,
+            iv.start(),
+            iv.end(),
+            iv.score(),
+            iv.strand().unwrap_or_default(),
+            iv.frame(),
+            attributes,
+        )
     }
 }

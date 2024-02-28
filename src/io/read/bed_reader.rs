@@ -1,10 +1,11 @@
 use super::{
     read_bed12_set, read_bed12_set_with, read_bed3_set, read_bed3_set_with, read_bed4_set,
-    read_bed4_set_with, read_bed6_set, read_bed6_set_with, read_meta_interval_set,
-    read_meta_interval_set_with,
+    read_bed4_set_with, read_bed6_set, read_bed6_set_with, read_gtf_set, read_gtf_set_with,
+    read_meta_interval_set, read_meta_interval_set_with,
 };
 use crate::types::{
-    Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, InputFormat, MetaIntervalSet, SplitTranslater,
+    Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, GtfSet, InputFormat, MetaIntervalSet,
+    SplitTranslater,
 };
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
@@ -131,6 +132,11 @@ impl BedReader {
         read_meta_interval_set(self.reader(), true) // meta intervals are always named
     }
 
+    /// Returns a GtfSet from the reader with an Option<SplitTranslater>
+    pub fn gtf_set(self) -> Result<(GtfSet, Option<SplitTranslater>)> {
+        read_gtf_set(self.reader(), true) // meta intervals are always named
+    }
+
     /// Returns a Bed3Set from the reader
     pub fn bed3_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed3Set> {
         read_bed3_set_with(self.reader(), translater)
@@ -146,7 +152,7 @@ impl BedReader {
         read_bed6_set_with(self.reader(), translater)
     }
 
-    /// Returns a Bed6Set from the reader
+    /// Returns a Bed12Set from the reader
     pub fn bed12_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed12Set> {
         read_bed12_set_with(self.reader(), translater)
     }
@@ -157,5 +163,10 @@ impl BedReader {
         translater: Option<&mut SplitTranslater>,
     ) -> Result<MetaIntervalSet> {
         read_meta_interval_set_with(self.reader(), translater)
+    }
+
+    /// Returns a Bed6Set from the reader
+    pub fn gtf_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<GtfSet> {
+        read_gtf_set_with(self.reader(), translater)
     }
 }
