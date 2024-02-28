@@ -108,7 +108,7 @@ pub fn flank(args: FlankArgs) -> Result<()> {
 mod testing {
 
     use super::*;
-    use bedrs::{Bed12, Bed3, Bed6, Coordinates, Strand};
+    use bedrs::{Bed12, Bed3, Bed6, Coordinates, Score, Strand};
 
     #[test]
     fn test_flank_left_bounds() {
@@ -135,7 +135,7 @@ mod testing {
 
     #[test]
     fn test_flank_left_bed6() {
-        let iv = Bed6::new(1, 100, 400, 1, 2.into(), Strand::default());
+        let iv = Bed6::new(1, 100, 400, 1, Score::new(2.0), Strand::default());
         let left = left_flank(iv, 50).unwrap();
         assert_eq!(left.start(), 50);
         assert_eq!(left.end(), 100);
@@ -151,7 +151,7 @@ mod testing {
             100,
             400,
             1,
-            2.into(),
+            Score::new(2.0),
             Strand::default(),
             3,
             4,
@@ -200,7 +200,7 @@ mod testing {
 
     #[test]
     fn test_flank_right_bed6() {
-        let iv = Bed6::new(1, 100, 400, 1, 2.into(), Strand::default());
+        let iv = Bed6::new(1, 100, 400, 1, Score::new(2.0), Strand::default());
         let right = right_flank(iv, 50, None).unwrap();
         assert_eq!(right.start(), 400);
         assert_eq!(right.end(), 450);
@@ -216,7 +216,7 @@ mod testing {
             100,
             400,
             1,
-            2.into(),
+            Score::new(2.0),
             Strand::default(),
             3,
             4,
