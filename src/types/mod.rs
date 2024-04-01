@@ -1,11 +1,13 @@
 mod depth;
 mod formats;
 mod pairs;
+mod spacing;
 mod translate;
 use bedrs::{Bed12, Bed3, Bed4, Bed6, Gtf, IntervalContainer, MetaInterval};
 pub use depth::IntervalDepth;
 pub use formats::{FieldFormat, Genome, InputFormat};
 pub use pairs::IntervalPair;
+pub use spacing::IntervalSpacing;
 pub use translate::{
     Rename, Renamer, Reorder, SplitRetranslater, SplitTranslater, StreamTranslater, Translate,
     TranslateGroup, Translater,
