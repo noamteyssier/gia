@@ -86,7 +86,7 @@ pub fn shift(args: ShiftArgs) -> Result<()> {
 mod testing {
 
     use super::*;
-    use bedrs::{Bed12, Bed3, Bed6, Coordinates, Strand};
+    use bedrs::{Bed12, Bed3, Bed6, Coordinates, Score, Strand};
 
     #[test]
     fn test_calculate_percentage() {
@@ -162,7 +162,7 @@ mod testing {
 
     #[test]
     fn test_shift_bed6() {
-        let iv = Bed6::new(1, 100, 200, 1, 2.into(), Strand::default());
+        let iv = Bed6::new(1, 100, 200, 1, Score::new(2.0), Strand::default());
         let si = shift_interval(iv, 50.0, false, None);
         assert_eq!(si.start(), 150);
         assert_eq!(si.end(), 250);
@@ -178,7 +178,7 @@ mod testing {
             100,
             400,
             1,
-            2.into(),
+            Score::new(2.0),
             Strand::default(),
             3,
             4,

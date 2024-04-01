@@ -1,5 +1,6 @@
 use crate::{
     cli::{SampleArgs, SampleParams},
+    dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, SplitTranslater},
 };
@@ -9,7 +10,7 @@ use serde::Serialize;
 use std::io::Write;
 
 fn sample_from_set<I, W>(
-    set: &mut IntervalContainer<I, usize, usize>,
+    set: IntervalContainer<I, usize, usize>,
     translater: Option<&SplitTranslater>,
     params: SampleParams,
     writer: W,
@@ -47,33 +48,7 @@ where
 }
 
 pub fn sample(args: SampleArgs) -> Result<()> {
-    // read input
     let reader = args.input.get_reader()?;
-
-    // open output
     let writer = args.output.get_writer()?;
-
-    // handle input format
-    match reader.input_format() {
-        InputFormat::Bed3 => {
-            let (mut set, translater) = reader.bed3_set()?;
-            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
-        }
-        InputFormat::Bed4 => {
-            let (mut set, translater) = reader.bed4_set()?;
-            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
-        }
-        InputFormat::Bed6 => {
-            let (mut set, translater) = reader.bed6_set()?;
-            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
-        }
-        InputFormat::Bed12 => {
-            let (mut set, translater) = reader.bed12_set()?;
-            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
-        }
-        InputFormat::Ambiguous => {
-            let (mut set, translater) = reader.meta_interval_set()?;
-            sample_from_set(&mut set, translater.as_ref(), args.params, writer)
-        }
-    }
+    dispatch_single!(reader, writer, args.params, sample_from_set)
 }

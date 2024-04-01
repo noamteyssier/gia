@@ -123,7 +123,7 @@ pub fn random_bed6<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
             (c, x, y, s)
         })
         // build the interval
-        .map(|(c, x, y, s)| NumericBed6::new(c, x, y, 0, Score::Empty, s));
+        .map(|(c, x, y, s)| NumericBed6::new(c, x, y, 0, Score::empty(), s));
 
     write_records_iter_with(interval_gen, writer, genome_sizes.translater())?;
 
@@ -175,7 +175,9 @@ pub fn random_bed12<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
             (c, x, y, t, u, s)
         })
         // build the interval
-        .map(|(c, x, y, t, u, s)| NumericBed12::new(c, x, y, 0, Score::Empty, s, t, u, 0, 0, 0, 0));
+        .map(|(c, x, y, t, u, s)| {
+            NumericBed12::new(c, x, y, 0, Score::empty(), s, t, u, 0, 0, 0, 0)
+        });
 
     write_records_iter_with(interval_gen, writer, genome_sizes.translater())?;
 
