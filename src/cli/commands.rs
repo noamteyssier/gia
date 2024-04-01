@@ -1,6 +1,6 @@
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs, SubtractArgs, WindowArgs,
+    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs, WindowArgs,
 };
 use clap::Subcommand;
 
@@ -51,6 +51,9 @@ pub enum Command {
 
     /// Sorts a BED file by chromosome, start, and end
     Sort(SortArgs),
+
+    /// Calculates the spacing between intervals in a BED file
+    Spacing(SpacingArgs),
 
     /// Subtracts two BED files
     ///

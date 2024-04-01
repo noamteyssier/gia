@@ -10,6 +10,7 @@ mod random;
 mod sample;
 mod shift;
 mod sort;
+mod spacing;
 mod subtract;
 mod window;
 
@@ -25,5 +26,6 @@ pub use random::random;
 pub use sample::sample;
 pub use shift::shift;
 pub use sort::sort;
+pub use spacing::spacing;
 pub use subtract::subtract;
 pub use window::window;

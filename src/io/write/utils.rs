@@ -1,5 +1,6 @@
 use crate::types::{
-    IntervalDepth, IntervalPair, NumericBed3, Rename, Renamer, SplitTranslater, StreamTranslater,
+    IntervalDepth, IntervalPair, IntervalSpacing, NumericBed3, Rename, Renamer, SplitTranslater,
+    StreamTranslater,
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
@@ -70,6 +71,57 @@ where
     N: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,
     It: Iterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    let mut wtr = build_writer(writer);
+    for record in records {
+        wtr.serialize(record.get_named_tuple())?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_spacing_iter_with<'a, W, I, N, It>(
+    records: It,
+    writer: W,
+    translater: Option<&SplitTranslater>,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalSpacing<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    if translater.is_some() {
+        write_named_spacing_iter(records, writer)
+    } else {
+        write_spacing_iter(records, writer)
+    }
+}
+
+fn write_spacing_iter<'a, W, I, N, It>(records: It, writer: W) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalSpacing<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    let mut wtr = build_writer(writer);
+    for record in records {
+        wtr.serialize(record.get_tuple())?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_named_spacing_iter<'a, W, I, N, It>(records: It, writer: W) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write,
+    It: Iterator<Item = IntervalSpacing<'a, I, N>>,
     Renamer: Rename<'a, I, N>,
 {
     let mut wtr = build_writer(writer);
