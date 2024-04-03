@@ -9,14 +9,15 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
-    closest, complement, coverage, extend, flank, get_fasta, intersect, merge, random, sample,
-    segment, shift, sort, spacing, subtract, unionbedgraph, window,
+    closest, cluster, complement, coverage, extend, flank, get_fasta, intersect, merge, random,
+    sample, segment, shift, sort, spacing, subtract, unionbedgraph, window,
 };
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Command::Closest(args) => closest(args)?,
+        Command::Cluster(args) => cluster(args)?,
         Command::Complement(args) => complement(args)?,
         Command::Coverage(args) => coverage(args)?,
         Command::Extend(args) => extend(args)?,

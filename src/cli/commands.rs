@@ -1,7 +1,7 @@
 use super::{
-    ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs, SegmentArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs,
-    UnionBedGraphArgs, WindowArgs,
+    ClosestArgs, ClusterArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs,
+    IntersectArgs, MergeArgs, RandomArgs, SampleArgs, SegmentArgs, ShiftArgs, SortArgs,
+    SpacingArgs, SubtractArgs, UnionBedGraphArgs, WindowArgs,
 };
 use clap::Subcommand;
 
@@ -9,6 +9,9 @@ use clap::Subcommand;
 pub enum Command {
     /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
     Closest(ClosestArgs),
+
+    /// Annotates the intervals of a BED file with their Cluster ID
+    Cluster(ClusterArgs),
 
     /// Generates the complement of a BED file
     ///
