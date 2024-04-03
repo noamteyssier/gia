@@ -28,6 +28,10 @@ macro_rules! dispatch_single {
                 let (set, translater) = $reader.meta_interval_set()?;
                 $func(set, translater.as_ref(), $params, $writer)
             }
+            InputFormat::BedGraph => {
+                let (set, translater) = $reader.bedgraph_set()?;
+                $func(set, translater.as_ref(), $params, $writer)
+            }
         }
     };
 }
@@ -59,6 +63,10 @@ macro_rules! dispatch_single_owned_tl {
             }
             InputFormat::Ambiguous => {
                 let (set, translater) = $reader.meta_interval_set()?;
+                $func(set, translater, $params, $writer)
+            }
+            InputFormat::BedGraph => {
+                let (set, translater) = $reader.bedgraph_set()?;
                 $func(set, translater, $params, $writer)
             }
         }
@@ -106,6 +114,10 @@ macro_rules! dispatch_to_lhs {
                 let set_a = $reader_a.meta_interval_set_with($translater.as_mut())?;
                 $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
             }
+            InputFormat::BedGraph => {
+                let set_a = $reader_a.bedgraph_set_with($translater.as_mut())?;
+                $crate::dispatch_to_rhs!(set_a, $reader_b, $translater, $writer, $params, $func)
+            }
         }
     };
 }
@@ -138,6 +150,10 @@ macro_rules! dispatch_to_rhs {
             }
             InputFormat::Ambiguous => {
                 let set_b = $reader_b.meta_interval_set_with($translater.as_mut())?;
+                $func($set_a, set_b, $translater.as_ref(), $params, $writer)
+            }
+            InputFormat::BedGraph => {
+                let set_b = $reader_b.bedgraph_set_with($translater.as_mut())?;
                 $func($set_a, set_b, $translater.as_ref(), $params, $writer)
             }
         }

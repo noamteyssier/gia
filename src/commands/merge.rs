@@ -6,8 +6,8 @@ use crate::{
         WriteNamedIter, WriteNamedIterImpl,
     },
     types::{
-        InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericGtf,
-        SplitTranslater,
+        InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericBedGraph,
+        NumericGtf, SplitTranslater,
     },
 };
 use anyhow::Result;
@@ -61,6 +61,11 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Resul
         }
         InputFormat::Bed4 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed4>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer)
+        }
+        InputFormat::BedGraph => {
+            let record_iter: Box<dyn Iterator<Item = NumericBedGraph>> =
+                iter_unnamed(&mut csv_reader);
             merge_streamed(record_iter, writer)
         }
         InputFormat::Bed6 => {

@@ -51,3 +51,29 @@ impl DualInput {
         Ok((self.reader_from_a()?, self.reader_from_b()?))
     }
 }
+
+#[derive(Parser, Debug, Clone)]
+pub struct MultiInput {
+    /// Input BED files to process
+    #[clap(short, long, num_args=2.., required=true)]
+    pub inputs: Vec<String>,
+}
+impl MultiInput {
+    /// Get readers for all input files and ensure they are all named or unnamed
+    pub fn get_readers(self) -> Result<Vec<BedReader>> {
+        let mut readers = vec![];
+        let mut named = None;
+        for input in self.inputs {
+            let reader = BedReader::from_path(Some(input), None, None)?;
+            if let Some(named) = named {
+                if named != reader.is_named() {
+                    bail!("Input files must all be either named or unnamed");
+                }
+            } else {
+                named = Some(reader.is_named());
+            }
+            readers.push(reader);
+        }
+        Ok(readers)
+    }
+}

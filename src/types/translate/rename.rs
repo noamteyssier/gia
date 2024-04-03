@@ -1,7 +1,8 @@
 use super::{SplitTranslater, Translate};
 use crate::types::{
-    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NamedGtf, NamedMetaInterval, NumericBed12,
-    NumericBed3, NumericBed4, NumericBed6, NumericGtf, NumericMetaInterval,
+    NamedBed12, NamedBed3, NamedBed4, NamedBed6, NamedBedGraph, NamedGtf, NamedMetaInterval,
+    NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericBedGraph, NumericGtf,
+    NumericMetaInterval,
 };
 use bedrs::{traits::IntervalBounds, Coordinates};
 
@@ -24,6 +25,12 @@ impl<'a> Rename<'a, NumericBed4, NamedBed4<'a>> for Renamer {
         let chr = translater.get_chr_name(*iv.chr()).unwrap();
         let name = translater.get_meta_name(*iv.name()).unwrap();
         NamedBed4::new(chr, iv.start(), iv.end(), name)
+    }
+}
+impl<'a> Rename<'a, NumericBedGraph, NamedBedGraph<'a>> for Renamer {
+    fn rename_with(iv: &NumericBedGraph, translater: &'a SplitTranslater) -> NamedBedGraph<'a> {
+        let chr = translater.get_chr_name(*iv.chr()).unwrap();
+        NamedBedGraph::new(chr, iv.start(), iv.end(), iv.score())
     }
 }
 impl<'a> Rename<'a, NumericBed6, NamedBed6<'a>> for Renamer {

@@ -13,6 +13,7 @@ mod shift;
 mod sort;
 mod spacing;
 mod subtract;
+mod unionbedg;
 mod window;
 
 pub use closest::closest;
@@ -30,4 +31,5 @@ pub use shift::shift;
 pub use sort::sort;
 pub use spacing::spacing;
 pub use subtract::subtract;
+pub use unionbedg::unionbedgraph;
 pub use window::window;

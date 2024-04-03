@@ -1,7 +1,7 @@
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
     MergeArgs, RandomArgs, SampleArgs, SegmentArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs,
-    WindowArgs,
+    UnionBedGraphArgs, WindowArgs,
 };
 use clap::Subcommand;
 
@@ -63,6 +63,14 @@ pub enum Command {
     ///
     /// Will subtract `b` from `a`
     Subtract(SubtractArgs),
+
+    /// Combines multiple BedGraph files into a single file
+    /// and shows coverage over segmented intervals of each
+    /// BedGraph file as a separate column
+    ///
+    /// Assumes all input files contain non-overlapping intervals internally
+    #[clap(name = "unionbedg")]
+    UnionBedGraph(UnionBedGraphArgs),
 
     /// Finds all the overlapping intervals in Set B after adding a window around all
     /// intervals in Set A

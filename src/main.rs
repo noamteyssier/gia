@@ -10,7 +10,7 @@ use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
     closest, complement, coverage, extend, flank, get_fasta, intersect, merge, random, sample,
-    segment, shift, sort, spacing, subtract, window,
+    segment, shift, sort, spacing, subtract, unionbedgraph, window,
 };
 
 fn main() -> Result<()> {
@@ -31,6 +31,7 @@ fn main() -> Result<()> {
         Command::Sort(args) => sort(args)?,
         Command::Spacing(args) => spacing(args)?,
         Command::Subtract(args) => subtract(args)?,
+        Command::UnionBedGraph(args) => unionbedgraph(args)?,
         Command::Window(args) => window(args)?,
     }
     Ok(())
