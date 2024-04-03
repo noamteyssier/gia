@@ -16,6 +16,7 @@ pub enum InputFormat {
     Gtf,
     Bed12,
     Ambiguous,
+    BedGraph,
 }
 impl InputFormat {
     pub fn predict<R>(bufreader: &BufReader<R>) -> Result<InputFormat> {
@@ -69,7 +70,7 @@ impl FieldFormat {
         };
         let fields = first.split(|b| *b == b'\t').collect::<Vec<_>>();
         match input_format {
-            InputFormat::Bed3 => {
+            InputFormat::Bed3 | InputFormat::BedGraph => {
                 let chr = from_utf8(fields[0])?;
                 if chr.parse::<u32>().is_err() {
                     Ok(FieldFormat::StringBased)

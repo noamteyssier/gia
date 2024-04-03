@@ -130,7 +130,7 @@ impl BedReader {
 
     /// Returns a BedGraphSet from the reader with an Option<SplitTranslater>
     pub fn bedgraph_set(self) -> Result<(BedGraphSet, Option<SplitTranslater>)> {
-        read_bedgraph_set(self.reader(), true) // bedgraphs are always named
+        read_bedgraph_set(self.reader(), true)
     }
 
     /// Returns a MetaIntervalSet from the reader with an Option<SplitTranslater>
