@@ -190,6 +190,47 @@ where
     Ok(())
 }
 
+/// Write a segment to a CSV writer
+/// without initializing the writer or flushing
+///
+/// Used in UnionBedGraph
+pub fn write_segment<W: Write>(
+    writer: &mut csv::Writer<W>,
+    translater: Option<&SplitTranslater>,
+    segment: NumericBed3,
+    scores: &[f64],
+) -> Result<()> {
+    if let Some(tx) = translater {
+        write_named_segment(writer, tx, segment, scores)
+    } else {
+        write_unnamed_segment(writer, segment, scores)
+    }
+}
+
+/// Write a named segment and scores to a CSV writer
+fn write_named_segment<W: Write>(
+    writer: &mut csv::Writer<W>,
+    translater: &SplitTranslater,
+    segment: NumericBed3,
+    scores: &[f64],
+) -> Result<()> {
+    let named_segment = Renamer::rename_with(&segment, translater);
+    let tuple = (named_segment, scores);
+    writer.serialize(tuple)?;
+    Ok(())
+}
+
+/// Write an unnamed segment and scores to a CSV writer
+fn write_unnamed_segment<W: Write>(
+    writer: &mut csv::Writer<W>,
+    segment: NumericBed3,
+    scores: &[f64],
+) -> Result<()> {
+    let tuple = (segment, scores);
+    writer.serialize(tuple)?;
+    Ok(())
+}
+
 pub fn write_named_records_iter_dashmap<W: Write, I: Iterator<Item = NumericBed3>>(
     records: I,
     writer: W,

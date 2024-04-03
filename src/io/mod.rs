@@ -7,9 +7,9 @@ pub use iter::{NamedIter, UnnamedIter};
 pub use read::{build_reader, iter_unnamed, read_bed3_set, BedReader};
 use serde::{Deserialize, Serialize};
 pub use write::{
-    write_3col_iter_with, write_depth_iter_with, write_named_records_iter_dashmap,
-    write_pairs_iter_with, write_records_iter, write_records_iter_with, write_spacing_iter_with,
-    WriteNamedIter, WriteNamedIterImpl,
+    build_writer, write_3col_iter_with, write_depth_iter_with, write_named_records_iter_dashmap,
+    write_pairs_iter_with, write_records_iter, write_records_iter_with, write_segment,
+    write_spacing_iter_with, WriteNamedIter, WriteNamedIterImpl,
 };
 
 #[derive(Deserialize, Serialize)]
