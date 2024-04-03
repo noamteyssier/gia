@@ -1,6 +1,7 @@
 use super::{
     ClosestArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs,
-    MergeArgs, RandomArgs, SampleArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs, WindowArgs,
+    MergeArgs, RandomArgs, SampleArgs, SegmentArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs,
+    WindowArgs,
 };
 use clap::Subcommand;
 
@@ -45,6 +46,9 @@ pub enum Command {
 
     /// Randomly sample a BED file
     Sample(SampleArgs),
+
+    /// Segments a BED file into non-overlapping regions
+    Segment(SegmentArgs),
 
     /// Shifts the intervals of a BED file by a specified amount
     Shift(ShiftArgs),
