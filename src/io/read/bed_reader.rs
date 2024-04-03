@@ -1,11 +1,12 @@
 use super::{
     read_bed12_set, read_bed12_set_with, read_bed3_set, read_bed3_set_with, read_bed4_set,
-    read_bed4_set_with, read_bed6_set, read_bed6_set_with, read_gtf_set, read_gtf_set_with,
-    read_meta_interval_set, read_meta_interval_set_with,
+    read_bed4_set_with, read_bed6_set, read_bed6_set_with, read_bedgraph_set,
+    read_bedgraph_set_with, read_gtf_set, read_gtf_set_with, read_meta_interval_set,
+    read_meta_interval_set_with,
 };
 use crate::types::{
-    Bed12Set, Bed3Set, Bed4Set, Bed6Set, FieldFormat, GtfSet, InputFormat, MetaIntervalSet,
-    SplitTranslater,
+    Bed12Set, Bed3Set, Bed4Set, Bed6Set, BedGraphSet, FieldFormat, GtfSet, InputFormat,
+    MetaIntervalSet, SplitTranslater,
 };
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
@@ -127,6 +128,11 @@ impl BedReader {
         read_bed12_set(self.reader(), is_named)
     }
 
+    /// Returns a BedGraphSet from the reader with an Option<SplitTranslater>
+    pub fn bedgraph_set(self) -> Result<(BedGraphSet, Option<SplitTranslater>)> {
+        read_bedgraph_set(self.reader(), true) // bedgraphs are always named
+    }
+
     /// Returns a MetaIntervalSet from the reader with an Option<SplitTranslater>
     pub fn meta_interval_set(self) -> Result<(MetaIntervalSet, Option<SplitTranslater>)> {
         read_meta_interval_set(self.reader(), true) // meta intervals are always named
@@ -155,6 +161,14 @@ impl BedReader {
     /// Returns a Bed12Set from the reader
     pub fn bed12_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed12Set> {
         read_bed12_set_with(self.reader(), translater)
+    }
+
+    /// Returns a BedGraphSet from the reader
+    pub fn bedgraph_set_with(
+        self,
+        translater: Option<&mut SplitTranslater>,
+    ) -> Result<BedGraphSet> {
+        read_bedgraph_set_with(self.reader(), translater)
     }
 
     /// Returns a MetaIntervalSet from the reader

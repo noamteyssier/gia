@@ -3,15 +3,18 @@ pub mod bed3;
 pub mod bed4;
 pub mod bed6;
 pub mod bed_reader;
+pub mod bedgraph;
 pub mod gtf;
 pub mod iter;
 pub mod meta_interval;
 pub mod utils;
+
 pub use bed12::{read_bed12_set, read_bed12_set_with};
 pub use bed3::{read_bed3_set, read_bed3_set_with};
 pub use bed4::{read_bed4_set, read_bed4_set_with};
 pub use bed6::{read_bed6_set, read_bed6_set_with};
 pub use bed_reader::BedReader;
+pub use bedgraph::{read_bedgraph_set, read_bedgraph_set_with};
 pub use gtf::{read_gtf_set, read_gtf_set_with};
 pub use iter::iter_unnamed;
 pub use meta_interval::{read_meta_interval_set, read_meta_interval_set_with};

@@ -3,7 +3,7 @@ mod formats;
 mod pairs;
 mod spacing;
 mod translate;
-use bedrs::{Bed12, Bed3, Bed4, Bed6, Gtf, IntervalContainer, MetaInterval};
+use bedrs::{Bed12, Bed3, Bed4, Bed6, BedGraph, Gtf, IntervalContainer, MetaInterval};
 pub use depth::IntervalDepth;
 pub use formats::{FieldFormat, Genome, InputFormat};
 pub use pairs::IntervalPair;
@@ -20,6 +20,10 @@ pub type Bed3Set = IntervalContainer<NumericBed3, usize, usize>;
 pub type NumericBed4 = Bed4<usize, usize, usize>;
 pub type NamedBed4<'a> = Bed4<&'a str, usize, &'a str>;
 pub type Bed4Set = IntervalContainer<NumericBed4, usize, usize>;
+
+pub type NumericBedGraph = BedGraph<usize, usize>;
+pub type NamedBedGraph<'a> = BedGraph<&'a str, usize>;
+pub type BedGraphSet = IntervalContainer<NumericBedGraph, usize, usize>;
 
 pub type NumericBed6 = Bed6<usize, usize, usize>;
 pub type NamedBed6<'a> = Bed6<&'a str, usize, &'a str>;
