@@ -10,7 +10,7 @@ use clap::Parser;
 use cli::{Cli, Command};
 use commands::{
     closest, complement, coverage, extend, flank, get_fasta, intersect, merge, random, sample,
-    shift, sort, spacing, subtract, window,
+    segment, shift, sort, spacing, subtract, window,
 };
 
 fn main() -> Result<()> {
@@ -26,6 +26,7 @@ fn main() -> Result<()> {
         Command::Merge(args) => merge(args)?,
         Command::Random(args) => random(args)?,
         Command::Sample(args) => sample(args)?,
+        Command::Segment(args) => segment(args)?,
         Command::Shift(args) => shift(args)?,
         Command::Sort(args) => sort(args)?,
         Command::Spacing(args) => spacing(args)?,
