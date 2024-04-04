@@ -4,7 +4,7 @@ pub use bed::convert_bed;
 use crate::cli::bam::{BamConversionType, ConvertArgs, ConvertParams};
 use crate::io::match_bam_input;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use noodles::bam::io::reader::Builder;
 use noodles::bam::io::Reader;
 use noodles::sam::Header;
@@ -17,7 +17,9 @@ fn dispatch_conversion<R: Read>(
 ) -> Result<()> {
     match params.conv {
         BamConversionType::Bed => convert_bed(bam, header, params),
-        _ => unimplemented!(),
+        _ => bail!(
+            "FASTQ conversion is not implemented yet - but checkout samtools fastq for a solution"
+        ),
     }
 }
 
