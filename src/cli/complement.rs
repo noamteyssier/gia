@@ -8,7 +8,18 @@ pub struct ComplementArgs {
     pub input: SingleInput,
 
     #[clap(flatten)]
+    pub params: ComplementParams,
+
+    #[clap(flatten)]
     pub output: Output,
+}
+
+#[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Parameters")]
+pub struct ComplementParams {
+    /// Assume input is sorted (default=false)
+    #[clap(short, long)]
+    pub sorted: bool,
 
     /// Stream the input file instead of loading it into memory
     ///
