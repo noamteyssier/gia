@@ -1,5 +1,5 @@
 use crate::{
-    cli::RandomArgs,
+    cli::{RandomArgs, RandomParams},
     io::{match_input, write_records_iter_with},
     types::{Genome, InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, Translater},
 };
@@ -27,7 +27,7 @@ fn build_chr_size(
     }
 }
 
-pub fn random_bed3<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
+pub fn random_bed3<W: Write>(args: RandomParams, writer: W) -> Result<()> {
     let mut rng_intervals = args.build_rng();
     let mut rng_chr = args.build_rng();
     let mut translater = Translater::new();
@@ -58,7 +58,7 @@ pub fn random_bed3<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
     write_records_iter_with(interval_gen, writer, genome.translater())
 }
 
-pub fn random_bed4<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
+pub fn random_bed4<W: Write>(args: RandomParams, writer: W) -> Result<()> {
     let mut rng_intervals = args.build_rng();
     let mut rng_chr = args.build_rng();
     let mut translater = Translater::new();
@@ -91,7 +91,7 @@ pub fn random_bed4<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
     Ok(())
 }
 
-pub fn random_bed6<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
+pub fn random_bed6<W: Write>(args: RandomParams, writer: W) -> Result<()> {
     let mut rng_intervals = args.build_rng();
     let mut rng_chr = args.build_rng();
     let mut rng_strand = args.build_rng();
@@ -130,7 +130,7 @@ pub fn random_bed6<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
     Ok(())
 }
 
-pub fn random_bed12<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
+pub fn random_bed12<W: Write>(args: RandomParams, writer: W) -> Result<()> {
     let mut rng_intervals = args.build_rng();
     let mut rng_chr = args.build_rng();
     let mut rng_strand = args.build_rng();
@@ -186,11 +186,11 @@ pub fn random_bed12<W: Write>(args: RandomArgs, writer: W) -> Result<()> {
 
 pub fn random(args: RandomArgs) -> Result<()> {
     let writer = args.output.get_writer()?;
-    match args.format {
-        InputFormat::Bed3 => random_bed3(args, writer),
-        InputFormat::Bed4 => random_bed4(args, writer),
-        InputFormat::Bed6 => random_bed6(args, writer),
-        InputFormat::Bed12 => random_bed12(args, writer),
+    match args.params.format {
+        InputFormat::Bed3 => random_bed3(args.params, writer),
+        InputFormat::Bed4 => random_bed4(args.params, writer),
+        InputFormat::Bed6 => random_bed6(args.params, writer),
+        InputFormat::Bed12 => random_bed12(args.params, writer),
         _ => anyhow::bail!("Unable to process ambiguous input format"),
     }
 }
