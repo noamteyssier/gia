@@ -6,6 +6,7 @@ use clap::Parser;
 use crate::io::match_output;
 
 #[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Output Options")]
 pub struct Output {
     /// Output BED file to write to (default=stdout)
     #[clap(short, long)]

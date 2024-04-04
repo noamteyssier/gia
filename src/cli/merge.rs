@@ -7,13 +7,14 @@ pub struct MergeArgs {
     pub input: SingleInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub params: MergeParams,
 
     #[clap(flatten)]
-    pub params: MergeParams,
+    pub output: Output,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Parameters")]
 pub struct MergeParams {
     /// Assume input is sorted (default=false)
     #[clap(short, long)]

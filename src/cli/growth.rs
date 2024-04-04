@@ -4,6 +4,7 @@ use bedrs::traits::IntervalBounds;
 use clap::Parser;
 
 #[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Growth Options")]
 pub struct Growth {
     /// Amount to apply to function on both sides of intervals
     #[clap(short = 't', long, required_unless_present_any(["left", "right"]), conflicts_with_all(&["left", "right"]))]

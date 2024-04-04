@@ -6,6 +6,7 @@ use anyhow::{bail, Result};
 use clap::Parser;
 
 #[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Single Input Options")]
 pub struct SingleInput {
     /// Input BED file to process (default=stdin)
     #[clap(short, long)]
@@ -26,6 +27,7 @@ impl SingleInput {
 }
 
 #[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Dual Input Options")]
 pub struct DualInput {
     /// Primary BED file to use (default=stdin)
     #[clap(short, long)]
@@ -53,6 +55,7 @@ impl DualInput {
 }
 
 #[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Multi Input Options")]
 pub struct MultiInput {
     /// Input BED files to process
     #[clap(short, long, num_args=2.., required=true)]

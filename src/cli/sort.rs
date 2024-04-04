@@ -8,12 +8,13 @@ pub struct SortArgs {
     #[clap(flatten)]
     pub input: SingleInput,
     #[clap(flatten)]
-    pub output: Output,
-    #[clap(flatten)]
     pub params: SortParams,
+    #[clap(flatten)]
+    pub output: Output,
 }
 
 #[derive(Parser, Debug, Clone, Copy)]
+#[clap(next_help_heading = "Parameters")]
 pub struct SortParams {
     /// Number of threads to use for sorting (default=1)
     #[clap(short = 't', long, default_value = "1")]

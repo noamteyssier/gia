@@ -7,13 +7,14 @@ pub struct ClusterArgs {
     pub input: SingleInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub params: ClusterParams,
 
     #[clap(flatten)]
-    pub params: ClusterParams,
+    pub output: Output,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Parameters")]
 pub struct ClusterParams {
     /// Assume input is sorted (default=false)
     #[clap(short, long)]

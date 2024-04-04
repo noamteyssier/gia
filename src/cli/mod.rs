@@ -36,7 +36,7 @@ pub use intersect::{IntersectArgs, IntersectParams, OutputMethod};
 pub use merge::{MergeArgs, MergeParams};
 pub use outputs::Output;
 pub use overlap_predicates::OverlapPredicates;
-pub use random::RandomArgs;
+pub use random::{RandomArgs, RandomParams};
 pub use sample::{SampleArgs, SampleParams};
 pub use segment::{SegmentArgs, SegmentParams};
 pub use shift::{ShiftArgs, ShiftParams};

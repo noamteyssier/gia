@@ -6,12 +6,13 @@ pub struct ShiftArgs {
     #[clap(flatten)]
     pub input: SingleInput,
     #[clap(flatten)]
-    pub output: Output,
-    #[clap(flatten)]
     pub params: ShiftParams,
+    #[clap(flatten)]
+    pub output: Output,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Parameters")]
 pub struct ShiftParams {
     /// Path to genome file to use for bounds when shifting
     #[clap(short, long)]

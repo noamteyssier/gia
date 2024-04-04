@@ -7,19 +7,20 @@ pub struct CoverageArgs {
     pub inputs: DualInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub params: CoverageParams,
 
     #[clap(flatten)]
-    pub params: CoverageParams,
+    pub output: Output,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Parameters")]
 pub struct CoverageParams {
-    #[clap(flatten)]
-    pub overlap_predicates: OverlapPredicates,
-
     /// Assert that the intervals are presorted in BOTH files (unexpected behavior if they are
     /// not)
     #[clap(short, long)]
     pub sorted: bool,
+
+    #[clap(flatten)]
+    pub overlap_predicates: OverlapPredicates,
 }

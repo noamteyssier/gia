@@ -4,18 +4,20 @@ use super::{outputs::Output, DualInput};
 
 /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Global options")]
 pub struct ClosestArgs {
     #[clap(flatten)]
     pub inputs: DualInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub params: ClosestParams,
 
     #[clap(flatten)]
-    pub params: ClosestParams,
+    pub output: Output,
 }
 
 #[derive(Parser, Debug, Clone, Copy)]
+#[clap(next_help_heading = "Parameters")]
 pub struct ClosestParams {
     /// Report only the closest upstream interval
     #[clap(short = 'u', long, conflicts_with = "downstream")]
