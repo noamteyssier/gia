@@ -1,4 +1,4 @@
-use crate::io::match_output;
+use crate::io::{match_bam_output, match_output};
 use anyhow::Result;
 use clap::Parser;
 use std::io::Write;
@@ -25,5 +25,18 @@ impl Output {
             self.compression_threads,
             self.compression_level,
         )
+    }
+}
+
+#[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "BAM Output Options")]
+pub struct BamOutput {
+    /// Output BAM file to write to (default=stdout)
+    #[clap(short, long)]
+    pub output: Option<String>,
+}
+impl BamOutput {
+    pub fn get_writer(&self) -> Result<Box<dyn Write>> {
+        match_bam_output(self.output.clone())
     }
 }
