@@ -84,6 +84,18 @@ pub fn match_output(
     }
 }
 
+pub fn match_bam_output(path: Option<String>) -> Result<Box<dyn Write>> {
+    if let Some(path) = path {
+        let file = File::create(path)?;
+        let buffer = BufWriter::new(file);
+        Ok(Box::new(buffer))
+    } else {
+        let stdout = std::io::stdout();
+        let buffer = BufWriter::new(stdout);
+        Ok(Box::new(buffer))
+    }
+}
+
 #[cfg(test)]
 mod testing {
 

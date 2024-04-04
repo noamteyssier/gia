@@ -18,6 +18,7 @@ fn main() -> Result<()> {
     match cli.command {
         Command::Bam(command) => match command {
             BamCommand::Convert(args) => bam::convert(args)?,
+            BamCommand::Filter(args) => bam::filter(args)?,
         },
         Command::Closest(args) => closest(args)?,
         Command::Cluster(args) => cluster(args)?,
