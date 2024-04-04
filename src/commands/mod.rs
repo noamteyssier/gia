@@ -1,4 +1,5 @@
 mod closest;
+mod cluster;
 mod complement;
 mod coverage;
 mod extend;
@@ -17,6 +18,7 @@ mod unionbedg;
 mod window;
 
 pub use closest::closest;
+pub use cluster::cluster;
 pub use complement::complement;
 pub use coverage::coverage;
 pub use extend::extend;

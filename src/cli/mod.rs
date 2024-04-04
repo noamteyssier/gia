@@ -1,4 +1,5 @@
 mod closest;
+mod cluster;
 mod commands;
 mod complement;
 mod coverage;
@@ -20,7 +21,9 @@ mod spacing;
 mod subtract;
 mod unionbedg;
 mod window;
+
 pub use closest::{ClosestArgs, ClosestParams};
+pub use cluster::{ClusterArgs, ClusterParams};
 pub use commands::Command;
 pub use complement::ComplementArgs;
 pub use coverage::{CoverageArgs, CoverageParams};
