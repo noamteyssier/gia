@@ -1,9 +1,7 @@
-use std::io::Write;
-
+use crate::io::match_output;
 use anyhow::Result;
 use clap::Parser;
-
-use crate::io::match_output;
+use std::io::Write;
 
 #[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Output Options")]

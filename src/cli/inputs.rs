@@ -27,6 +27,14 @@ impl SingleInput {
 }
 
 #[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Single BAM Input Options")]
+pub struct SingleInputBam {
+    /// Input BAM file to process (default=stdin)
+    #[clap(short, long)]
+    pub input: Option<String>,
+}
+
+#[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Dual Input Options")]
 pub struct DualInput {
     /// Primary BED file to use (default=stdin)

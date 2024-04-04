@@ -1,3 +1,4 @@
+pub mod bam;
 mod closest;
 mod cluster;
 mod commands;
@@ -31,7 +32,7 @@ pub use extend::ExtendArgs;
 pub use flank::FlankArgs;
 pub use get_fasta::GetFastaArgs;
 pub use growth::Growth;
-pub use inputs::{DualInput, MultiInput, SingleInput};
+pub use inputs::{DualInput, MultiInput, SingleInput, SingleInputBam};
 pub use intersect::{IntersectArgs, IntersectParams, OutputMethod};
 pub use merge::{MergeArgs, MergeParams};
 pub use outputs::Output;

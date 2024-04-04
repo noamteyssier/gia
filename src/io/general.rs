@@ -32,6 +32,22 @@ pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
     }
 }
 
+pub fn match_bam_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
+    match input {
+        Some(filename) => {
+            let file = File::open(filename)?;
+            let reader = BufReader::new(file);
+            Ok(Box::new(reader))
+        }
+        None => {
+            let stdin = std::io::stdin();
+            let handle = stdin.lock();
+            let buffer = BufReader::new(handle);
+            Ok(Box::new(buffer))
+        }
+    }
+}
+
 fn compression_aware_write_buffer(
     filename: String,
     compression_threads: usize,
