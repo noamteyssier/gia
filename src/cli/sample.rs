@@ -9,13 +9,14 @@ pub struct SampleArgs {
     pub input: SingleInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub params: SampleParams,
 
     #[clap(flatten)]
-    pub params: SampleParams,
+    pub output: Output,
 }
 
 #[derive(Parser, Debug, Clone, Copy)]
+#[clap(next_help_heading = "Parameters")]
 pub struct SampleParams {
     /// Number of intervals to sample (choose one of n or f)
     #[clap(short, long, required_unless_present_any(&["fraction"]), conflicts_with_all(&["fraction"]))]

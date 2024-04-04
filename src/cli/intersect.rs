@@ -8,20 +8,15 @@ pub struct IntersectArgs {
     pub inputs: DualInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub params: IntersectParams,
 
     #[clap(flatten)]
-    pub params: IntersectParams,
+    pub output: Output,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Parameters")]
 pub struct IntersectParams {
-    #[clap(flatten)]
-    pub overlap_predicates: OverlapPredicates,
-
-    #[clap(flatten)]
-    pub output_predicates: OutputPredicates,
-
     /// Stream the input files instead of loading them into memory
     /// (only works if both files are sorted)
     #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
@@ -30,9 +25,16 @@ pub struct IntersectParams {
     /// Assert the inputs are pre-sorted
     #[clap(short, long)]
     pub sorted: bool,
+
+    #[clap(flatten)]
+    pub overlap_predicates: OverlapPredicates,
+
+    #[clap(flatten)]
+    pub output_predicates: OutputPredicates,
 }
 
 #[derive(Parser, Debug)]
+#[clap(next_help_heading = "Output Predicates")]
 pub struct OutputPredicates {
     /// Return the records from a that overlap with b instead of the intersection
     #[clap(short = 'q', long, conflicts_with = "with_target")]

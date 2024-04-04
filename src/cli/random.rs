@@ -7,8 +7,14 @@ use rand_chacha::ChaChaRng;
 #[derive(Parser, Debug, Clone)]
 pub struct RandomArgs {
     #[clap(flatten)]
+    pub params: RandomParams,
+    #[clap(flatten)]
     pub output: Output,
+}
 
+#[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Parameters")]
+pub struct RandomParams {
     /// Number of intervals to generate (default = 10_000)
     #[clap(short, long, default_value = "10000")]
     pub n_intervals: usize,
@@ -41,7 +47,8 @@ pub struct RandomArgs {
     #[clap(short = 'T', long, default_value = "bed3")]
     pub format: InputFormat,
 }
-impl RandomArgs {
+
+impl RandomParams {
     pub fn build_rng(&self) -> Box<dyn RngCore> {
         match self.seed {
             Some(seed) => Box::new(ChaChaRng::seed_from_u64(seed as u64)),

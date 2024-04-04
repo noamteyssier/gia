@@ -8,8 +8,8 @@ pub struct ExtendArgs {
     pub input: SingleInput,
 
     #[clap(flatten)]
-    pub output: Output,
+    pub growth: Growth,
 
     #[clap(flatten)]
-    pub growth: Growth,
+    pub output: Output,
 }
