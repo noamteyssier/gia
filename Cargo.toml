@@ -34,7 +34,7 @@ gzp = { version = "0.11.3", features = [
 ], default-features = false }
 rayon = "1.10.0"
 flate2 = "1.0.28"
-noodles = { version = "0.68.0", features = ["bam", "sam"] }
+rust-htslib = "0.46.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.14"
