@@ -21,10 +21,10 @@ const LAST_SEGMENT: &[u8] = &[b'/', b'2'];
 pub fn parse_query_name(record: &Record) -> Result<Vec<u8>> {
     let name = record.qname();
     if record.is_paired() {
-        if record.is_reverse() {
-            Ok([name, LAST_SEGMENT].concat())
-        } else {
+        if record.is_first_in_template() {
             Ok([name, FIRST_SEGMENT].concat())
+        } else {
+            Ok([name, LAST_SEGMENT].concat())
         }
     } else {
         Ok(name.to_vec())
