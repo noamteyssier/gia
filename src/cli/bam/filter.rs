@@ -19,4 +19,15 @@ pub struct FilterArgs {
 pub struct FilterParams {
     #[clap(flatten)]
     pub overlap_predicates: OverlapPredicates,
+
+    #[clap(flatten)]
+    pub output_predicates: OutputPredicates,
+}
+
+#[derive(Parser, Debug)]
+#[clap(next_help_heading = "Output Predicates")]
+pub struct OutputPredicates {
+    /// Only return the records from a that DON'T overlap with b
+    #[clap(short = 'v', long)]
+    pub invert: bool,
 }

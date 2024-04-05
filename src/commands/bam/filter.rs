@@ -5,6 +5,7 @@ use crate::{
     types::{InputFormat, NumericBed3, SplitTranslater},
 };
 
+use super::utils::{parse_chr_name, parse_endpoints};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, types::QueryMethod, IntervalContainer};
 use noodles::bam::io::Writer as BamWriter;
@@ -15,8 +16,6 @@ use noodles::{
 };
 use serde::Serialize;
 use std::io::{Read, Write};
-
-use super::utils::{parse_chr_name, parse_endpoints};
 
 fn temp_bed3(
     record: &BamRecord,
@@ -32,6 +31,58 @@ fn temp_bed3(
     };
     let (start, end) = parse_endpoints(record)?;
     Ok(Some(NumericBed3::new(chr_idx, start, end)))
+}
+
+fn run_inverted_overlap<I, W>(
+    record: &BamRecord,
+    header: &Header,
+    set: &IntervalContainer<I, usize, usize>,
+    translater: &SplitTranslater,
+    query_method: QueryMethod<usize>,
+    wtr: &mut BamWriter<W>,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Copy + Serialize,
+    W: Write,
+    WriteNamedIterImpl: WriteNamedIter<I>,
+{
+    if let Some(bed) = temp_bed3(record, header, translater)? {
+        let no_overlaps = set
+            .find_iter_sorted_method_unchecked(&bed, query_method)?
+            .next()
+            .is_none();
+        if no_overlaps {
+            wtr.write_record(header, record)?;
+        }
+    } else {
+        wtr.write_record(header, record)?;
+    }
+    Ok(())
+}
+
+fn run_overlap<I, W>(
+    record: &BamRecord,
+    header: &Header,
+    set: &IntervalContainer<I, usize, usize>,
+    translater: &SplitTranslater,
+    query_method: QueryMethod<usize>,
+    wtr: &mut BamWriter<W>,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Copy + Serialize,
+    W: Write,
+    WriteNamedIterImpl: WriteNamedIter<I>,
+{
+    if let Some(bed) = temp_bed3(record, header, translater)? {
+        let any_overlaps = set
+            .find_iter_sorted_method_unchecked(&bed, query_method)?
+            .next()
+            .is_some();
+        if any_overlaps {
+            wtr.write_record(header, record)?;
+        }
+    }
+    Ok(())
 }
 
 fn run_filter<I, R, W>(
@@ -61,20 +112,15 @@ where
     // Initialize the overlap query method
     let query_method: QueryMethod<usize> = params.overlap_predicates.into();
 
-    // Iterate over the BAM records
-    for record in bam.records() {
-        let record = record?;
-        let bed_record = if let Some(bed) = temp_bed3(&record, &header, translater)? {
-            bed
-        } else {
-            continue;
-        };
-        let any_overlaps = set
-            .find_iter_sorted_method_unchecked(&bed_record, query_method)?
-            .next()
-            .is_some();
-        if any_overlaps {
-            wtr.write_record(&header, &record)?;
+    if params.output_predicates.invert {
+        for record in bam.records() {
+            let record = record?;
+            run_inverted_overlap(&record, &header, &set, translater, query_method, &mut wtr)?;
+        }
+    } else {
+        for record in bam.records() {
+            let record = record?;
+            run_overlap(&record, &header, &set, translater, query_method, &mut wtr)?;
         }
     }
     Ok(())
