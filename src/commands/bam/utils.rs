@@ -1,56 +1,42 @@
 use anyhow::{bail, Result};
-use noodles::bam::Record as BamRecord;
-use noodles::sam::alignment::Record;
-use noodles::sam::Header;
+use rust_htslib::bam::{HeaderView, Record};
 
-pub fn parse_chr_name<'a>(record: &BamRecord, header: &'a Header) -> Result<&'a [u8]> {
-    if let Some(chr) = record.reference_sequence(header) {
-        let (chr_name, _map) = chr?;
-        Ok(chr_name.as_ref())
-    } else {
+pub fn parse_chr_name<'a>(record: &Record, header: &'a HeaderView) -> Result<&'a [u8]> {
+    let tid = record.tid();
+    if tid < 0 {
         bail!("Record is missing chr name");
     }
+    let chr_name = header.tid2name(tid as u32);
+    Ok(chr_name)
 }
 
-pub fn parse_endpoints(record: &BamRecord) -> Result<(usize, usize)> {
-    let start = if let Some(start) = record.alignment_start() {
-        // Adjust to 0-based
-        start?.get() - 1
-    } else {
-        bail!("Record is missing start");
-    };
-    let end = if let Some(end) = record.alignment_end() {
-        end?.get()
-    } else {
-        bail!("Record is missing end");
-    };
+pub fn parse_endpoints(record: &Record) -> Result<(usize, usize)> {
+    let start = record.pos() as usize;
+    let end = record.cigar().end_pos() as usize;
     Ok((start, end))
 }
 
 const FIRST_SEGMENT: &[u8] = &[b'/', b'1'];
 const LAST_SEGMENT: &[u8] = &[b'/', b'2'];
-pub fn parse_query_name(record: &BamRecord) -> Result<Vec<u8>> {
-    if let Some(name) = record.name() {
-        if record.flags().is_segmented() {
-            if record.flags().is_first_segment() {
-                Ok([name.as_bytes(), FIRST_SEGMENT].concat())
-            } else {
-                Ok([name.as_bytes(), LAST_SEGMENT].concat())
-            }
+pub fn parse_query_name(record: &Record) -> Result<Vec<u8>> {
+    let name = record.qname();
+    if record.is_paired() {
+        if record.is_reverse() {
+            Ok([name, LAST_SEGMENT].concat())
         } else {
-            Ok(name.as_bytes().to_vec())
+            Ok([name, FIRST_SEGMENT].concat())
         }
     } else {
-        bail!("Record is missing query name");
+        Ok(name.to_vec())
     }
 }
 
-pub fn parse_mapping_quality(record: &BamRecord) -> u8 {
-    record.mapping_quality().map(|x| x.get()).unwrap_or(255)
+pub fn parse_mapping_quality(record: &Record) -> u8 {
+    record.mapq()
 }
 
-pub fn get_strand(record: &BamRecord) -> char {
-    if record.flags().is_reverse_complemented() {
+pub fn get_strand(record: &Record) -> char {
+    if record.is_reverse() {
         '-'
     } else {
         '+'

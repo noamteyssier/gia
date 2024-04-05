@@ -5,18 +5,11 @@ use crate::cli::bam::{BamConversionType, ConvertArgs, ConvertParams};
 use crate::io::match_bam_input;
 
 use anyhow::{bail, Result};
-use noodles::bam::io::reader::Builder;
-use noodles::bam::io::Reader;
-use noodles::sam::Header;
-use std::io::Read;
+use rust_htslib::bam::Reader as BamReader;
 
-fn dispatch_conversion<R: Read>(
-    bam: Reader<R>,
-    header: Header,
-    params: ConvertParams,
-) -> Result<()> {
+fn dispatch_conversion(bam: BamReader, params: ConvertParams) -> Result<()> {
     match params.conv {
-        BamConversionType::Bed => convert_bed(bam, header, params),
+        BamConversionType::Bed => convert_bed(bam, params),
         _ => bail!(
             "FASTQ conversion is not implemented yet - but checkout samtools fastq for a solution"
         ),
@@ -24,8 +17,6 @@ fn dispatch_conversion<R: Read>(
 }
 
 pub fn convert(args: ConvertArgs) -> Result<()> {
-    let in_handle = match_bam_input(args.input.input)?;
-    let mut bam = Builder.build_from_reader(in_handle);
-    let header = bam.read_header()?;
-    dispatch_conversion(bam, header, args.params)
+    let bam = match_bam_input(args.input.input)?;
+    dispatch_conversion(bam, args.params)
 }

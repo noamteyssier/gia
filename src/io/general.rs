@@ -2,6 +2,7 @@ use anyhow::Result;
 use gzp::deflate::Bgzf;
 use gzp::{Compression, ZBuilder};
 use niffler::get_reader;
+use rust_htslib::bam::{Format, Header, HeaderView, Reader as BamReader, Writer as BamWriter};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{
@@ -32,19 +33,10 @@ pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
     }
 }
 
-pub fn match_bam_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
+pub fn match_bam_input(input: Option<String>) -> Result<BamReader> {
     match input {
-        Some(filename) => {
-            let file = File::open(filename)?;
-            let reader = BufReader::new(file);
-            Ok(Box::new(reader))
-        }
-        None => {
-            let stdin = std::io::stdin();
-            let handle = stdin.lock();
-            let buffer = BufReader::new(handle);
-            Ok(Box::new(buffer))
-        }
+        Some(filename) => Ok(BamReader::from_path(filename)?),
+        None => Ok(BamReader::from_stdin()?),
     }
 }
 
@@ -84,16 +76,19 @@ pub fn match_output(
     }
 }
 
-pub fn match_bam_output(path: Option<String>) -> Result<Box<dyn Write>> {
-    if let Some(path) = path {
-        let file = File::create(path)?;
-        let buffer = BufWriter::new(file);
-        Ok(Box::new(buffer))
+pub fn match_bam_output(
+    path: Option<String>,
+    header: &HeaderView,
+    format: Format,
+    n_threads: usize,
+) -> Result<BamWriter> {
+    let mut writer = if let Some(filename) = path {
+        BamWriter::from_path(filename, &Header::from_template(header), format)
     } else {
-        let stdout = std::io::stdout();
-        let buffer = BufWriter::new(stdout);
-        Ok(Box::new(buffer))
-    }
+        BamWriter::from_stdout(&Header::from_template(header), format)
+    }?;
+    writer.set_threads(n_threads)?;
+    Ok(writer)
 }
 
 #[cfg(test)]
