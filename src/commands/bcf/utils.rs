@@ -12,5 +12,6 @@ pub fn parse_chr_name<'a>(record: &Record, header: &'a HeaderView) -> Result<&'a
 
 pub fn parse_endpoints(record: &Record) -> Result<(usize, usize)> {
     let start = record.pos() as usize;
-    Ok((start, start + 1))
+    let end = record.end() as usize;
+    Ok((start, end))
 }
