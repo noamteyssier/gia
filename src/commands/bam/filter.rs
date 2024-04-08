@@ -1,7 +1,7 @@
 use crate::{
     cli::bam::{FilterArgs, FilterParams},
     dispatch_single_with_htslib,
-    io::{match_bam_input, WriteNamedIter, WriteNamedIterImpl},
+    io::{WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, NumericBed3, SplitTranslater},
 };
 
@@ -119,7 +119,13 @@ where
 
 pub fn filter(args: FilterArgs) -> Result<()> {
     let bed_reader = args.inputs.get_reader_bed()?;
-    let mut bam = match_bam_input(args.inputs.bam)?;
-    let mut writer = args.output.get_writer(bam.header())?;
-    dispatch_single_with_htslib!(&mut bam, bed_reader, &mut writer, args.params, run_filter)
+    let mut bam_reader = args.inputs.get_reader_bam()?;
+    let mut writer = args.output.get_writer(bam_reader.header())?;
+    dispatch_single_with_htslib!(
+        &mut bam_reader,
+        bed_reader,
+        &mut writer,
+        args.params,
+        run_filter
+    )
 }

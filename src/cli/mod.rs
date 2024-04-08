@@ -1,4 +1,5 @@
 pub mod bam;
+pub mod bcf;
 mod closest;
 mod cluster;
 mod commands;
@@ -21,7 +22,6 @@ mod sort;
 mod spacing;
 mod subtract;
 mod unionbedg;
-pub mod vcf;
 mod window;
 
 pub use closest::{ClosestArgs, ClosestParams};

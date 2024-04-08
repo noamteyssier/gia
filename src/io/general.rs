@@ -5,8 +5,8 @@ use niffler::get_reader;
 use rust_htslib::{
     bam::{Format as SamFormat, Header, HeaderView, Reader as BamReader, Writer as BamWriter},
     bcf::{
-        header::HeaderView as VcfHeaderView, Format as VcfFormat, Header as VcfHeader,
-        Reader as VcfReader, Writer as VcfWriter,
+        header::HeaderView as BcfHeaderView, Format as BcfFormat, Header as BcfHeader,
+        Reader as BcfReader, Writer as BcfWriter,
     },
 };
 use std::ffi::OsStr;
@@ -46,10 +46,10 @@ pub fn match_bam_input(input: Option<String>) -> Result<BamReader> {
     }
 }
 
-pub fn match_vcf_input(input: Option<String>) -> Result<VcfReader> {
+pub fn match_bcf_input(input: Option<String>) -> Result<BcfReader> {
     match input {
-        Some(filename) => Ok(VcfReader::from_path(filename)?),
-        None => Ok(VcfReader::from_stdin()?),
+        Some(filename) => Ok(BcfReader::from_path(filename)?),
+        None => Ok(BcfReader::from_stdin()?),
     }
 }
 
@@ -104,22 +104,22 @@ pub fn match_bam_output(
     Ok(writer)
 }
 
-pub fn match_vcf_output(
+pub fn match_bcf_output(
     path: Option<String>,
-    header: &VcfHeaderView,
-    format: VcfFormat,
+    header: &BcfHeaderView,
+    format: BcfFormat,
     uncompressed: bool,
     n_threads: usize,
-) -> Result<VcfWriter> {
+) -> Result<BcfWriter> {
     let mut writer = if let Some(filename) = path {
-        VcfWriter::from_path(
+        BcfWriter::from_path(
             filename,
-            &VcfHeader::from_template(header),
+            &BcfHeader::from_template(header),
             uncompressed,
             format,
         )
     } else {
-        VcfWriter::from_stdout(&VcfHeader::from_template(header), uncompressed, format)
+        BcfWriter::from_stdout(&BcfHeader::from_template(header), uncompressed, format)
     }?;
     writer.set_threads(n_threads)?;
     Ok(writer)

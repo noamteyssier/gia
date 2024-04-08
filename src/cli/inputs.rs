@@ -1,9 +1,10 @@
 use crate::{
-    io::BedReader,
+    io::{match_bam_input, match_bcf_input, BedReader},
     types::{FieldFormat, InputFormat},
 };
 use anyhow::{bail, Result};
 use clap::Parser;
+use rust_htslib::{bam::Reader as BamReader, bcf::Reader as BcfReader};
 
 #[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Single Input Options")]
@@ -49,22 +50,30 @@ impl MixedInputBam {
         // The bed format must always be read as string-based when working with BAM files
         BedReader::from_path(Some(self.bed.clone()), None, Some(FieldFormat::StringBased))
     }
+
+    pub fn get_reader_bam(&self) -> Result<BamReader> {
+        match_bam_input(self.bam.clone())
+    }
 }
 
 #[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Mixed BAM/Bed Dual Input")]
 pub struct MixedInputVcf {
-    /// Input VCF/BCF file to process (default=stdin)
+    /// Input BCF/VCF file to process (default=stdin)
     #[clap(short = 'a', long)]
-    pub vcf: Option<String>,
+    pub bcf: Option<String>,
     /// Input BED file to process
     #[clap(short = 'b', long)]
     pub bed: String,
 }
 impl MixedInputVcf {
     pub fn get_reader_bed(&self) -> Result<BedReader> {
-        // The bed format must always be read as string-based when working with BAM files
+        // The bed format must always be read as string-based when working with BCF files
         BedReader::from_path(Some(self.bed.clone()), None, Some(FieldFormat::StringBased))
+    }
+
+    pub fn get_reader_bcf(&self) -> Result<BcfReader> {
+        match_bcf_input(self.bcf.clone())
     }
 }
 

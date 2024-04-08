@@ -1,7 +1,7 @@
 use crate::{
-    cli::vcf::{FilterArgs, FilterParams},
+    cli::bcf::{FilterArgs, FilterParams},
     dispatch_single_with_htslib,
-    io::{match_vcf_input, WriteNamedIter, WriteNamedIterImpl},
+    io::{WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, NumericBed3, SplitTranslater},
 };
 
@@ -121,7 +121,13 @@ where
 
 pub fn filter(args: FilterArgs) -> Result<()> {
     let bed_reader = args.inputs.get_reader_bed()?;
-    let mut vcf = match_vcf_input(args.inputs.vcf)?;
-    let mut writer = args.output.get_writer(vcf.header())?;
-    dispatch_single_with_htslib!(&mut vcf, bed_reader, &mut writer, args.params, run_filter)
+    let mut bcf_reader = args.inputs.get_reader_bcf()?;
+    let mut writer = args.output.get_writer(bcf_reader.header())?;
+    dispatch_single_with_htslib!(
+        &mut bcf_reader,
+        bed_reader,
+        &mut writer,
+        args.params,
+        run_filter
+    )
 }

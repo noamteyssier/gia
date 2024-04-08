@@ -1,5 +1,5 @@
 mod commands;
 mod filter;
 
-pub use commands::VcfCommand;
+pub use commands::BcfCommand;
 pub use filter::{FilterArgs, FilterParams};

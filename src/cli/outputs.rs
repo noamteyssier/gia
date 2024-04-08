@@ -1,4 +1,4 @@
-use crate::io::{match_bam_output, match_output, match_vcf_output};
+use crate::io::{match_bam_output, match_bcf_output, match_output};
 use anyhow::Result;
 use clap::{Parser, ValueEnum};
 use rust_htslib::{
@@ -61,17 +61,17 @@ impl BamOutput {
 #[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "BAM Output Options")]
 pub struct VcfOutput {
-    /// Output VCF file to write to (default=stdout)
+    /// Output BCF file to write to (default=stdout)
     #[clap(short, long)]
     pub output: Option<String>,
 
-    /// Output Format to write to (default=vcf)
-    #[clap(short = 'O', long, default_value = "vcf")]
+    /// Output Format to write to
+    #[clap(short = 'O', long, default_value = "bcf")]
     pub format: WrapVcfFormat,
 
-    /// Compressed output
+    /// Uncompressed output
     #[clap(short = 'C', long)]
-    pub compressed: bool,
+    pub uncompressed: bool,
 
     /// Threads to use when writing VCF files
     #[clap(short = 't', long, default_value = "1")]
@@ -79,11 +79,11 @@ pub struct VcfOutput {
 }
 impl VcfOutput {
     pub fn get_writer(&self, header: &VcfHeaderView) -> Result<VcfWriter> {
-        match_vcf_output(
+        match_bcf_output(
             self.output.clone(),
             header,
             self.format.into(),
-            !self.compressed,
+            self.uncompressed,
             self.threads,
         )
     }
