@@ -1,14 +1,16 @@
 use crate::{
-    cli::bam::{FilterArgs, FilterParams},
+    cli::vcf::{FilterArgs, FilterParams},
     dispatch_single_with_htslib,
-    io::{match_bam_input, WriteNamedIter, WriteNamedIterImpl},
+    io::{match_vcf_input, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, NumericBed3, SplitTranslater},
 };
 
 use super::utils::{parse_chr_name, parse_endpoints};
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, types::QueryMethod, IntervalContainer};
-use rust_htslib::bam::{HeaderView, Read, Reader as BamReader, Record, Writer as BamWriter};
+use rust_htslib::bcf::{
+    header::HeaderView, Read as VcfRead, Reader as VcfReader, Record, Writer as VcfWriter,
+};
 use serde::Serialize;
 
 fn temp_bed3(
@@ -33,7 +35,7 @@ fn run_inverted_overlap<I>(
     set: &IntervalContainer<I, usize, usize>,
     translater: &SplitTranslater,
     query_method: QueryMethod<usize>,
-    wtr: &mut BamWriter,
+    wtr: &mut VcfWriter,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
@@ -59,7 +61,7 @@ fn run_overlap<I>(
     set: &IntervalContainer<I, usize, usize>,
     translater: &SplitTranslater,
     query_method: QueryMethod<usize>,
-    wtr: &mut BamWriter,
+    wtr: &mut VcfWriter,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
@@ -78,18 +80,18 @@ where
 }
 
 fn run_filter<I>(
-    bam: &mut BamReader,
+    vcf: &mut VcfReader,
     mut set: IntervalContainer<I, usize, usize>,
     translater: Option<&SplitTranslater>,
     params: FilterParams,
-    writer: &mut BamWriter,
+    writer: &mut VcfWriter,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     // Get the header
-    let header = bam.header().clone();
+    let header = vcf.header().clone();
 
     // Sort the BED Set
     set.sort();
@@ -100,17 +102,17 @@ where
     // Initialize the overlap query method
     let query_method: QueryMethod<usize> = params.overlap_predicates.into();
 
-    // Initialize an empty record to avoid repeated allocations
-    let mut record = Record::new();
+    // Initialize an empty VCF record to avoid repeated allocations
+    let mut record = vcf.empty_record();
 
     if params.output_predicates.invert {
-        while let Some(result) = bam.read(&mut record) {
-            result?;
+        while let Some(record_result) = vcf.read(&mut record) {
+            record_result?;
             run_inverted_overlap(&record, &header, &set, translater, query_method, writer)?;
         }
     } else {
-        while let Some(result) = bam.read(&mut record) {
-            result?;
+        while let Some(record_result) = vcf.read(&mut record) {
+            record_result?;
             run_overlap(&record, &header, &set, translater, query_method, writer)?;
         }
     }
@@ -119,7 +121,7 @@ where
 
 pub fn filter(args: FilterArgs) -> Result<()> {
     let bed_reader = args.inputs.get_reader_bed()?;
-    let mut bam = match_bam_input(args.inputs.bam)?;
-    let mut writer = args.output.get_writer(bam.header())?;
-    dispatch_single_with_htslib!(&mut bam, bed_reader, &mut writer, args.params, run_filter)
+    let mut vcf = match_vcf_input(args.inputs.vcf)?;
+    let mut writer = args.output.get_writer(vcf.header())?;
+    dispatch_single_with_htslib!(&mut vcf, bed_reader, &mut writer, args.params, run_filter)
 }

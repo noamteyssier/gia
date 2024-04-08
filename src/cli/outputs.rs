@@ -1,7 +1,10 @@
-use crate::io::{match_bam_output, match_output};
+use crate::io::{match_bam_output, match_output, match_vcf_output};
 use anyhow::Result;
 use clap::{Parser, ValueEnum};
-use rust_htslib::bam::{Format, HeaderView, Writer as BamWriter};
+use rust_htslib::{
+    bam::{Format as SamFormat, HeaderView as BamHeaderView, Writer as BamWriter},
+    bcf::{header::HeaderView as VcfHeaderView, Format as VcfFormat, Writer as VcfWriter},
+};
 use std::io::Write;
 
 #[derive(Parser, Debug, Clone)]
@@ -38,14 +41,14 @@ pub struct BamOutput {
 
     /// Output Format to write to (default=BAM)
     #[clap(short = 'O', long, default_value = "bam")]
-    pub format: WrapHtsFormat,
+    pub format: WrapSamFormat,
 
     /// Threads to use when writing BAM files
     #[clap(short = 't', long, default_value = "1")]
     pub threads: usize,
 }
 impl BamOutput {
-    pub fn get_writer(&self, header: &HeaderView) -> Result<BamWriter> {
+    pub fn get_writer(&self, header: &BamHeaderView) -> Result<BamWriter> {
         match_bam_output(
             self.output.clone(),
             header,
@@ -55,18 +58,63 @@ impl BamOutput {
     }
 }
 
+#[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "BAM Output Options")]
+pub struct VcfOutput {
+    /// Output VCF file to write to (default=stdout)
+    #[clap(short, long)]
+    pub output: Option<String>,
+
+    /// Output Format to write to (default=vcf)
+    #[clap(short = 'O', long, default_value = "vcf")]
+    pub format: WrapVcfFormat,
+
+    /// Compressed output
+    #[clap(short = 'C', long)]
+    pub compressed: bool,
+
+    /// Threads to use when writing VCF files
+    #[clap(short = 't', long, default_value = "1")]
+    pub threads: usize,
+}
+impl VcfOutput {
+    pub fn get_writer(&self, header: &VcfHeaderView) -> Result<VcfWriter> {
+        match_vcf_output(
+            self.output.clone(),
+            header,
+            self.format.into(),
+            !self.compressed,
+            self.threads,
+        )
+    }
+}
+
 #[derive(Parser, Debug, Clone, ValueEnum, Copy)]
-pub enum WrapHtsFormat {
+pub enum WrapSamFormat {
     Bam,
     Sam,
     Cram,
 }
-impl From<WrapHtsFormat> for Format {
-    fn from(format: WrapHtsFormat) -> Self {
+impl From<WrapSamFormat> for SamFormat {
+    fn from(format: WrapSamFormat) -> Self {
         match format {
-            WrapHtsFormat::Bam => Format::Bam,
-            WrapHtsFormat::Sam => Format::Sam,
-            WrapHtsFormat::Cram => Format::Cram,
+            WrapSamFormat::Bam => SamFormat::Bam,
+            WrapSamFormat::Sam => SamFormat::Sam,
+            WrapSamFormat::Cram => SamFormat::Cram,
+        }
+    }
+}
+
+#[derive(Parser, Debug, Clone, ValueEnum, Copy)]
+pub enum WrapVcfFormat {
+    Vcf,
+    Bcf,
+}
+impl From<WrapVcfFormat> for VcfFormat {
+    fn from(format: WrapVcfFormat) -> Self {
+        match format {
+            WrapVcfFormat::Vcf => VcfFormat::Vcf,
+            WrapVcfFormat::Bcf => VcfFormat::Bcf,
         }
     }
 }

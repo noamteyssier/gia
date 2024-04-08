@@ -7,10 +7,10 @@ mod utils;
 
 use anyhow::Result;
 use clap::Parser;
-use cli::{bam::BamCommand, Cli, Command};
+use cli::{bam::BamCommand, vcf::VcfCommand, Cli, Command};
 use commands::{
     bam, closest, cluster, complement, coverage, extend, flank, get_fasta, intersect, merge,
-    random, sample, segment, shift, sort, spacing, subtract, unionbedgraph, window,
+    random, sample, segment, shift, sort, spacing, subtract, unionbedgraph, vcf, window,
 };
 
 fn main() -> Result<()> {
@@ -19,6 +19,9 @@ fn main() -> Result<()> {
         Command::Bam(command) => match command {
             BamCommand::Convert(args) => bam::convert(args)?,
             BamCommand::Filter(args) => bam::filter(args)?,
+        },
+        Command::Vcf(command) => match command {
+            VcfCommand::Filter(args) => vcf::filter(args)?,
         },
         Command::Closest(args) => closest(args)?,
         Command::Cluster(args) => cluster(args)?,

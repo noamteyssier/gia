@@ -36,7 +36,7 @@ pub struct SingleInputBam {
 
 #[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Mixed BAM/Bed Dual Input")]
-pub struct MixedInput {
+pub struct MixedInputBam {
     /// Input BAM file to process (default=stdin)
     #[clap(short = 'a', long)]
     pub bam: Option<String>,
@@ -44,7 +44,24 @@ pub struct MixedInput {
     #[clap(short = 'b', long)]
     pub bed: String,
 }
-impl MixedInput {
+impl MixedInputBam {
+    pub fn get_reader_bed(&self) -> Result<BedReader> {
+        // The bed format must always be read as string-based when working with BAM files
+        BedReader::from_path(Some(self.bed.clone()), None, Some(FieldFormat::StringBased))
+    }
+}
+
+#[derive(Parser, Debug, Clone)]
+#[clap(next_help_heading = "Mixed BAM/Bed Dual Input")]
+pub struct MixedInputVcf {
+    /// Input VCF/BCF file to process (default=stdin)
+    #[clap(short = 'a', long)]
+    pub vcf: Option<String>,
+    /// Input BED file to process
+    #[clap(short = 'b', long)]
+    pub bed: String,
+}
+impl MixedInputVcf {
     pub fn get_reader_bed(&self) -> Result<BedReader> {
         // The bed format must always be read as string-based when working with BAM files
         BedReader::from_path(Some(self.bed.clone()), None, Some(FieldFormat::StringBased))
