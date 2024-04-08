@@ -66,14 +66,14 @@ pub struct VcfOutput {
     pub output: Option<String>,
 
     /// Output Format to write to
-    #[clap(short = 'O', long, default_value = "bcf")]
+    ///
+    /// v/z: VCF (uncompressed/compressed)
+    ///
+    /// u/b: BCF (uncompressed/compressed)
+    #[clap(short = 'O', long, default_value = "b")]
     pub format: WrapVcfFormat,
 
-    /// Uncompressed output
-    #[clap(short = 'C', long)]
-    pub uncompressed: bool,
-
-    /// Threads to use when writing VCF files
+    /// Threads to use when writing BCF/VCF files
     #[clap(short = 't', long, default_value = "1")]
     pub threads: usize,
 }
