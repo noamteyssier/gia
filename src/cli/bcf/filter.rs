@@ -2,7 +2,7 @@ use crate::cli::{outputs::VcfOutput, MixedInputVcf, OverlapPredicates};
 
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct FilterArgs {
     #[clap(flatten)]
     pub inputs: MixedInputVcf,
@@ -14,7 +14,7 @@ pub struct FilterArgs {
     pub output: VcfOutput,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Parameters")]
 pub struct FilterParams {
     #[clap(flatten)]
@@ -24,7 +24,7 @@ pub struct FilterParams {
     pub output_predicates: OutputPredicates,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Output Predicates")]
 pub struct OutputPredicates {
     /// Only return the records from a that DON'T overlap with b
