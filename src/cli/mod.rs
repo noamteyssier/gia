@@ -1,3 +1,4 @@
+pub mod bam;
 mod closest;
 mod cluster;
 mod commands;
@@ -31,10 +32,10 @@ pub use extend::ExtendArgs;
 pub use flank::FlankArgs;
 pub use get_fasta::GetFastaArgs;
 pub use growth::Growth;
-pub use inputs::{DualInput, MultiInput, SingleInput};
+pub use inputs::{DualInput, MixedInput, MultiInput, SingleInput, SingleInputBam};
 pub use intersect::{IntersectArgs, IntersectParams, OutputMethod};
 pub use merge::{MergeArgs, MergeParams};
-pub use outputs::Output;
+pub use outputs::{BamOutput, Output};
 pub use overlap_predicates::OverlapPredicates;
 pub use random::{RandomArgs, RandomParams};
 pub use sample::{SampleArgs, SampleParams};

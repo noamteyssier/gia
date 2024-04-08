@@ -7,15 +7,19 @@ mod utils;
 
 use anyhow::Result;
 use clap::Parser;
-use cli::{Cli, Command};
+use cli::{bam::BamCommand, Cli, Command};
 use commands::{
-    closest, cluster, complement, coverage, extend, flank, get_fasta, intersect, merge, random,
-    sample, segment, shift, sort, spacing, subtract, unionbedgraph, window,
+    bam, closest, cluster, complement, coverage, extend, flank, get_fasta, intersect, merge,
+    random, sample, segment, shift, sort, spacing, subtract, unionbedgraph, window,
 };
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
+        Command::Bam(command) => match command {
+            BamCommand::Convert(args) => bam::convert(args)?,
+            BamCommand::Filter(args) => bam::filter(args)?,
+        },
         Command::Closest(args) => closest(args)?,
         Command::Cluster(args) => cluster(args)?,
         Command::Complement(args) => complement(args)?,

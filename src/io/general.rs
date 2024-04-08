@@ -2,6 +2,7 @@ use anyhow::Result;
 use gzp::deflate::Bgzf;
 use gzp::{Compression, ZBuilder};
 use niffler::get_reader;
+use rust_htslib::bam::{Format, Header, HeaderView, Reader as BamReader, Writer as BamWriter};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{
@@ -29,6 +30,13 @@ pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
             buffer.fill_buf()?;
             Ok(Box::new(buffer))
         }
+    }
+}
+
+pub fn match_bam_input(input: Option<String>) -> Result<BamReader> {
+    match input {
+        Some(filename) => Ok(BamReader::from_path(filename)?),
+        None => Ok(BamReader::from_stdin()?),
     }
 }
 
@@ -66,6 +74,21 @@ pub fn match_output(
             Ok(Box::new(buffer))
         }
     }
+}
+
+pub fn match_bam_output(
+    path: Option<String>,
+    header: &HeaderView,
+    format: Format,
+    n_threads: usize,
+) -> Result<BamWriter> {
+    let mut writer = if let Some(filename) = path {
+        BamWriter::from_path(filename, &Header::from_template(header), format)
+    } else {
+        BamWriter::from_stdout(&Header::from_template(header), format)
+    }?;
+    writer.set_threads(n_threads)?;
+    Ok(writer)
 }
 
 #[cfg(test)]

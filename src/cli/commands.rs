@@ -1,12 +1,16 @@
 use super::{
-    ClosestArgs, ClusterArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs, GetFastaArgs,
-    IntersectArgs, MergeArgs, RandomArgs, SampleArgs, SegmentArgs, ShiftArgs, SortArgs,
-    SpacingArgs, SubtractArgs, UnionBedGraphArgs, WindowArgs,
+    bam::BamCommand, ClosestArgs, ClusterArgs, ComplementArgs, CoverageArgs, ExtendArgs, FlankArgs,
+    GetFastaArgs, IntersectArgs, MergeArgs, RandomArgs, SampleArgs, SegmentArgs, ShiftArgs,
+    SortArgs, SpacingArgs, SubtractArgs, UnionBedGraphArgs, WindowArgs,
 };
 use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// BAM-centric commands
+    #[clap(subcommand)]
+    Bam(BamCommand),
+
     /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
     Closest(ClosestArgs),
 

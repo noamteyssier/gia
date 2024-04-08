@@ -23,6 +23,9 @@ impl SplitTranslater {
             TranslateGroup::Meta => self.meta_tl.get_idx(name),
         }
     }
+    pub fn get_chr_idx(&self, name: &str) -> Option<usize> {
+        self.chr_tl.get_idx(name)
+    }
     pub fn get_translater(&self, group: TranslateGroup) -> &Translater {
         match group {
             TranslateGroup::Chr => &self.chr_tl,

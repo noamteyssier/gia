@@ -73,6 +73,44 @@ macro_rules! dispatch_single_owned_tl {
     };
 }
 
+/// This is a macro to match the input format and dispatch to some function with some parameters and
+/// a writer alongside a BAM reader and header.
+#[macro_export]
+macro_rules! dispatch_single_with_bam {
+    ($bam_reader:expr, $bed_reader:expr, $writer:expr, $params:expr, $func:expr) => {
+        match $bed_reader.input_format() {
+            InputFormat::Bed3 => {
+                let (set, translater) = $bed_reader.bed3_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed4 => {
+                let (set, translater) = $bed_reader.bed4_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed6 => {
+                let (set, translater) = $bed_reader.bed6_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Bed12 => {
+                let (set, translater) = $bed_reader.bed12_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Gtf => {
+                let (set, translater) = $bed_reader.gtf_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::Ambiguous => {
+                let (set, translater) = $bed_reader.meta_interval_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+            InputFormat::BedGraph => {
+                let (set, translater) = $bed_reader.bedgraph_set()?;
+                $func($bam_reader, set, translater.as_ref(), $params, $writer)
+            }
+        }
+    };
+}
+
 /// This is a macro to match the LHS and RHS BED format and dispatch to some function with some
 /// parameters and a writer.
 #[macro_export]
