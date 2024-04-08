@@ -1,7 +1,7 @@
 use super::{ConvertArgs, FilterArgs};
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub enum BamCommand {
     /// Convert BAM to different formats
     Convert(ConvertArgs),

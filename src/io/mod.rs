@@ -2,7 +2,9 @@ mod general;
 mod iter;
 pub mod read;
 mod write;
-pub use general::{match_bam_input, match_bam_output, match_input, match_output};
+pub use general::{
+    match_bam_input, match_bam_output, match_bcf_input, match_bcf_output, match_input, match_output,
+};
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{build_reader, iter_unnamed, read_bed3_set, BedReader};
 use serde::{Deserialize, Serialize};

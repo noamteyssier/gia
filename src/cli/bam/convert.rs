@@ -1,7 +1,7 @@
 use crate::cli::SingleInputBam;
 use clap::{Parser, ValueEnum};
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct ConvertArgs {
     #[clap(flatten)]
     pub input: SingleInputBam,
@@ -10,7 +10,7 @@ pub struct ConvertArgs {
     pub params: ConvertParams,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Parameters")]
 pub struct ConvertParams {
     #[clap(short, long, default_value = "bed")]
@@ -23,7 +23,7 @@ pub struct ConvertParams {
     pub fastq: FastqConversionParams,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "BED Conversion Options")]
 pub struct BedConversionParams {
     #[clap(short = 'C', long)]
@@ -31,7 +31,7 @@ pub struct BedConversionParams {
     pub cigar: bool,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "FASTQ Conversion Options")]
 pub struct FastqConversionParams {}
 

@@ -1,4 +1,5 @@
 pub mod bam;
+pub mod bcf;
 mod closest;
 mod cluster;
 mod complement;

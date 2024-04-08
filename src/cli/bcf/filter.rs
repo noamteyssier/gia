@@ -1,17 +1,17 @@
-use crate::cli::{BamOutput, MixedInputBam, OverlapPredicates};
+use crate::cli::{outputs::VcfOutput, MixedInputVcf, OverlapPredicates};
 
 use clap::Parser;
 
 #[derive(Parser, Debug, Clone)]
 pub struct FilterArgs {
     #[clap(flatten)]
-    pub inputs: MixedInputBam,
+    pub inputs: MixedInputVcf,
 
     #[clap(flatten)]
     pub params: FilterParams,
 
     #[clap(flatten)]
-    pub output: BamOutput,
+    pub output: VcfOutput,
 }
 
 #[derive(Parser, Debug, Clone)]
