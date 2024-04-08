@@ -83,7 +83,7 @@ impl VcfOutput {
             self.output.clone(),
             header,
             self.format.into(),
-            self.uncompressed,
+            self.format.into(),
             self.threads,
         )
     }
@@ -107,14 +107,28 @@ impl From<WrapSamFormat> for SamFormat {
 
 #[derive(Parser, Debug, Clone, ValueEnum, Copy)]
 pub enum WrapVcfFormat {
-    Vcf,
-    Bcf,
+    #[clap(name = "z")]
+    VcfCompressed,
+    #[clap(name = "v")]
+    VcfUncompressed,
+    #[clap(name = "b")]
+    BcfCompressed,
+    #[clap(name = "u")]
+    BcfUncompressed,
 }
 impl From<WrapVcfFormat> for VcfFormat {
     fn from(format: WrapVcfFormat) -> Self {
         match format {
-            WrapVcfFormat::Vcf => VcfFormat::Vcf,
-            WrapVcfFormat::Bcf => VcfFormat::Bcf,
+            WrapVcfFormat::VcfCompressed | WrapVcfFormat::VcfUncompressed => VcfFormat::Vcf,
+            WrapVcfFormat::BcfCompressed | WrapVcfFormat::BcfUncompressed => VcfFormat::Bcf,
+        }
+    }
+}
+impl From<WrapVcfFormat> for bool {
+    fn from(format: WrapVcfFormat) -> Self {
+        match format {
+            WrapVcfFormat::VcfCompressed | WrapVcfFormat::BcfCompressed => true,
+            WrapVcfFormat::VcfUncompressed | WrapVcfFormat::BcfUncompressed => false,
         }
     }
 }

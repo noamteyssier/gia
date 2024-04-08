@@ -108,18 +108,18 @@ pub fn match_bcf_output(
     path: Option<String>,
     header: &BcfHeaderView,
     format: BcfFormat,
-    uncompressed: bool,
+    compressed: bool,
     n_threads: usize,
 ) -> Result<BcfWriter> {
     let mut writer = if let Some(filename) = path {
         BcfWriter::from_path(
             filename,
             &BcfHeader::from_template(header),
-            uncompressed,
+            !compressed,
             format,
         )
     } else {
-        BcfWriter::from_stdout(&BcfHeader::from_template(header), uncompressed, format)
+        BcfWriter::from_stdout(&BcfHeader::from_template(header), !compressed, format)
     }?;
     writer.set_threads(n_threads)?;
     Ok(writer)
