@@ -1,6 +1,6 @@
 use crate::types::{Genome, Translater};
 use anyhow::Result;
-use bedrs::traits::IntervalBounds;
+use bedrs::{traits::IntervalBounds, Strand};
 use clap::Parser;
 
 #[derive(Parser, Debug, Clone)]
@@ -25,6 +25,13 @@ pub struct Growth {
     /// Genome file to validate growth against
     #[clap(short, long)]
     pub genome: Option<String>,
+
+    /// Follow strand specificity when applying growth
+    ///
+    /// i.e. if the strand is negative, apply growth to the right side of the interval
+    /// when the left side is requested (and vice versa) [default = false]
+    #[clap(short, long)]
+    pub stranded: bool,
 }
 impl Growth {
     #[allow(clippy::option_map_unit_fn)]
@@ -52,7 +59,7 @@ impl Growth {
     where
         I: IntervalBounds<usize, usize>,
     {
-        if let Some(val) = self.both {
+        let (left, right) = if let Some(val) = self.both {
             self.calculate_percentage(iv, val, val)
         } else {
             self.calculate_percentage(
@@ -60,6 +67,11 @@ impl Growth {
                 self.left.unwrap_or_default(),
                 self.right.unwrap_or_default(),
             )
+        };
+        if self.stranded && iv.strand() == Some(Strand::Reverse) {
+            (right, left)
+        } else {
+            (left, right)
         }
     }
 
