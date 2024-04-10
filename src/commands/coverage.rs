@@ -30,7 +30,7 @@ where
     let query_method = params.overlap_predicates.into();
     let depth_iter = set_a.records().iter().map(|iv| {
         let n_overlaps = set_b
-            .find_iter_sorted_method_unchecked(iv, query_method)
+            .query_iter(iv, query_method)
             .expect("Error in finding overlaps")
             .count();
         IntervalDepth::new(*iv, n_overlaps, translater)

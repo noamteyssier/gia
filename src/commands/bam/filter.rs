@@ -7,7 +7,7 @@ use crate::{
 
 use super::utils::{parse_chr_name, parse_endpoints};
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, types::QueryMethod, IntervalContainer};
+use bedrs::{traits::IntervalBounds, types::Query, IntervalContainer};
 use rust_htslib::bam::{HeaderView, Read, Reader as BamReader, Record, Writer as BamWriter};
 use serde::Serialize;
 
@@ -32,7 +32,7 @@ fn run_inverted_overlap<I>(
     header: &HeaderView,
     set: &IntervalContainer<I, usize, usize>,
     translater: &SplitTranslater,
-    query_method: QueryMethod<usize>,
+    query_method: Query<usize>,
     wtr: &mut BamWriter,
 ) -> Result<()>
 where
@@ -40,10 +40,7 @@ where
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     if let Some(bed) = temp_bed3(record, header, translater)? {
-        let no_overlaps = set
-            .find_iter_sorted_method_unchecked(&bed, query_method)?
-            .next()
-            .is_none();
+        let no_overlaps = set.query_iter(&bed, query_method)?.next().is_none();
         if no_overlaps {
             wtr.write(record)?;
         }
@@ -58,7 +55,7 @@ fn run_overlap<I>(
     header: &HeaderView,
     set: &IntervalContainer<I, usize, usize>,
     translater: &SplitTranslater,
-    query_method: QueryMethod<usize>,
+    query_method: Query<usize>,
     wtr: &mut BamWriter,
 ) -> Result<()>
 where
@@ -66,10 +63,7 @@ where
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     if let Some(bed) = temp_bed3(record, header, translater)? {
-        let any_overlaps = set
-            .find_iter_sorted_method_unchecked(&bed, query_method)?
-            .next()
-            .is_some();
+        let any_overlaps = set.query_iter(&bed, query_method)?.next().is_some();
         if any_overlaps {
             wtr.write(record)?;
         }
@@ -98,7 +92,7 @@ where
     let translater = translater.unwrap();
 
     // Initialize the overlap query method
-    let query_method: QueryMethod<usize> = params.overlap_predicates.into();
+    let query_method = params.overlap_predicates.into();
 
     // Initialize an empty record to avoid repeated allocations
     let mut record = Record::new();

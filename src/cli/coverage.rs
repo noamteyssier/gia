@@ -18,7 +18,7 @@ pub struct CoverageArgs {
 pub struct CoverageParams {
     /// Assert that the intervals are presorted in BOTH files (unexpected behavior if they are
     /// not)
-    #[clap(short, long)]
+    #[clap(short = 'S', long)]
     pub sorted: bool,
 
     #[clap(flatten)]

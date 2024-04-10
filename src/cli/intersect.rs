@@ -19,11 +19,11 @@ pub struct IntersectArgs {
 pub struct IntersectParams {
     /// Stream the input files instead of loading them into memory
     /// (only works if both files are sorted)
-    #[clap(short = 'S', long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
+    #[clap(long, conflicts_with_all = &["with_query", "with_target", "unique", "inverse"])]
     pub stream: bool,
 
     /// Assert the inputs are pre-sorted
-    #[clap(short, long)]
+    #[clap(short = 'S', long)]
     pub sorted: bool,
 
     #[clap(flatten)]

@@ -4,18 +4,24 @@ use crate::{
     types::{BedGraphSet, NumericBed3, SplitTranslater},
 };
 use anyhow::Result;
-use bedrs::IntervalContainer;
+use bedrs::{types::Query, IntervalContainer};
 use std::io::Write;
 
-fn calculate_segment_scores(sets: &[BedGraphSet], segment: NumericBed3, scores: &mut Vec<f64>) {
+fn calculate_segment_scores(
+    sets: &[BedGraphSet],
+    segment: NumericBed3,
+    scores: &mut Vec<f64>,
+    method: Query<usize>,
+) -> Result<()> {
     // Calculate the scores for each set
     for set in sets.iter() {
         let score = set
-            .find_iter_sorted_unchecked(&segment)
+            .query_iter(&segment, method)?
             .map(|ix| ix.score())
             .sum::<f64>();
         scores.push(score);
     }
+    Ok(())
 }
 
 fn run_unionbedgraph<W: Write>(
@@ -55,13 +61,16 @@ fn run_unionbedgraph<W: Write>(
     // Initialize the scores vector
     let mut scores = vec![];
 
+    // Initialize the query method
+    let method = Query::default();
+
     // Write the segments
     for segment in segments.records() {
         // Clear the scores for each new segment
         scores.clear();
 
         // Calculate the scores for each set
-        calculate_segment_scores(&sets, *segment, &mut scores);
+        calculate_segment_scores(&sets, *segment, &mut scores, method)?;
 
         // Write the segment
         write_segment(&mut wtr, translater, *segment, &scores)?;

@@ -1,5 +1,8 @@
-use bedrs::{traits::ValueBounds, types::QueryMethod};
-use clap::Parser;
+use bedrs::{
+    traits::ValueBounds,
+    types::{Query, QueryMethod, StrandMethod},
+};
+use clap::{Parser, ValueEnum};
 
 #[derive(Parser, Debug, Clone, Copy)]
 #[clap(next_help_heading = "Overlap Predicates")]
@@ -25,18 +28,30 @@ pub struct OverlapPredicates {
     /// Requires that either fraction provided with `-f` or `-F` is met
     #[clap(short, long, requires_all=&["fraction_query", "fraction_target"], conflicts_with = "reciprocal")]
     pub either: bool,
-}
 
-impl<T: ValueBounds> From<OverlapPredicates> for QueryMethod<T> {
-    fn from(args: OverlapPredicates) -> Self {
-        let fraction_target = if args.reciprocal {
-            args.fraction_query
+    /// Strand-specificity to use when comparing intervals
+    ///
+    /// i: Ignore strand (default)
+    ///
+    /// m: Match strand (+/+ or -/- only)
+    ///
+    /// o: Opposite strand (+/- or -/+ only)
+    #[clap(short = 's', long, default_value = "i")]
+    pub strandedness: WrapStrandedness,
+}
+impl OverlapPredicates {
+    fn get_strand_method(&self) -> StrandMethod {
+        self.strandedness.into()
+    }
+    fn get_overlap_method<T: ValueBounds>(&self) -> QueryMethod<T> {
+        let fraction_target = if self.reciprocal {
+            self.fraction_query
         } else {
-            args.fraction_target
+            self.fraction_target
         };
-        match (args.fraction_query, fraction_target) {
+        match (self.fraction_query, fraction_target) {
             (Some(fraction_query), Some(fraction_target)) => {
-                if args.either {
+                if self.either {
                     QueryMethod::CompareReciprocalFractionOr(fraction_query, fraction_target)
                 } else {
                     QueryMethod::CompareReciprocalFractionAnd(fraction_query, fraction_target)
@@ -46,5 +61,30 @@ impl<T: ValueBounds> From<OverlapPredicates> for QueryMethod<T> {
             (None, Some(fraction_target)) => QueryMethod::CompareByTargetFraction(fraction_target),
             (None, None) => QueryMethod::Compare,
         }
+    }
+}
+
+#[derive(Parser, Debug, Clone, Copy, ValueEnum)]
+pub enum WrapStrandedness {
+    #[clap(name = "i")]
+    Ignore,
+    #[clap(name = "m")]
+    Match,
+    #[clap(name = "o")]
+    Opposite,
+}
+impl From<WrapStrandedness> for StrandMethod {
+    fn from(wrap: WrapStrandedness) -> Self {
+        match wrap {
+            WrapStrandedness::Ignore => StrandMethod::Ignore,
+            WrapStrandedness::Match => StrandMethod::MatchStrand,
+            WrapStrandedness::Opposite => StrandMethod::OppositeStrand,
+        }
+    }
+}
+
+impl<T: ValueBounds> From<OverlapPredicates> for Query<T> {
+    fn from(args: OverlapPredicates) -> Self {
+        Query::new(args.get_overlap_method(), args.get_strand_method())
     }
 }

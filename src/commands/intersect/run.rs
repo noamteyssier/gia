@@ -35,9 +35,9 @@ where
         OutputMethod::Target => {
             let ix_iter = set_a.records().iter().flat_map(|iv| {
                 let overlaps = set_b
-                    .find_iter_sorted_method_unchecked(iv, query_method)
+                    .query_iter(iv, query_method)
                     .expect("Error in finding overlaps")
-                    .cloned();
+                    .copied();
                 let intersections = run_function_target(overlaps, output_method);
                 intersections
             });
@@ -47,9 +47,9 @@ where
         _ => {
             let ix_iter = set_a.records().iter().flat_map(|iv| {
                 let overlaps = set_b
-                    .find_iter_sorted_method_unchecked(iv, query_method)
+                    .query_iter(iv, query_method)
                     .expect("Error in finding overlaps")
-                    .cloned();
+                    .copied();
                 let intersections = run_function_query(iv, overlaps, output_method);
                 intersections
             });
