@@ -23,6 +23,10 @@ pub struct BamCoverageParams {
     #[clap(short = 'S', long)]
     pub sorted: bool,
 
+    /// Number of threads to use when reading BAM file
+    #[clap(short, long, default_value = "1")]
+    pub threads: usize,
+
     #[clap(flatten)]
     pub overlap_predicates: OverlapPredicates,
 }

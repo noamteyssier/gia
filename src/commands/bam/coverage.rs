@@ -1,3 +1,4 @@
+use super::utils::get_stranded_bed3;
 use crate::{
     cli::bam::{BamCoverageArgs, BamCoverageParams},
     dispatch_single_with_htslib,
@@ -8,8 +9,6 @@ use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};
 use rust_htslib::bam::{Read, Reader as BamReader, Record};
 use serde::Serialize;
-
-use super::utils::get_stranded_bed3;
 
 fn run_coverage<'a, I, N, W>(
     bam: &mut BamReader,
@@ -31,6 +30,12 @@ where
     } else {
         set.sort();
     }
+
+    // Set the number of threads for the BAM reader if necessary
+    if params.threads > 1 {
+        bam.set_threads(params.threads)?;
+    }
+
     let mut coverage = vec![0; set.len()];
 
     // Get the BAM header
