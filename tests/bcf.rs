@@ -11,8 +11,7 @@ mod testing {
     fn get_num_cols(output: &[u8]) -> usize {
         output
             .split(|&c| c == b'\n')
-            .skip_while(|line| line.starts_with(b"#"))
-            .next()
+            .find(|line| !line.starts_with(b"#"))
             .unwrap()
             .split(|&c| c == b'\t')
             .count()

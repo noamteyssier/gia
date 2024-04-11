@@ -8,7 +8,7 @@ use crate::{
 use anyhow::Result;
 use bedrs::{
     traits::{ChromBounds, IntervalBounds, ValueBounds},
-    types::QueryMethod,
+    types::Query,
     Coordinates, IntervalContainer, Subtract,
 };
 use serde::Serialize;
@@ -43,7 +43,7 @@ where
 fn iter_subtraction<'a, Ia, Ib, C, T>(
     aset: &'a IntervalContainer<Ia, C, T>,
     bset: &'a IntervalContainer<Ib, C, T>,
-    method: QueryMethod<T>,
+    method: Query<T>,
 ) -> Box<dyn Iterator<Item = Ia> + 'a>
 where
     Ia: IntervalBounds<C, T> + Copy + 'static + Debug,
@@ -53,7 +53,7 @@ where
 {
     let sub_iter = aset.records().iter().flat_map(move |iv| {
         let overlaps = bset
-            .find_iter_sorted_method_unchecked(iv, method)
+            .query_iter(iv, method)
             .expect("Error in finding overlaps")
             .copied();
         queued_diff(iv, overlaps)

@@ -2,20 +2,20 @@ use crate::{
     cli::bam::{FilterArgs, FilterParams},
     dispatch_single_with_htslib,
     io::{WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, NumericBed3, SplitTranslater},
+    types::{InputFormat, SplitTranslater},
 };
 
-use super::utils::{parse_chr_name, parse_endpoints};
+use super::utils::{parse_chr_name, parse_endpoints, parse_strand};
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, types::QueryMethod, IntervalContainer};
+use bedrs::{traits::IntervalBounds, types::Query, IntervalContainer, StrandedBed3};
 use rust_htslib::bam::{HeaderView, Read, Reader as BamReader, Record, Writer as BamWriter};
 use serde::Serialize;
 
-fn temp_bed3(
+fn temp_sbed3(
     record: &Record,
     header: &HeaderView,
     translater: &SplitTranslater,
-) -> Result<Option<NumericBed3>> {
+) -> Result<Option<StrandedBed3<usize>>> {
     let chr_bytes = parse_chr_name(record, header)?;
     let chr_name = std::str::from_utf8(chr_bytes)?;
     let chr_idx = if let Some(idx) = translater.get_chr_idx(chr_name) {
@@ -24,7 +24,8 @@ fn temp_bed3(
         return Ok(None);
     };
     let (start, end) = parse_endpoints(record)?;
-    Ok(Some(NumericBed3::new(chr_idx, start, end)))
+    let strand = parse_strand(record);
+    Ok(Some(StrandedBed3::new(chr_idx, start, end, strand)))
 }
 
 fn run_inverted_overlap<I>(
@@ -32,18 +33,15 @@ fn run_inverted_overlap<I>(
     header: &HeaderView,
     set: &IntervalContainer<I, usize, usize>,
     translater: &SplitTranslater,
-    query_method: QueryMethod<usize>,
+    query_method: Query<usize>,
     wtr: &mut BamWriter,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    if let Some(bed) = temp_bed3(record, header, translater)? {
-        let no_overlaps = set
-            .find_iter_sorted_method_unchecked(&bed, query_method)?
-            .next()
-            .is_none();
+    if let Some(bed) = temp_sbed3(record, header, translater)? {
+        let no_overlaps = set.query_iter(&bed, query_method)?.next().is_none();
         if no_overlaps {
             wtr.write(record)?;
         }
@@ -58,18 +56,15 @@ fn run_overlap<I>(
     header: &HeaderView,
     set: &IntervalContainer<I, usize, usize>,
     translater: &SplitTranslater,
-    query_method: QueryMethod<usize>,
+    query_method: Query<usize>,
     wtr: &mut BamWriter,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    if let Some(bed) = temp_bed3(record, header, translater)? {
-        let any_overlaps = set
-            .find_iter_sorted_method_unchecked(&bed, query_method)?
-            .next()
-            .is_some();
+    if let Some(bed) = temp_sbed3(record, header, translater)? {
+        let any_overlaps = set.query_iter(&bed, query_method)?.next().is_some();
         if any_overlaps {
             wtr.write(record)?;
         }
@@ -98,7 +93,7 @@ where
     let translater = translater.unwrap();
 
     // Initialize the overlap query method
-    let query_method: QueryMethod<usize> = params.overlap_predicates.into();
+    let query_method = params.overlap_predicates.into();
 
     // Initialize an empty record to avoid repeated allocations
     let mut record = Record::new();

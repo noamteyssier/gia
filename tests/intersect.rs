@@ -291,7 +291,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-S")
+            .arg("--stream")
             .output()?;
         let expected = vec![
             (1, 72, 222),

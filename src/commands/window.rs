@@ -1,5 +1,5 @@
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, IntervalContainer};
+use bedrs::{traits::IntervalBounds, types::Query, IntervalContainer};
 use serde::Serialize;
 use std::io::Write;
 
@@ -28,6 +28,7 @@ where
     Renamer: Rename<'a, Ia, Na> + Rename<'a, Ib, Nb>,
 {
     sort_pairs(&mut set_a, &mut set_b, false);
+    let method = Query::default();
     if params.inverse {
         let iv_iter = set_a
             .iter()
@@ -39,7 +40,10 @@ where
                 (iv, w_iv)
             })
             .filter(|(_iv, w_iv)| {
-                let overlaps = set_b.find_iter_sorted_unchecked(w_iv).count();
+                let overlaps = set_b
+                    .query_iter(w_iv, method)
+                    .expect("Unexpected error")
+                    .count();
                 overlaps == 0
             })
             .map(|(iv, _w_iv)| *iv);
@@ -53,7 +57,9 @@ where
             (iv, w_iv)
         });
         let pairs_iter = windows_iter.flat_map(|(iv, w_iv)| {
-            let overlaps = set_b.find_iter_sorted_owned_unchecked(w_iv);
+            let overlaps = set_b
+                .query_iter_owned(w_iv, method)
+                .expect("Unexpected error");
             overlaps.map(|ov| IntervalPair::new(*iv, *ov, translater))
         });
         write_pairs_iter_with(pairs_iter, output, translater)?;

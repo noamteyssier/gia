@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use bedrs::Strand;
 use rust_htslib::bam::{HeaderView, Record};
 
 pub fn parse_chr_name<'a>(record: &Record, header: &'a HeaderView) -> Result<&'a [u8]> {
@@ -40,5 +41,13 @@ pub fn get_strand(record: &Record) -> char {
         '-'
     } else {
         '+'
+    }
+}
+
+pub fn parse_strand(record: &Record) -> Strand {
+    match get_strand(record) {
+        '+' => Strand::Forward,
+        '-' => Strand::Reverse,
+        _ => Strand::Unknown,
     }
 }

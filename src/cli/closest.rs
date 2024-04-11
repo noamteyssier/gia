@@ -1,6 +1,5 @@
+use super::{outputs::Output, overlap_predicates::WrapStrandedness, DualInput};
 use clap::Parser;
-
-use super::{outputs::Output, DualInput};
 
 /// Finds the closest interval in a secondary BED file for all intervals in a primary BED file
 #[derive(Parser, Debug)]
@@ -27,7 +26,11 @@ pub struct ClosestParams {
     #[clap(short = 'd', long, conflicts_with = "upstream")]
     pub downstream: bool,
 
+    /// Strand-specificity of closest intervals
+    #[clap(short, long, default_value = "i")]
+    pub strandedness: WrapStrandedness,
+
     /// Specify that the input files are already presorted
-    #[clap(short, long)]
+    #[clap(short = 'S', long)]
     pub sorted: bool,
 }
