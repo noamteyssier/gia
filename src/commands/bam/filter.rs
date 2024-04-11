@@ -5,28 +5,11 @@ use crate::{
     types::{InputFormat, SplitTranslater},
 };
 
-use super::utils::{parse_chr_name, parse_endpoints, parse_strand};
+use super::utils::get_stranded_bed3;
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, types::Query, IntervalContainer, StrandedBed3};
+use bedrs::{traits::IntervalBounds, types::Query, IntervalContainer};
 use rust_htslib::bam::{HeaderView, Read, Reader as BamReader, Record, Writer as BamWriter};
 use serde::Serialize;
-
-fn temp_sbed3(
-    record: &Record,
-    header: &HeaderView,
-    translater: &SplitTranslater,
-) -> Result<Option<StrandedBed3<usize>>> {
-    let chr_bytes = parse_chr_name(record, header)?;
-    let chr_name = std::str::from_utf8(chr_bytes)?;
-    let chr_idx = if let Some(idx) = translater.get_chr_idx(chr_name) {
-        idx
-    } else {
-        return Ok(None);
-    };
-    let (start, end) = parse_endpoints(record)?;
-    let strand = parse_strand(record);
-    Ok(Some(StrandedBed3::new(chr_idx, start, end, strand)))
-}
 
 fn run_inverted_overlap<I>(
     record: &Record,
@@ -40,7 +23,7 @@ where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    if let Some(bed) = temp_sbed3(record, header, translater)? {
+    if let Some(bed) = get_stranded_bed3(record, header, translater)? {
         let no_overlaps = set.query_iter(&bed, query_method)?.next().is_none();
         if no_overlaps {
             wtr.write(record)?;
@@ -63,7 +46,7 @@ where
     I: IntervalBounds<usize, usize> + Copy + Serialize,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    if let Some(bed) = temp_sbed3(record, header, translater)? {
+    if let Some(bed) = get_stranded_bed3(record, header, translater)? {
         let any_overlaps = set.query_iter(&bed, query_method)?.next().is_some();
         if any_overlaps {
             wtr.write(record)?;

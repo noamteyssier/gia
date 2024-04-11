@@ -1,6 +1,8 @@
 use anyhow::{bail, Result};
-use bedrs::Strand;
+use bedrs::{Strand, StrandedBed3};
 use rust_htslib::bam::{HeaderView, Record};
+
+use crate::types::SplitTranslater;
 
 pub fn parse_chr_name<'a>(record: &Record, header: &'a HeaderView) -> Result<&'a [u8]> {
     let tid = record.tid();
@@ -50,4 +52,21 @@ pub fn parse_strand(record: &Record) -> Strand {
         '-' => Strand::Reverse,
         _ => Strand::Unknown,
     }
+}
+
+pub fn get_stranded_bed3(
+    record: &Record,
+    header: &HeaderView,
+    translater: &SplitTranslater,
+) -> Result<Option<StrandedBed3<usize>>> {
+    let chr_bytes = parse_chr_name(record, header)?;
+    let chr_name = std::str::from_utf8(chr_bytes)?;
+    let chr_idx = if let Some(idx) = translater.get_chr_idx(chr_name) {
+        idx
+    } else {
+        return Ok(None);
+    };
+    let (start, end) = parse_endpoints(record)?;
+    let strand = parse_strand(record);
+    Ok(Some(StrandedBed3::new(chr_idx, start, end, strand)))
 }

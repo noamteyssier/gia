@@ -19,6 +19,7 @@ fn main() -> Result<()> {
         Command::Bam(command) => match command {
             BamCommand::Convert(args) => bam::convert(args)?,
             BamCommand::Filter(args) => bam::filter(args)?,
+            BamCommand::Coverage(args) => bam::coverage(args)?,
         },
         Command::Bcf(command) => match command {
             BcfCommand::Filter(args) => bcf::filter(args)?,
