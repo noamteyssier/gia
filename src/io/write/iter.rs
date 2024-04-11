@@ -27,8 +27,7 @@ where
     }
     Ok(())
 }
-
-pub fn write_3col_iter_with<W, I, Co, Tr>(
+pub fn write_demoted_records_iter_with<W, I, Co, Tr>(
     records: I,
     writer: W,
     translater: Option<&Tr>,
@@ -41,9 +40,9 @@ where
     WriteNamedIterImpl: WriteNamedIter<Co>,
 {
     if let Some(translater) = translater {
-        WriteNamedIterImpl::write_named_3col_iter(writer, records, translater)?;
+        WriteNamedIterImpl::write_named_iter_demoted(writer, records, translater)?;
     } else {
-        WriteIterImpl::<Co>::write_3col_iter(writer, records)?;
+        WriteIterImpl::<Co>::write_iter_demoted(writer, records)?;
     }
     Ok(())
 }
@@ -53,7 +52,7 @@ where
     C: Coordinates<usize, usize>,
 {
     fn write_iter<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()>;
-    fn write_3col_iter<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()>;
+    fn write_iter_demoted<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()>;
 }
 
 pub struct WriteIterImpl<C>
@@ -74,12 +73,11 @@ where
         wtr.flush()?;
         Ok(())
     }
-
-    fn write_3col_iter<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()> {
+    fn write_iter_demoted<W: Write, It: Iterator<Item = C>>(writer: W, iterator: It) -> Result<()> {
         let mut wtr = build_writer(writer);
         for interval in iterator {
-            let named_interval = (interval.chr(), interval.start(), interval.end());
-            wtr.serialize(named_interval)?;
+            let iv = (interval.chr(), interval.start(), interval.end());
+            wtr.serialize(iv)?;
         }
         wtr.flush()?;
         Ok(())
@@ -98,8 +96,7 @@ where
     ) -> Result<()> {
         unimplemented!()
     }
-    #[allow(unused_variables)]
-    fn write_named_3col_iter<W: Write, It: Iterator<Item = C>, Tr: Translate>(
+    fn write_named_iter_demoted<W: Write, It: Iterator<Item = C>, Tr: Translate>(
         writer: W,
         iterator: It,
         translater: &Tr,

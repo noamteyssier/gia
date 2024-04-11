@@ -2,15 +2,15 @@ use crate::{
     cli::{MergeArgs, MergeParams},
     dispatch_single,
     io::{
-        build_reader, iter_unnamed, write_3col_iter_with, write_records_iter, BedReader,
-        WriteNamedIter, WriteNamedIterImpl,
+        build_reader, iter_unnamed, write_demoted_records_iter_with, write_records_iter_with,
+        BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
     types::{
         InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericBedGraph,
         NumericGtf, SplitTranslater,
     },
 };
-use anyhow::Result;
+use anyhow::{bail, Result};
 use bedrs::{traits::IntervalBounds, IntervalContainer, MergeIter};
 use serde::Serialize;
 use std::io::Write;
@@ -31,22 +31,48 @@ where
     } else {
         set.set_sorted();
     }
-    let merged = set.merge()?;
-    write_3col_iter_with(merged.into_iter(), writer, translater)?;
-    Ok(())
+    let merged = if params.stranded {
+        set.merge_stranded()?
+    } else if let Some(strand) = params.specific {
+        set.merge_specific_strand(strand.into())?
+    } else {
+        Some(set.merge()?)
+    };
+    if let Some(merged_set) = merged {
+        if params.demote {
+            write_demoted_records_iter_with(merged_set.into_iter(), writer, translater)
+        } else {
+            write_records_iter_with(merged_set.into_iter(), writer, translater)
+        }
+    } else {
+        bail!("No intervals to merge matching the specified criteria")
+    }
 }
 
-fn merge_streamed<Iv, W>(record_iter: impl Iterator<Item = Iv>, writer: W) -> Result<()>
+fn merge_streamed<Iv, W>(
+    record_iter: impl Iterator<Item = Iv>,
+    writer: W,
+    params: MergeParams,
+) -> Result<()>
 where
     W: Write,
     Iv: IntervalBounds<usize, usize> + Serialize,
+    WriteNamedIterImpl: WriteNamedIter<Iv>,
 {
     let merged_iter = MergeIter::new(record_iter);
-    write_records_iter(merged_iter, writer)?;
-    Ok(())
+    let no_transl: Option<&SplitTranslater> = None;
+    if params.demote {
+        write_demoted_records_iter_with(merged_iter, writer, no_transl)
+    } else {
+        write_records_iter_with(merged_iter, writer, no_transl)
+    }
 }
 
-fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Result<()> {
+fn merge_streamed_by_format<W: Write>(
+    bed_reader: BedReader,
+    writer: W,
+    params: MergeParams,
+) -> Result<()> {
     if bed_reader.is_named() {
         return Err(anyhow::anyhow!(
             "Named input is not supported for streaming"
@@ -57,28 +83,28 @@ fn merge_streamed_by_format<W: Write>(bed_reader: BedReader, writer: W) -> Resul
     match input_format {
         InputFormat::Bed3 | InputFormat::Ambiguous => {
             let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, writer)
+            merge_streamed(record_iter, writer, params)
         }
         InputFormat::Bed4 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed4>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, writer)
+            merge_streamed(record_iter, writer, params)
         }
         InputFormat::BedGraph => {
             let record_iter: Box<dyn Iterator<Item = NumericBedGraph>> =
                 iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, writer)
+            merge_streamed(record_iter, writer, params)
         }
         InputFormat::Bed6 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed6>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, writer)
+            merge_streamed(record_iter, writer, params)
         }
         InputFormat::Bed12 => {
             let record_iter: Box<dyn Iterator<Item = NumericBed12>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, writer)
+            merge_streamed(record_iter, writer, params)
         }
         InputFormat::Gtf => {
             let record_iter: Box<dyn Iterator<Item = NumericGtf>> = iter_unnamed(&mut csv_reader);
-            merge_streamed(record_iter, writer)
+            merge_streamed(record_iter, writer, params)
         }
     }
 }
@@ -87,7 +113,7 @@ pub fn merge(args: MergeArgs) -> Result<()> {
     let reader = args.input.get_reader()?;
     let writer = args.output.get_writer()?;
     if args.params.stream {
-        merge_streamed_by_format(reader, writer)
+        merge_streamed_by_format(reader, writer, args.params)
     } else {
         dispatch_single!(reader, writer, args.params, merge_in_memory)
     }
