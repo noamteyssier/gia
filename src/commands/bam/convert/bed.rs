@@ -20,7 +20,7 @@ fn format_print_record<W: Write>(
     let qname = parse_query_name(record)?;
     let mapq = parse_mapping_quality(record);
     let strand = get_strand(record);
-    //
+
     if params.bed.cigar {
         let cigar = record.cigar();
         let tuple = (
@@ -48,6 +48,9 @@ fn format_print_record<W: Write>(
 }
 
 pub fn convert_bed(mut bam: BamReader, params: ConvertParams) -> Result<()> {
+    if params.threads > 1 {
+        bam.set_threads(params.threads)?;
+    }
     let header = bam.header().clone();
     let mut wtr = build_writer(stdout());
     let mut record = Record::new();

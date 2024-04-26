@@ -13,6 +13,10 @@ pub struct ConvertArgs {
 #[derive(Parser, Debug, Clone)]
 #[clap(next_help_heading = "Parameters")]
 pub struct ConvertParams {
+    /// Number of threads to use when reading BAM file
+    #[clap(short, long, default_value = "1")]
+    pub threads: usize,
+
     #[clap(short, long, default_value = "bed")]
     pub conv: BamConversionType,
 
