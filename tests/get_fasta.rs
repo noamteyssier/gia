@@ -22,6 +22,23 @@ mod testing {
     }
 
     #[test]
+    fn test_get_gzfasta_named_bed3() -> Result<()> {
+        let input = "tests/datasets/get_fasta/named.bed";
+        let fasta = "tests/datasets/get_fasta/named.fasta.gz";
+        let mut cmd = Command::cargo_bin("gia")?;
+        let output = cmd
+            .arg("get-fasta")
+            .arg("-i")
+            .arg(input)
+            .arg("-f")
+            .arg(fasta)
+            .output()?;
+        let expected = ">chr1:20-30\nAGCGACTACG\n>chr2:30-40\nCGATCGATCG\n";
+        assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
+        Ok(())
+    }
+
+    #[test]
     fn test_get_fasta_named_bed3() -> Result<()> {
         let input = "tests/datasets/get_fasta/named.bed";
         let fasta = "tests/datasets/get_fasta/named.fa";
