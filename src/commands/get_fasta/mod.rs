@@ -1,5 +1,6 @@
 mod gzip;
 mod text;
+mod utils;
 
 use self::gzip::get_gzip_fasta;
 use self::text::get_text_fasta;

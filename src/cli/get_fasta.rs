@@ -14,6 +14,11 @@ pub struct GetFastaArgs {
     #[clap(short, long)]
     pub fasta: String,
 
+    /// Reverse complement the sequence if the strand is negative
+    /// Default is to ignore strand information
+    #[clap(short, long)]
+    pub stranded: bool,
+
     #[clap(flatten)]
     pub output: Output,
 }
