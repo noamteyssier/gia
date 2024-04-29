@@ -31,7 +31,7 @@ pub use complement::ComplementArgs;
 pub use coverage::{CoverageArgs, CoverageParams};
 pub use extend::ExtendArgs;
 pub use flank::FlankArgs;
-pub use get_fasta::GetFastaArgs;
+pub use get_fasta::{GetFastaArgs, GetFastaParams};
 pub use growth::Growth;
 pub use inputs::{
     DualInput, MixedInputBam, MixedInputVcf, MultiInput, SingleInput, SingleInputBam,

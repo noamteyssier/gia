@@ -1,6 +1,6 @@
 use super::utils::write_sequence;
 use crate::{
-    cli::GetFastaArgs,
+    cli::{GetFastaArgs, GetFastaParams},
     io::build_reader,
     types::{Header, InputFormat, NamedBed12, NamedBed3, NamedBed4, NamedBed6},
 };
@@ -15,7 +15,7 @@ fn write_fasta_gzip<'a, I, W>(
     seq_names: &HashSet<Vec<u8>>,
     record: &I,
     fasta: &Reader,
-    strandedness: bool,
+    params: GetFastaParams,
     shared_buffer: &mut Vec<u8>,
     mut output: W,
 ) -> Result<()>
@@ -26,11 +26,11 @@ where
     if !seq_names.contains(record.chr().as_bytes()) {
         return Ok(());
     }
-    let revcomp = strandedness & matches!(record.strand(), Some(Strand::Reverse));
+    let revcomp = params.stranded && matches!(record.strand(), Some(Strand::Reverse));
     // The BED format is 0-based, inclusive
     if let Ok(buffer) = fasta.fetch_seq(record.chr(), record.start(), record.end() - 1) {
         record.write_header(&mut output)?;
-        write_sequence(shared_buffer, buffer, revcomp, &mut output)?;
+        write_sequence(shared_buffer, buffer, revcomp, params.rna, &mut output)?;
     }
     Ok(())
 }
@@ -51,7 +51,7 @@ fn dispatch_get_fasta_gzip<R: Read, W: Write>(
     byterecord: &mut ByteRecord,
     fasta_reader: &Reader,
     seq_names: &HashSet<Vec<u8>>,
-    strandedness: bool,
+    params: GetFastaParams,
     mut output: W,
 ) -> Result<()> {
     let mut shared_buffer = Vec::new();
@@ -63,7 +63,7 @@ fn dispatch_get_fasta_gzip<R: Read, W: Write>(
                     seq_names,
                     &record,
                     fasta_reader,
-                    strandedness,
+                    params,
                     &mut shared_buffer,
                     &mut output,
                 )?;
@@ -74,7 +74,7 @@ fn dispatch_get_fasta_gzip<R: Read, W: Write>(
                     seq_names,
                     &record,
                     fasta_reader,
-                    strandedness,
+                    params,
                     &mut shared_buffer,
                     &mut output,
                 )?;
@@ -85,7 +85,7 @@ fn dispatch_get_fasta_gzip<R: Read, W: Write>(
                     seq_names,
                     &record,
                     fasta_reader,
-                    strandedness,
+                    params,
                     &mut shared_buffer,
                     &mut output,
                 )?;
@@ -96,7 +96,7 @@ fn dispatch_get_fasta_gzip<R: Read, W: Write>(
                     seq_names,
                     &record,
                     fasta_reader,
-                    strandedness,
+                    params,
                     &mut shared_buffer,
                     &mut output,
                 )?;
@@ -121,7 +121,7 @@ pub fn get_gzip_fasta(args: GetFastaArgs) -> Result<()> {
         &mut byterecord,
         &reader,
         &seq_names,
-        args.stranded,
+        args.params,
         writer,
     )
 }

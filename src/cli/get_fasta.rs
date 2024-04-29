@@ -1,7 +1,7 @@
 use super::{Output, SingleInput};
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct GetFastaArgs {
     #[clap(flatten)]
     pub input: SingleInput,
@@ -14,11 +14,21 @@ pub struct GetFastaArgs {
     #[clap(short, long)]
     pub fasta: String,
 
+    #[clap(flatten)]
+    pub params: GetFastaParams,
+
+    #[clap(flatten)]
+    pub output: Output,
+}
+
+#[derive(Parser, Debug, Copy, Clone)]
+pub struct GetFastaParams {
     /// Reverse complement the sequence if the strand is negative
     /// Default is to ignore strand information
     #[clap(short, long)]
     pub stranded: bool,
 
-    #[clap(flatten)]
-    pub output: Output,
+    /// The FASTA is RNA instead of DNA and reverse complement is handled accordingly.
+    #[clap(short, long, requires("stranded"))]
+    pub rna: bool,
 }

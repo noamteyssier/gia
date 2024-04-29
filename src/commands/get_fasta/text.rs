@@ -1,5 +1,5 @@
 use crate::{
-    cli::GetFastaArgs,
+    cli::{GetFastaArgs, GetFastaParams},
     io::build_reader,
     types::{Header, InputFormat, NamedBed12, NamedBed3, NamedBed4, NamedBed6},
 };
@@ -19,7 +19,7 @@ fn build_fasta_index(fasta: &str) -> Result<FastaIndex> {
 fn write_fasta<'a, I, W>(
     record: &I,
     fasta: &IndexedFasta,
-    strandedness: bool,
+    params: GetFastaParams,
     shared_buffer: &mut Vec<u8>,
     mut output: W,
 ) -> Result<()>
@@ -27,10 +27,10 @@ where
     I: Coordinates<&'a str, usize> + Header,
     W: Write,
 {
-    let revcomp = strandedness && matches!(record.strand(), Some(Strand::Reverse));
+    let revcomp = params.stranded && matches!(record.strand(), Some(Strand::Reverse));
     if let Ok(buffer) = fasta.query_buffer(record.chr(), record.start(), record.end()) {
         record.write_header(&mut output)?;
-        write_sequence(shared_buffer, buffer, revcomp, &mut output)?;
+        write_sequence(shared_buffer, buffer, revcomp, params.rna, &mut output)?;
     }
     Ok(())
 }
@@ -40,7 +40,7 @@ fn dispatch_get_fasta<R: Read, W: Write>(
     csv_reader: &mut csv::Reader<R>,
     byterecord: &mut ByteRecord,
     fasta: IndexedFasta,
-    strandedness: bool,
+    params: GetFastaParams,
     mut output: W,
 ) -> Result<()> {
     let mut shared_buffer = Vec::new();
@@ -48,43 +48,19 @@ fn dispatch_get_fasta<R: Read, W: Write>(
         match format {
             InputFormat::Bed3 => {
                 let record: NamedBed3 = byterecord.deserialize(None)?;
-                write_fasta(
-                    &record,
-                    &fasta,
-                    strandedness,
-                    &mut shared_buffer,
-                    &mut output,
-                )?;
+                write_fasta(&record, &fasta, params, &mut shared_buffer, &mut output)?;
             }
             InputFormat::Bed4 => {
                 let record: NamedBed4 = byterecord.deserialize(None)?;
-                write_fasta(
-                    &record,
-                    &fasta,
-                    strandedness,
-                    &mut shared_buffer,
-                    &mut output,
-                )?;
+                write_fasta(&record, &fasta, params, &mut shared_buffer, &mut output)?;
             }
             InputFormat::Bed6 => {
                 let record: NamedBed6 = byterecord.deserialize(None)?;
-                write_fasta(
-                    &record,
-                    &fasta,
-                    strandedness,
-                    &mut shared_buffer,
-                    &mut output,
-                )?;
+                write_fasta(&record, &fasta, params, &mut shared_buffer, &mut output)?;
             }
             InputFormat::Bed12 => {
                 let record: NamedBed12 = byterecord.deserialize(None)?;
-                write_fasta(
-                    &record,
-                    &fasta,
-                    strandedness,
-                    &mut shared_buffer,
-                    &mut output,
-                )?;
+                write_fasta(&record, &fasta, params, &mut shared_buffer, &mut output)?;
             }
             _ => anyhow::bail!("Unable to process ambiguous input format"),
         }
@@ -105,7 +81,7 @@ pub fn get_text_fasta(args: GetFastaArgs) -> Result<()> {
         &mut csv_reader,
         &mut byterecord,
         fasta,
-        args.stranded,
+        args.params,
         writer,
     )
 }
