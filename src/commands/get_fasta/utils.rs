@@ -63,3 +63,90 @@ pub fn write_sequence<W: Write>(
     output.write_all(shared_buffer)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod testing {
+
+    use super::*;
+
+    #[test]
+    fn test_reverse_complement() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCGatcg";
+        reverse_complement(&mut shared_buffer, seq_buffer);
+        assert_eq!(shared_buffer, b"cgatCGAT");
+    }
+
+    #[test]
+    fn test_reverse_complement_with_embedded_newline() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        reverse_complement(&mut shared_buffer, seq_buffer);
+        assert_eq!(shared_buffer, b"cgatCGAT");
+    }
+
+    #[test]
+    fn test_rc_transcribe() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCGatcg";
+        rc_transcribe(&mut shared_buffer, seq_buffer);
+        assert_eq!(shared_buffer, b"cgauCGAU");
+    }
+
+    #[test]
+    fn test_rc_transcribe_with_embedded_newline() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        rc_transcribe(&mut shared_buffer, seq_buffer);
+        assert_eq!(shared_buffer, b"cgauCGAU");
+    }
+
+    #[test]
+    fn test_remove_newline() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        remove_newline(&mut shared_buffer, seq_buffer);
+        assert_eq!(shared_buffer, b"ATCGatcg");
+    }
+
+    #[test]
+    // Test writing a sequence with no flags set
+    fn test_write_sequence_ff() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        let mut output = Vec::new();
+        write_sequence(&mut shared_buffer, seq_buffer, false, false, &mut output).unwrap();
+        assert_eq!(output, b"ATCGatcg\n");
+    }
+
+    #[test]
+    // Test writing a sequence with revcomp flag set
+    fn test_write_sequence_tf() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        let mut output = Vec::new();
+        write_sequence(&mut shared_buffer, seq_buffer, true, false, &mut output).unwrap();
+        assert_eq!(output, b"cgatCGAT\n");
+    }
+
+    #[test]
+    // Test writing a sequence with rna flag set but not revcomp
+    // This should not change the sequence
+    fn test_write_sequence_ft() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        let mut output = Vec::new();
+        write_sequence(&mut shared_buffer, seq_buffer, false, true, &mut output).unwrap();
+        assert_eq!(output, b"ATCGatcg\n");
+    }
+
+    #[test]
+    // Test writing a sequence with rna and revcomp flags set
+    fn test_write_sequence_tt() {
+        let mut shared_buffer = Vec::new();
+        let seq_buffer = b"ATCG\natcg";
+        let mut output = Vec::new();
+        write_sequence(&mut shared_buffer, seq_buffer, true, true, &mut output).unwrap();
+        assert_eq!(output, b"cgauCGAU\n");
+    }
+}
