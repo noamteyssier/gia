@@ -2,21 +2,15 @@ use std::io::Write;
 
 use crate::{
     cli::ComplementArgs,
-    io::{
-        build_reader, iter_unnamed, read_bed3_set, write_records_iter, write_records_iter_with,
-        BedReader,
-    },
+    io::{build_reader, iter_unnamed, write_records_iter, write_records_iter_with, BedReader},
     types::NumericBed3,
 };
 use anyhow::{bail, Result};
 use bedrs::{types::iterator::ComplementIter, MergeIter};
 
 fn complement_inplace<W: Write>(reader: BedReader, output: W) -> Result<()> {
-    // Check if the input is named
-    let named = reader.is_named();
-
     // Read records into a set
-    let (mut iset, translater) = read_bed3_set(reader.reader(), named)?;
+    let (mut iset, translater) = reader.bed3_set()?;
 
     // Sort the set
     iset.sort();
