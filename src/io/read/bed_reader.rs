@@ -1,12 +1,17 @@
 use super::{
     read_bed12_set, read_bed12_set_with, read_bed3_set, read_bed3_set_with, read_bed4_set,
     read_bed4_set_with, read_bed6_set, read_bed6_set_with, read_bedgraph_set,
-    read_bedgraph_set_with, read_gtf_set, read_gtf_set_with, read_meta_interval_set,
-    read_meta_interval_set_with,
+    read_bedgraph_set_with, read_gtf_set, read_gtf_set_with, read_into_bed12_set_with,
+    read_into_bed3_set_with, read_into_bed4_set_with, read_into_bed6_set_with,
+    read_into_bedgraph_set_with, read_into_gtf_set_with, read_into_meta_interval_set_with,
+    read_meta_interval_set, read_meta_interval_set_with,
 };
-use crate::types::{
-    Bed12Set, Bed3Set, Bed4Set, Bed6Set, BedGraphSet, FieldFormat, GtfSet, InputFormat,
-    MetaIntervalSet, SplitTranslater,
+use crate::{
+    create_io,
+    types::{
+        Bed12Set, Bed3Set, Bed4Set, Bed6Set, BedGraphSet, FieldFormat, GtfSet, InputFormat,
+        MetaIntervalSet, SplitTranslater,
+    },
 };
 use anyhow::Result;
 use flate2::read::MultiGzDecoder;
@@ -104,83 +109,11 @@ impl BedReader {
         ))
     }
 
-    /// Returns a Bed3Set from the reader with an Option<SplitTranslater>
-    pub fn bed3_set(self) -> Result<(Bed3Set, Option<SplitTranslater>)> {
-        let is_named = self.is_named();
-        read_bed3_set(self.reader(), is_named)
-    }
-
-    /// Returns a Bed4Set from the reader with an Option<SplitTranslater>
-    pub fn bed4_set(self) -> Result<(Bed4Set, Option<SplitTranslater>)> {
-        let is_named = self.is_named();
-        read_bed4_set(self.reader(), is_named)
-    }
-
-    /// Returns a Bed6Set from the reader with an Option<SplitTranslater>
-    pub fn bed6_set(self) -> Result<(Bed6Set, Option<SplitTranslater>)> {
-        let is_named = self.is_named();
-        read_bed6_set(self.reader(), is_named)
-    }
-
-    /// Returns a Bed6Set from the reader with an Option<SplitTranslater>
-    pub fn bed12_set(self) -> Result<(Bed12Set, Option<SplitTranslater>)> {
-        let is_named = self.is_named();
-        read_bed12_set(self.reader(), is_named)
-    }
-
-    /// Returns a BedGraphSet from the reader with an Option<SplitTranslater>
-    pub fn bedgraph_set(self) -> Result<(BedGraphSet, Option<SplitTranslater>)> {
-        read_bedgraph_set(self.reader(), true)
-    }
-
-    /// Returns a MetaIntervalSet from the reader with an Option<SplitTranslater>
-    pub fn meta_interval_set(self) -> Result<(MetaIntervalSet, Option<SplitTranslater>)> {
-        read_meta_interval_set(self.reader(), true) // meta intervals are always named
-    }
-
-    /// Returns a GtfSet from the reader with an Option<SplitTranslater>
-    pub fn gtf_set(self) -> Result<(GtfSet, Option<SplitTranslater>)> {
-        read_gtf_set(self.reader(), true) // meta intervals are always named
-    }
-
-    /// Returns a Bed3Set from the reader
-    pub fn bed3_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed3Set> {
-        read_bed3_set_with(self.reader(), translater)
-    }
-
-    /// Returns a Bed4Set from the reader
-    pub fn bed4_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed4Set> {
-        read_bed4_set_with(self.reader(), translater)
-    }
-
-    /// Returns a Bed6Set from the reader
-    pub fn bed6_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed6Set> {
-        read_bed6_set_with(self.reader(), translater)
-    }
-
-    /// Returns a Bed12Set from the reader
-    pub fn bed12_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<Bed12Set> {
-        read_bed12_set_with(self.reader(), translater)
-    }
-
-    /// Returns a BedGraphSet from the reader
-    pub fn bedgraph_set_with(
-        self,
-        translater: Option<&mut SplitTranslater>,
-    ) -> Result<BedGraphSet> {
-        read_bedgraph_set_with(self.reader(), translater)
-    }
-
-    /// Returns a MetaIntervalSet from the reader
-    pub fn meta_interval_set_with(
-        self,
-        translater: Option<&mut SplitTranslater>,
-    ) -> Result<MetaIntervalSet> {
-        read_meta_interval_set_with(self.reader(), translater)
-    }
-
-    /// Returns a Bed6Set from the reader
-    pub fn gtf_set_with(self, translater: Option<&mut SplitTranslater>) -> Result<GtfSet> {
-        read_gtf_set_with(self.reader(), translater)
-    }
+    create_io!(bed3, Bed3Set);
+    create_io!(bed4, Bed4Set);
+    create_io!(bed6, Bed6Set);
+    create_io!(bed12, Bed12Set);
+    create_io!(gtf, GtfSet);
+    create_io!(bedgraph, BedGraphSet);
+    create_io!(meta_interval, MetaIntervalSet);
 }
