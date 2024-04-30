@@ -58,7 +58,7 @@ pub fn get_stranded_bed3(
     record: &Record,
     header: &HeaderView,
     translater: &SplitTranslater,
-) -> Result<Option<StrandedBed3<usize>>> {
+) -> Result<Option<StrandedBed3<usize, usize>>> {
     let chr_bytes = parse_chr_name(record, header)?;
     let chr_name = std::str::from_utf8(chr_bytes)?;
     let chr_idx = if let Some(idx) = translater.get_chr_idx(chr_name) {
