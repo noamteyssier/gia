@@ -2,7 +2,7 @@ use crate::{
     cli::bcf::{FilterArgs, FilterParams},
     dispatch_single_with_htslib,
     io::{WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, NumericBed3, SplitTranslater},
+    types::{NumericBed3, SplitTranslater},
 };
 
 use super::utils::{parse_chr_name, parse_endpoints};

@@ -1,8 +1,8 @@
 use crate::{
     cli::{ClosestArgs, ClosestParams},
-    dispatch_pair,
+    dispatch_pair, dispatch_pair_multi,
     io::write_pairs_iter_with,
-    types::{InputFormat, IntervalPair, Rename, Renamer, SplitTranslater},
+    types::{IntervalPair, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 use anyhow::Result;
@@ -70,9 +70,14 @@ where
 }
 
 pub fn closest(args: ClosestArgs) -> Result<()> {
-    let (bed_a, bed_b) = args.inputs.get_readers()?;
     let writer = args.output.get_writer()?;
-    dispatch_pair!(bed_a, bed_b, writer, args.params, run_closest)
+    if args.inputs.is_multi() {
+        let (bed_a, bed_b) = args.inputs.get_multi_readers()?;
+        dispatch_pair_multi!(bed_a, bed_b, writer, args.params, run_closest)
+    } else {
+        let (bed_a, bed_b) = args.inputs.get_readers()?;
+        dispatch_pair!(bed_a, bed_b, writer, args.params, run_closest)
+    }
 }
 
 #[cfg(test)]

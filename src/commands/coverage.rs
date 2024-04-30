@@ -6,9 +6,9 @@ use serde::Serialize;
 
 use crate::{
     cli::{CoverageArgs, CoverageParams},
-    dispatch_pair,
+    dispatch_pair, dispatch_pair_multi,
     io::write_depth_iter_with,
-    types::{InputFormat, IntervalDepth, Rename, Renamer, SplitTranslater},
+    types::{IntervalDepth, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 
@@ -39,7 +39,12 @@ where
 }
 
 pub fn coverage(args: CoverageArgs) -> Result<()> {
-    let (reader_a, reader_b) = args.inputs.get_readers()?;
     let writer = args.output.get_writer()?;
-    dispatch_pair!(reader_a, reader_b, writer, args.params, run_coverage)
+    if args.inputs.is_multi() {
+        let (reader_a, readers_b) = args.inputs.get_multi_readers()?;
+        dispatch_pair_multi!(reader_a, readers_b, writer, args.params, run_coverage)
+    } else {
+        let (reader_a, reader_b) = args.inputs.get_readers()?;
+        dispatch_pair!(reader_a, reader_b, writer, args.params, run_coverage)
+    }
 }

@@ -1,12 +1,12 @@
 use super::iter::{run_function_query, run_function_target};
 use crate::{
     cli::{IntersectArgs, IntersectParams, OutputMethod},
-    dispatch_pair,
+    dispatch_pair, dispatch_pair_multi,
     io::{
         build_reader, write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
         UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, NumericBed3, SplitTranslater, StreamTranslater},
+    types::{NumericBed3, SplitTranslater, StreamTranslater},
     utils::sort_pairs,
 };
 use anyhow::Result;
@@ -62,9 +62,14 @@ pub fn intersect(args: IntersectArgs) -> Result<()> {
     if args.params.stream {
         intersect_stream(args)
     } else {
-        let (bed_a, bed_b) = args.inputs.get_readers()?;
         let writer = args.output.get_writer()?;
-        dispatch_pair!(bed_a, bed_b, writer, args.params, intersect_sets)
+        if args.inputs.is_multi() {
+            let (bed_a, bed_b) = args.inputs.get_multi_readers()?;
+            dispatch_pair_multi!(bed_a, bed_b, writer, args.params, intersect_sets)
+        } else {
+            let (bed_a, bed_b) = args.inputs.get_readers()?;
+            dispatch_pair!(bed_a, bed_b, writer, args.params, intersect_sets)
+        }
     }
 }
 

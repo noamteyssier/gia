@@ -2,7 +2,7 @@ use crate::{
     cli::bam::{FilterArgs, FilterParams},
     dispatch_single_with_htslib,
     io::{WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, SplitTranslater},
+    types::SplitTranslater,
 };
 
 use super::utils::get_stranded_bed3;

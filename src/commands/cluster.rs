@@ -2,7 +2,7 @@ use crate::{
     cli::{ClusterArgs, ClusterParams},
     dispatch_single,
     io::{write_depth_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, IntervalDepth, Rename, Renamer, SplitTranslater},
+    types::{IntervalDepth, Rename, Renamer, SplitTranslater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, types::ClusterIter, IntervalContainer};

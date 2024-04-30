@@ -2,7 +2,7 @@ use crate::{
     cli::{SortArgs, SortParams},
     dispatch_single_owned_tl,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, Reorder, SplitRetranslater, SplitTranslater},
+    types::{Reorder, SplitRetranslater, SplitTranslater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};

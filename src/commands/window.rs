@@ -5,9 +5,9 @@ use std::io::Write;
 
 use crate::{
     cli::{WindowArgs, WindowParams},
-    dispatch_pair,
+    dispatch_pair, dispatch_pair_multi,
     io::{write_pairs_iter_with, write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, IntervalPair, Rename, Renamer, SplitTranslater},
+    types::{IntervalPair, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 
@@ -68,7 +68,12 @@ where
 }
 
 pub fn window(args: WindowArgs) -> Result<()> {
-    let (bed_a, bed_b) = args.inputs.get_readers()?;
     let writer = args.output.get_writer()?;
-    dispatch_pair!(bed_a, bed_b, writer, args.params, windowed_set_overlaps)
+    if args.inputs.is_multi() {
+        let (bed_a, bed_b) = args.inputs.get_multi_readers()?;
+        dispatch_pair_multi!(bed_a, bed_b, writer, args.params, windowed_set_overlaps)
+    } else {
+        let (bed_a, bed_b) = args.inputs.get_readers()?;
+        dispatch_pair!(bed_a, bed_b, writer, args.params, windowed_set_overlaps)
+    }
 }

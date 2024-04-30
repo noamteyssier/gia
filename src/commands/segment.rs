@@ -2,7 +2,7 @@ use crate::{
     cli::{SegmentArgs, SegmentParams},
     dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, SplitTranslater},
+    types::SplitTranslater,
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};

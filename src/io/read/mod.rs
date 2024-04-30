@@ -1,21 +1,33 @@
-pub mod bed12;
-pub mod bed3;
-pub mod bed4;
-pub mod bed6;
 pub mod bed_reader;
-pub mod bedgraph;
-pub mod gtf;
 pub mod iter;
-pub mod meta_interval;
+pub mod macros;
+pub mod named;
 pub mod utils;
 
-pub use bed12::{read_bed12_set, read_bed12_set_with};
-pub use bed3::{read_bed3_set, read_bed3_set_with};
-pub use bed4::{read_bed4_set, read_bed4_set_with};
-pub use bed6::{read_bed6_set, read_bed6_set_with};
 pub use bed_reader::BedReader;
-pub use bedgraph::{read_bedgraph_set, read_bedgraph_set_with};
-pub use gtf::{read_gtf_set, read_gtf_set_with};
 pub use iter::iter_unnamed;
-pub use meta_interval::{read_meta_interval_set, read_meta_interval_set_with};
 pub use utils::build_reader;
+
+pub use named::{
+    read_bed12_set_named, read_bed3_set_named, read_bed4_set_named, read_bed6_set_named,
+    read_bedgraph_set_named, read_gtf_set_named, read_meta_interval_set_named,
+};
+
+use crate::{
+    create_set_io,
+    types::{
+        Bed12Set, Bed3Set, Bed4Set, Bed6Set, BedGraphSet, GtfSet, MetaIntervalSet, NumericBed12,
+        NumericBed3, NumericBed4, NumericBed6, NumericBedGraph, NumericGtf, NumericMetaInterval,
+        SplitTranslater,
+    },
+};
+use anyhow::Result;
+use std::io::Read;
+
+create_set_io!(bed3, Bed3Set, NumericBed3);
+create_set_io!(bed4, Bed4Set, NumericBed4);
+create_set_io!(bed6, Bed6Set, NumericBed6);
+create_set_io!(bed12, Bed12Set, NumericBed12);
+create_set_io!(gtf, GtfSet, NumericGtf);
+create_set_io!(bedgraph, BedGraphSet, NumericBedGraph);
+create_set_io!(meta_interval, MetaIntervalSet, NumericMetaInterval);
