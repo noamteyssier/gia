@@ -2,7 +2,7 @@ use crate::{
     cli::{ExtendArgs, Growth},
     dispatch_single,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{Genome, InputFormat, SplitTranslater, TranslateGroup},
+    types::{Genome, SplitTranslater, TranslateGroup},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, IntervalContainer};

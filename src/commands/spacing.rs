@@ -2,7 +2,7 @@ use crate::{
     cli::{SpacingArgs, SpacingParams},
     dispatch_single,
     io::{write_spacing_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, IntervalSpacing, NumericBed3, Rename, Renamer, SplitTranslater},
+    types::{IntervalSpacing, NumericBed3, Rename, Renamer, SplitTranslater},
 };
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates, IntervalContainer};
