@@ -84,7 +84,11 @@ pub struct DualInput {
     #[clap(short, long)]
     pub a: Option<String>,
 
-    /// Secondary BED file to use
+    /// Secondary BED file(s) to use
+    ///
+    ///
+    /// Multiple BED files can be provided, mixed
+    /// format input will be demoted to the lowest rank BED provided.
     #[clap(short, long, num_args = 1..)]
     pub b: Vec<String>,
 }
