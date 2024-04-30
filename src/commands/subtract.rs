@@ -1,6 +1,6 @@
 use crate::{
     cli::{SubtractArgs, SubtractParams},
-    dispatch_pair,
+    dispatch_pair, dispatch_pair_multi,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
     types::{InputFormat, SplitTranslater},
     utils::sort_pairs,
@@ -89,7 +89,12 @@ where
 }
 
 pub fn subtract(args: SubtractArgs) -> Result<()> {
-    let (reader_a, reader_b) = args.inputs.get_readers()?;
     let writer = args.output.get_writer()?;
-    dispatch_pair!(reader_a, reader_b, writer, args.params, run_subtract)
+    if args.inputs.is_multi() {
+        let (reader_a, readers_b) = args.inputs.get_multi_readers()?;
+        dispatch_pair_multi!(reader_a, readers_b, writer, args.params, run_subtract)
+    } else {
+        let (reader_a, reader_b) = args.inputs.get_readers()?;
+        dispatch_pair!(reader_a, reader_b, writer, args.params, run_subtract)
+    }
 }
