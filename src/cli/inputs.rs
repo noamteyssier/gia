@@ -85,15 +85,35 @@ pub struct DualInput {
     pub a: Option<String>,
 
     /// Secondary BED file to use
-    #[clap(short, long)]
-    pub b: String,
+    #[clap(short, long, num_args = 1..)]
+    pub b: Vec<String>,
 }
 impl DualInput {
     pub fn reader_from_a(&self) -> Result<BedReader> {
         BedReader::from_path(self.a.clone(), None, None)
     }
+    pub fn readers_from_b(&self) -> Result<Vec<BedReader>> {
+        let mut readers = vec![];
+        for b in self.b.clone() {
+            readers.push(BedReader::from_path(Some(b), None, None)?);
+        }
+        let minimum_rank = readers.iter().filter_map(|x| x.input_format().rank()).min();
+        readers.clear();
+        if let Some(minimum_rank) = minimum_rank {
+            if let Some(in_format) = InputFormat::from_rank(minimum_rank) {
+                for b in self.b.clone() {
+                    readers.push(BedReader::from_path(Some(b), Some(in_format), None)?);
+                }
+                Ok(readers)
+            } else {
+                bail!("Cannot properly demote input format type - please merge your BED files manually");
+            }
+        } else {
+            bail!("None of the provided input formats can be properly joined - please merge your input files manually")
+        }
+    }
     pub fn reader_from_b(&self) -> Result<BedReader> {
-        BedReader::from_path(Some(self.b.clone()), None, None)
+        BedReader::from_path(Some(self.b[0].clone()), None, None)
     }
     pub fn get_readers(self) -> Result<(BedReader, BedReader)> {
         let bed_a = self.reader_from_a()?;
@@ -102,6 +122,19 @@ impl DualInput {
             bail!("Input files must both be either named or unnamed");
         }
         Ok((self.reader_from_a()?, self.reader_from_b()?))
+    }
+    pub fn get_multi_readers(self) -> Result<(BedReader, Vec<BedReader>)> {
+        let bed_a = self.reader_from_a()?;
+        let bed_b = self.readers_from_b()?;
+        for reader in bed_b.iter() {
+            if bed_a.is_named() != reader.is_named() {
+                bail!("Input files must all be either named or unnamed");
+            }
+        }
+        Ok((self.reader_from_a()?, self.readers_from_b()?))
+    }
+    pub fn is_multi(&self) -> bool {
+        self.b.len() > 1
     }
 }
 

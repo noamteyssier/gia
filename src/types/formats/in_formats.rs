@@ -19,6 +19,25 @@ pub enum InputFormat {
     BedGraph,
 }
 impl InputFormat {
+    /// Returns a rank for the input format.
+    pub fn rank(&self) -> Option<usize> {
+        match self {
+            InputFormat::Bed3 => Some(0),
+            InputFormat::Bed4 => Some(1),
+            InputFormat::Bed6 => Some(2),
+            InputFormat::Bed12 => Some(3),
+            _ => None,
+        }
+    }
+    pub fn from_rank(rank: usize) -> Option<Self> {
+        match rank {
+            0 => Some(InputFormat::Bed3),
+            1 => Some(InputFormat::Bed4),
+            2 => Some(InputFormat::Bed6),
+            3 => Some(InputFormat::Bed12),
+            _ => None,
+        }
+    }
     pub fn predict<R>(bufreader: &BufReader<R>) -> Result<InputFormat> {
         let internal = bufreader.buffer();
         if internal.is_empty() {
