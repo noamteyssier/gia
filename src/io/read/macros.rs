@@ -77,6 +77,8 @@ macro_rules! create_set_fn {
     };
 }
 
+/// These are the macros to create the IO functions for reading a specific BED struct
+/// on the `BedReader` struct
 #[macro_export]
 macro_rules! create_io {
     ($name:ident, $type:ty) => {

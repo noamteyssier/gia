@@ -6,7 +6,7 @@ pub use general::{
     match_bam_input, match_bam_output, match_bcf_input, match_bcf_output, match_input, match_output,
 };
 pub use iter::{NamedIter, UnnamedIter};
-pub use read::{build_reader, iter_unnamed, read_bed3_set, BedReader};
+pub use read::{build_reader, iter_unnamed, BedReader};
 use serde::{Deserialize, Serialize};
 pub use write::{
     build_writer, write_demoted_records_iter_with, write_depth_iter_with,
