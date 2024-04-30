@@ -6,7 +6,7 @@ use crate::{
         build_reader, write_named_records_iter_dashmap, write_records_iter_with, NamedIter,
         UnnamedIter, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::{InputFormat, NumericBed3, SplitTranslater, StreamTranslater},
+    types::{NumericBed3, SplitTranslater, StreamTranslater},
     utils::sort_pairs,
 };
 use anyhow::Result;

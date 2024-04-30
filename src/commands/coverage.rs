@@ -8,7 +8,7 @@ use crate::{
     cli::{CoverageArgs, CoverageParams},
     dispatch_pair, dispatch_pair_multi,
     io::write_depth_iter_with,
-    types::{InputFormat, IntervalDepth, Rename, Renamer, SplitTranslater},
+    types::{IntervalDepth, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 

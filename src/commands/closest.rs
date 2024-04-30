@@ -2,7 +2,7 @@ use crate::{
     cli::{ClosestArgs, ClosestParams},
     dispatch_pair, dispatch_pair_multi,
     io::write_pairs_iter_with,
-    types::{InputFormat, IntervalPair, Rename, Renamer, SplitTranslater},
+    types::{IntervalPair, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 use anyhow::Result;

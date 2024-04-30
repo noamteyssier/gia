@@ -7,7 +7,7 @@ use crate::{
     cli::{WindowArgs, WindowParams},
     dispatch_pair, dispatch_pair_multi,
     io::{write_pairs_iter_with, write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, IntervalPair, Rename, Renamer, SplitTranslater},
+    types::{IntervalPair, Rename, Renamer, SplitTranslater},
     utils::sort_pairs,
 };
 

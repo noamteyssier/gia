@@ -2,7 +2,7 @@ use crate::{
     cli::{SubtractArgs, SubtractParams},
     dispatch_pair, dispatch_pair_multi,
     io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
-    types::{InputFormat, SplitTranslater},
+    types::SplitTranslater,
     utils::sort_pairs,
 };
 use anyhow::Result;

@@ -1,6 +1,8 @@
 #[macro_export]
 macro_rules! dispatch_pair_multi {
     ($reader_a:expr, $reader_b:expr, $writer:expr, $params:expr, $func:expr) => {{
+        use $crate::types::InputFormat;
+
         let mut translater = $reader_a
             .is_named()
             .then_some($crate::types::SplitTranslater::new());
