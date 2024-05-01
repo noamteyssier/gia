@@ -4,7 +4,9 @@ mod testing {
     use assert_cmd::prelude::*;
     use std::{fmt::Display, process::Command};
 
-    fn build_expected_str<T: Display>(expected: &Vec<(T, u32, u32)>) -> String {
+    type Expected<T> = Vec<(T, u32, u32)>;
+
+    fn build_expected_str<T: Display>(expected: &Expected<T>) -> String {
         expected
             .iter()
             .map(|(chr, start, end)| format!("{}\t{}\t{}\n", chr, start, end))
@@ -16,7 +18,12 @@ mod testing {
     fn test_merge_sorted_bed3() -> Result<()> {
         let input = "tests/datasets/merge/sorted.bed";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge").arg("-i").arg(input).output()?;
+        let output = cmd
+            .arg("merge")
+            .arg("-i")
+            .arg(input)
+            .arg("--demote")
+            .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
         let expected_str = build_expected_str(&expected);
@@ -32,8 +39,7 @@ mod testing {
             .arg("merge")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed6")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
@@ -50,8 +56,7 @@ mod testing {
             .arg("merge")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed12")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
@@ -64,7 +69,13 @@ mod testing {
     fn test_merge_sorted_skip_sort() -> Result<()> {
         let input = "tests/datasets/merge/sorted.bed";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge").arg("-s").arg("-i").arg(input).output()?;
+        let output = cmd
+            .arg("merge")
+            .arg("-s")
+            .arg("-i")
+            .arg(input)
+            .arg("--demote")
+            .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
         let expected_str = build_expected_str(&expected);
@@ -76,7 +87,12 @@ mod testing {
     fn test_merge_unsorted_bed3() -> Result<()> {
         let input = "tests/datasets/merge/unsorted.bed";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge").arg("-i").arg(input).output()?;
+        let output = cmd
+            .arg("merge")
+            .arg("-i")
+            .arg(input)
+            .arg("--demote")
+            .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
         let expected_str = build_expected_str(&expected);
@@ -92,8 +108,7 @@ mod testing {
             .arg("merge")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed6")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
@@ -110,8 +125,7 @@ mod testing {
             .arg("merge")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed12")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
@@ -124,7 +138,12 @@ mod testing {
     fn test_merge_unsorted_named_bed3() -> Result<()> {
         let input = "tests/datasets/merge/unsorted_named.bed";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge").arg("-N").arg("-i").arg(input).output()?;
+        let output = cmd
+            .arg("merge")
+            .arg("-i")
+            .arg(input)
+            .arg("--demote")
+            .output()?;
 
         let expected = vec![("chr1", 10, 45), ("chr1", 100, 300), ("chr2", 105, 301)];
         let expected_str = build_expected_str(&expected);
@@ -138,11 +157,9 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("merge")
-            .arg("-N")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed6")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![("chr1", 10, 45), ("chr1", 100, 300), ("chr2", 105, 301)];
@@ -157,11 +174,9 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("merge")
-            .arg("-N")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed12")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![("chr1", 10, 45), ("chr1", 100, 300), ("chr2", 105, 301)];
@@ -174,7 +189,12 @@ mod testing {
     fn test_merge_sorted_named_bed3() -> Result<()> {
         let input = "tests/datasets/merge/sorted_named.bed";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge").arg("-N").arg("-i").arg(input).output()?;
+        let output = cmd
+            .arg("merge")
+            .arg("-i")
+            .arg(input)
+            .arg("--demote")
+            .output()?;
 
         let expected = vec![("chr1", 10, 45), ("chr1", 100, 300), ("chr2", 105, 301)];
         let expected_str = build_expected_str(&expected);
@@ -188,11 +208,9 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("merge")
-            .arg("-N")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed6")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![("chr1", 10, 45), ("chr1", 100, 300), ("chr2", 105, 301)];
@@ -207,11 +225,9 @@ mod testing {
         let mut cmd = Command::cargo_bin("gia")?;
         let output = cmd
             .arg("merge")
-            .arg("-N")
             .arg("-i")
             .arg(input)
-            .arg("--format")
-            .arg("bed12")
+            .arg("--demote")
             .output()?;
 
         let expected = vec![("chr1", 10, 45), ("chr1", 100, 300), ("chr2", 105, 301)];
@@ -224,7 +240,13 @@ mod testing {
     fn test_merge_stream() -> Result<()> {
         let input = "tests/datasets/merge/sorted.bed";
         let mut cmd = Command::cargo_bin("gia")?;
-        let output = cmd.arg("merge").arg("-S").arg("-i").arg(input).output()?;
+        let output = cmd
+            .arg("merge")
+            .arg("-S")
+            .arg("-i")
+            .arg(input)
+            .arg("--demote")
+            .output()?;
 
         let expected = vec![(1, 10, 45), (1, 100, 300), (2, 105, 301)];
         let expected_str = build_expected_str(&expected);

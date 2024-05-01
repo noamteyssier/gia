@@ -4,7 +4,11 @@ mod testing {
     use assert_cmd::prelude::*;
     use std::{fmt::Display, process::Command};
 
-    fn build_expected_str<T: Display>(expected: &Vec<(T, u32, u32)>) -> String {
+    type Expected3<T> = Vec<(T, u32, u32)>;
+    type Expected6<T, S, F, C> = Vec<(S, T, T, S, F, C)>;
+    type Expected12<T, S, F, C> = Vec<(S, T, T, S, F, C, T, T, T, T, T, T)>;
+
+    fn build_expected_str<T: Display>(expected: &Expected3<T>) -> String {
         expected
             .iter()
             .map(|(chr, start, end)| format!("{}\t{}\t{}\n", chr, start, end))
@@ -13,13 +17,13 @@ mod testing {
     }
 
     fn build_expected_str_bed6<T: Display, S: Display, F: Display, C: Display>(
-        expected: &Vec<(S, T, T, S, F, C)>,
+        expected: &Expected6<T, S, F, C>,
     ) -> String {
         expected
             .iter()
             .map(|(chr, start, end, name, score, strand)| {
                 format!(
-                    "{}\t{}\t{}\t{}\t{:.1}\t{}\n",
+                    "{}\t{}\t{}\t{}\t{:.3}\t{}\n",
                     chr, start, end, name, score, strand
                 )
             })
@@ -28,7 +32,7 @@ mod testing {
     }
 
     fn build_expected_str_bed12<T: Display, S: Display, F: Display, C: Display>(
-        expected: &Vec<(S, T, T, S, F, C, T, T, T, T, T, T)>,
+        expected: &Expected12<T, S, F, C>,
     ) -> String {
         expected
             .iter()
@@ -48,7 +52,7 @@ mod testing {
                     block_starts,
                 )| {
                     format!(
-                        "{}\t{}\t{}\t{}\t{:.1}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                        "{}\t{}\t{}\t{}\t{:.3}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
                         chr,
                         start,
                         end,
@@ -107,17 +111,15 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed6")
             .output()?;
 
         let expected = vec![
-            (1, 100, 120, 0, 0.0, '+'),
-            (1, 125, 150, 0, 0.0, '+'),
-            (1, 160, 300, 0, 0.0, '+'),
-            (1, 400, 460, 0, 0.0, '+'),
-            (1, 470, 475, 0, 0.0, '+'),
-            (1, 500, 550, 0, 0.0, '+'),
+            (1, 100, 120, 0, '.', '+'),
+            (1, 125, 150, 0, '.', '+'),
+            (1, 160, 300, 0, '.', '+'),
+            (1, 400, 460, 0, '.', '+'),
+            (1, 470, 475, 0, '.', '+'),
+            (1, 500, 550, 0, '.', '+'),
         ];
         let expected_str = build_expected_str_bed6(&expected);
         assert_eq!(output.stdout, expected_str.as_bytes());
@@ -136,17 +138,15 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed12")
             .output()?;
 
         let expected = vec![
-            (1, 100, 120, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 125, 150, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 160, 300, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 400, 460, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 470, 475, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 500, 550, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
+            (1, 100, 120, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 125, 150, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 160, 300, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 400, 460, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 470, 475, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 500, 550, 0, ".", '+', 0, 0, 0, 0, 0, 0),
         ];
         let expected_str = build_expected_str_bed12(&expected);
         assert_eq!(output.stdout, expected_str.as_bytes());
@@ -194,19 +194,17 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed6")
             .arg("-u")
             .output()?;
 
         let expected = vec![
-            (1, 100, 120, 0, 0.0, '+'),
-            (1, 125, 150, 0, 0.0, '+'),
-            (1, 160, 200, 0, 0.0, '+'),
-            (1, 200, 300, 0, 0.0, '+'),
-            (1, 400, 460, 0, 0.0, '+'),
-            (1, 470, 475, 0, 0.0, '+'),
-            (1, 500, 550, 0, 0.0, '+'),
+            (1, 100, 120, 0, ".", '+'),
+            (1, 125, 150, 0, ".", '+'),
+            (1, 160, 200, 0, ".", '+'),
+            (1, 200, 300, 0, "0", '+'),
+            (1, 400, 460, 0, ".", '+'),
+            (1, 470, 475, 0, ".", '+'),
+            (1, 500, 550, 0, "0", '+'),
         ];
         let expected_str = build_expected_str_bed6(&expected);
         assert_eq!(output.stdout, expected_str.as_bytes());
@@ -225,21 +223,23 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed12")
             .arg("-u")
             .output()?;
 
         let expected = vec![
-            (1, 100, 120, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 125, 150, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 160, 200, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 200, 300, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 400, 460, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 470, 475, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
-            (1, 500, 550, 0, 0.0, '+', 0, 0, 0, 0, 0, 0),
+            (1, 100, 120, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 125, 150, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 160, 200, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 200, 300, 0, "0", '+', 0, 0, 0, 0, 0, 0),
+            (1, 400, 460, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 470, 475, 0, ".", '+', 0, 0, 0, 0, 0, 0),
+            (1, 500, 550, 0, "0", '+', 0, 0, 0, 0, 0, 0),
         ];
         let expected_str = build_expected_str_bed12(&expected);
+
+        println!("{}", std::str::from_utf8(&output.stdout).unwrap());
+        println!("{}", expected_str);
+
         assert_eq!(output.stdout, expected_str.as_bytes());
         Ok(())
     }

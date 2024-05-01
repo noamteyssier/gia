@@ -1,4 +1,7 @@
-use crate::{io::build_reader, types::Translater};
+use crate::{
+    io::{build_reader, match_input},
+    types::Translater,
+};
 use anyhow::Result;
 use csv::ByteRecord;
 use hashbrown::HashMap;
@@ -39,6 +42,27 @@ impl<'a> Genome<'a> {
                 Self::from_reader_named_immutable(reader, translater, break_on_missing)
             }
             None => Self::from_reader_unnamed(reader),
+        }
+    }
+
+    pub fn from_path_immutable_with(
+        path: String,
+        translater: Option<&'a Translater>,
+        break_on_missing: bool,
+    ) -> Result<Self> {
+        let handle = match_input(Some(path))?;
+        Self::from_reader_immutable(handle, translater, break_on_missing)
+    }
+
+    pub fn from_opt_path_immutable_with(
+        path: Option<String>,
+        translater: Option<&'a Translater>,
+        break_on_missing: bool,
+    ) -> Result<Option<Self>> {
+        if let Some(path) = path {
+            Self::from_path_immutable_with(path, translater, break_on_missing).map(Some)
+        } else {
+            Ok(None)
         }
     }
 
@@ -88,13 +112,11 @@ impl<'a> Genome<'a> {
             let record: (&str, usize) = raw_record.deserialize(None)?;
             if let Some(chr_int) = translater.get_idx(record.0) {
                 map.insert(chr_int, record.1);
-            } else {
-                if break_on_missing {
-                    anyhow::bail!(
-                        "Genome file contains chromosome name not in BED file: {}",
-                        record.0
-                    );
-                }
+            } else if break_on_missing {
+                anyhow::bail!(
+                    "Genome file contains chromosome name not in BED file: {}",
+                    record.0
+                );
             }
         }
 
@@ -148,9 +170,9 @@ mod testing {
         assert_eq!(genome.chr_size_unchecked(2), 3000);
         assert!(genome.translater().is_some());
         let translater = genome.translater().unwrap();
-        assert_eq!(translater.get_name(0).unwrap(), "chr1");
-        assert_eq!(translater.get_name(1).unwrap(), "chr2");
-        assert_eq!(translater.get_name(2).unwrap(), "chr3");
+        assert_eq!(translater.get_chr_name(0).unwrap(), "chr1");
+        assert_eq!(translater.get_chr_name(1).unwrap(), "chr2");
+        assert_eq!(translater.get_chr_name(2).unwrap(), "chr3");
     }
 
     #[test]
@@ -158,6 +180,6 @@ mod testing {
         let mut rng = rand::thread_rng();
         let genome = Genome::from_reader_unnamed(GENOME_UNNAMED).unwrap();
         let chr = genome.sample_chr(&mut rng);
-        assert!(chr >= 1 && chr <= 3);
+        (1..=3).contains(&chr);
     }
 }

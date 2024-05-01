@@ -1,19 +1,20 @@
 use crate::{
-    io::{match_input, match_output, write_records_iter_with},
-    types::{Genome, InputFormat, NumericBed12, NumericBed6, Translater},
-    utils::build_rng,
+    cli::{RandomArgs, RandomParams},
+    io::{match_input, write_records_iter_with},
+    types::{Genome, InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, Translater},
 };
 use anyhow::Result;
-use bedrs::{GenomicInterval, Strand};
+use bedrs::{Score, Strand};
 use rand::Rng;
+use std::io::Write;
 
-fn build_chr_size<'a>(
+fn build_chr_size(
     n_chr: usize,
     max_chr_len: usize,
     genome: Option<String>,
     named: bool,
-    translater: &'a mut Translater,
-) -> Result<Genome<'a>> {
+    translater: &mut Translater,
+) -> Result<Genome<'_>> {
     if let Some(path) = genome {
         let handle = match_input(Some(path))?;
         if named {
@@ -26,69 +27,89 @@ fn build_chr_size<'a>(
     }
 }
 
-pub fn random_bed3(
-    n_intervals: usize,
-    l_intervals: usize,
-    n_chr: usize,
-    max_chr_len: usize,
-    seed: Option<usize>,
-    output: Option<String>,
-    genome: Option<String>,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let mut rng_intervals = build_rng(seed);
-    let mut rng_chr = build_rng(seed);
+pub fn random_bed3<W: Write>(args: RandomParams, writer: W) -> Result<()> {
+    let mut rng_intervals = args.build_rng();
+    let mut rng_chr = args.build_rng();
     let mut translater = Translater::new();
-    let genome = build_chr_size(n_chr, max_chr_len, genome, named, &mut translater)?;
+    let genome = build_chr_size(
+        args.n_chr,
+        args.max_chr_len,
+        args.genome,
+        args.named,
+        &mut translater,
+    )?;
 
-    let interval_gen = (0..n_intervals)
+    let interval_gen = (0..args.n_intervals)
         // draw a random chromosome
         .map(|_| genome.sample_chr(&mut rng_chr))
         // draw a random end position in the chromosome
         .map(|c| {
-            let y = rng_intervals.gen_range(l_intervals..=genome.chr_size_unchecked(c));
+            let y = rng_intervals.gen_range(args.l_intervals..=genome.chr_size_unchecked(c));
             (c, y)
         })
         // calculate the start position
         .map(|(c, y)| {
-            let x = y - l_intervals;
+            let x = y - args.l_intervals;
             (c, x, y)
         })
         // build the interval
-        .map(|(c, x, y)| GenomicInterval::new(c, x, y));
+        .map(|(c, x, y)| NumericBed3::new(c, x, y));
 
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    write_records_iter_with(interval_gen, output_handle, genome.translater())?;
-
-    Ok(())
+    write_records_iter_with(interval_gen, writer, genome.translater())
 }
 
-pub fn random_bed6(
-    n_intervals: usize,
-    l_intervals: usize,
-    n_chr: usize,
-    max_chr_len: usize,
-    seed: Option<usize>,
-    output: Option<String>,
-    genome: Option<String>,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let mut rng_intervals = build_rng(seed);
-    let mut rng_chr = build_rng(seed);
-    let mut rng_strand = build_rng(seed);
+pub fn random_bed4<W: Write>(args: RandomParams, writer: W) -> Result<()> {
+    let mut rng_intervals = args.build_rng();
+    let mut rng_chr = args.build_rng();
     let mut translater = Translater::new();
-    let genome_sizes = build_chr_size(n_chr, max_chr_len, genome, named, &mut translater)?;
+    let genome_sizes = build_chr_size(
+        args.n_chr,
+        args.max_chr_len,
+        args.genome,
+        args.named,
+        &mut translater,
+    )?;
 
-    let interval_gen = (0..n_intervals)
+    let interval_gen = (0..args.n_intervals)
         // draw a random chromosome
         .map(|_| genome_sizes.sample_chr(&mut rng_chr))
         // draw a random end position in the chromosome
         .map(|c| {
-            let y = rng_intervals.gen_range(l_intervals..=genome_sizes.chr_size_unchecked(c));
+            let y = rng_intervals.gen_range(args.l_intervals..=genome_sizes.chr_size_unchecked(c));
+            (c, y)
+        })
+        // calculate the start position
+        .map(|(c, y)| {
+            let x = y - args.l_intervals;
+            (c, x, y)
+        })
+        // build the interval
+        .map(|(c, x, y)| NumericBed4::new(c, x, y, 0));
+
+    write_records_iter_with(interval_gen, writer, genome_sizes.translater())?;
+
+    Ok(())
+}
+
+pub fn random_bed6<W: Write>(args: RandomParams, writer: W) -> Result<()> {
+    let mut rng_intervals = args.build_rng();
+    let mut rng_chr = args.build_rng();
+    let mut rng_strand = args.build_rng();
+    let mut translater = Translater::new();
+    let genome_sizes = build_chr_size(
+        args.n_chr,
+        args.max_chr_len,
+        args.genome,
+        args.named,
+        &mut translater,
+    )?;
+
+    let interval_gen = (0..args.n_intervals)
+        // draw a random chromosome
+        .map(|_| genome_sizes.sample_chr(&mut rng_chr))
+        // draw a random end position in the chromosome
+        .map(|c| {
+            let y = rng_intervals.gen_range(args.l_intervals..=genome_sizes.chr_size_unchecked(c));
             (c, y)
         })
         // draw a random strand
@@ -98,44 +119,39 @@ pub fn random_bed6(
         })
         // calculate the start position
         .map(|(c, y, s)| {
-            let x = y - l_intervals;
+            let x = y - args.l_intervals;
             (c, x, y, s)
         })
         // build the interval
-        .map(|(c, x, y, s)| NumericBed6::new(c, x, y, 0, 0.0, s));
+        .map(|(c, x, y, s)| NumericBed6::new(c, x, y, 0, Score::empty(), s));
 
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    write_records_iter_with(interval_gen, output_handle, genome_sizes.translater())?;
+    write_records_iter_with(interval_gen, writer, genome_sizes.translater())?;
 
     Ok(())
 }
 
-pub fn random_bed12(
-    n_intervals: usize,
-    l_intervals: usize,
-    n_chr: usize,
-    max_chr_len: usize,
-    seed: Option<usize>,
-    output: Option<String>,
-    genome: Option<String>,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let mut rng_intervals = build_rng(seed);
-    let mut rng_chr = build_rng(seed);
-    let mut rng_strand = build_rng(seed);
-    let mut rng_thick_start = build_rng(seed);
-    let mut rng_thick_end = build_rng(seed);
-    let mut translater = Translater::new();
-    let genome_sizes = build_chr_size(n_chr, max_chr_len, genome, named, &mut translater)?;
+pub fn random_bed12<W: Write>(args: RandomParams, writer: W) -> Result<()> {
+    let mut rng_intervals = args.build_rng();
+    let mut rng_chr = args.build_rng();
+    let mut rng_strand = args.build_rng();
+    let mut rng_thick_start = args.build_rng();
+    let mut rng_thick_end = args.build_rng();
 
-    let interval_gen = (0..n_intervals)
+    let mut translater = Translater::new();
+    let genome_sizes = build_chr_size(
+        args.n_chr,
+        args.max_chr_len,
+        args.genome,
+        args.named,
+        &mut translater,
+    )?;
+
+    let interval_gen = (0..args.n_intervals)
         // draw a random chromosome
         .map(|_| genome_sizes.sample_chr(&mut rng_chr))
         // draw a random end position in the chromosome
         .map(|c| {
-            let y = rng_intervals.gen_range(l_intervals..=genome_sizes.chr_size_unchecked(c));
+            let y = rng_intervals.gen_range(args.l_intervals..=genome_sizes.chr_size_unchecked(c));
             (c, y)
         })
         // draw a random strand
@@ -145,7 +161,7 @@ pub fn random_bed12(
         })
         // calculate the start position
         .map(|(c, y, s)| {
-            let x = y - l_intervals;
+            let x = y - args.l_intervals;
             (c, x, y, s)
         })
         // draw a random thick start
@@ -159,63 +175,22 @@ pub fn random_bed12(
             (c, x, y, t, u, s)
         })
         // build the interval
-        .map(|(c, x, y, t, u, s)| NumericBed12::new(c, x, y, 0, 0.0, s, t, u, 0, 0, 0, 0));
+        .map(|(c, x, y, t, u, s)| {
+            NumericBed12::new(c, x, y, 0, Score::empty(), s, t, u, 0, 0, 0, 0)
+        });
 
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    write_records_iter_with(interval_gen, output_handle, genome_sizes.translater())?;
+    write_records_iter_with(interval_gen, writer, genome_sizes.translater())?;
 
     Ok(())
 }
 
-pub fn random(
-    n_intervals: usize,
-    l_intervals: usize,
-    n_chr: usize,
-    max_chr_len: usize,
-    seed: Option<usize>,
-    output: Option<String>,
-    genome: Option<String>,
-    named: bool,
-    format: InputFormat,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    match format {
-        InputFormat::Bed3 => random_bed3(
-            n_intervals,
-            l_intervals,
-            n_chr,
-            max_chr_len,
-            seed,
-            output,
-            genome,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed6 => random_bed6(
-            n_intervals,
-            l_intervals,
-            n_chr,
-            max_chr_len,
-            seed,
-            output,
-            genome,
-            named,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed12 => random_bed12(
-            n_intervals,
-            l_intervals,
-            n_chr,
-            max_chr_len,
-            seed,
-            output,
-            genome,
-            named,
-            compression_threads,
-            compression_level,
-        ),
+pub fn random(args: RandomArgs) -> Result<()> {
+    let writer = args.output.get_writer()?;
+    match args.params.format {
+        InputFormat::Bed3 => random_bed3(args.params, writer),
+        InputFormat::Bed4 => random_bed4(args.params, writer),
+        InputFormat::Bed6 => random_bed6(args.params, writer),
+        InputFormat::Bed12 => random_bed12(args.params, writer),
+        _ => anyhow::bail!("Unable to process ambiguous input format"),
     }
 }

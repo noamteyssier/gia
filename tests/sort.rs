@@ -2,7 +2,7 @@
 mod testing {
     use anyhow::Result;
     use assert_cmd::prelude::*;
-    use bedrs::{Coordinates, GenomicInterval};
+    use bedrs::{Bed3, Coordinates};
     use std::process::Command;
 
     #[test]
@@ -12,18 +12,18 @@ mod testing {
         let output = cmd.arg("sort").arg("-i").arg(input).output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
             let fields = row
-                .split("\t")
+                .split('\t')
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(fields[0], fields[1], fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -42,18 +42,18 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
             let fields = row
-                .split("\t")
+                .split('\t')
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(fields[0], fields[1], fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -66,19 +66,19 @@ mod testing {
         let output = cmd.arg("sort").arg("-i").arg(input).arg("-N").output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
             let fields = row
-                .split("\t")
+                .split('\t')
                 .map(|field| field.replace("chr", ""))
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval = GenomicInterval::new(fields[0], fields[1], fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(fields[0], fields[1], fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -97,22 +97,21 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 6);
             let numeric_fields = fields
                 .iter()
                 .take(3)
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -133,22 +132,21 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 6);
             let numeric_fields = fields
                 .iter()
                 .take(3)
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -167,13 +165,13 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 6);
             let numeric_fields = fields
                 .iter()
@@ -181,9 +179,8 @@ mod testing {
                 .map(|field| field.replace("chr", ""))
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -202,13 +199,13 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 6);
             let numeric_fields = fields
                 .iter()
@@ -216,9 +213,8 @@ mod testing {
                 .map(|field| field.replace("chr", ""))
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
             assert_eq!(fields[3], "0");
             assert_eq!(fields[4], "0.0");
@@ -240,22 +236,21 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 12);
             let numeric_fields = fields
                 .iter()
                 .take(3)
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -276,22 +271,21 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 12);
             let numeric_fields = fields
                 .iter()
                 .take(3)
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -310,13 +304,13 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 12);
             let numeric_fields = fields
                 .iter()
@@ -324,9 +318,8 @@ mod testing {
                 .map(|field| field.replace("chr", ""))
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
         }
         Ok(())
@@ -345,13 +338,13 @@ mod testing {
             .output()?;
         let output_str = String::from_utf8(output.stdout)?;
         let rows = output_str
-            .split("\n")
+            .split('\n')
             .filter(|row| !row.is_empty())
             .collect::<Vec<&str>>();
 
-        let mut last_interval = GenomicInterval::new(0, 0, 0);
+        let mut last_interval = Bed3::new(0, 0, 0);
         for row in rows {
-            let fields = row.split("\t").collect::<Vec<&str>>();
+            let fields = row.split('\t').collect::<Vec<&str>>();
             assert_eq!(fields.len(), 12);
             let numeric_fields = fields
                 .iter()
@@ -359,9 +352,8 @@ mod testing {
                 .map(|field| field.replace("chr", ""))
                 .map(|field| field.parse::<u32>().unwrap())
                 .collect::<Vec<u32>>();
-            let interval =
-                GenomicInterval::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
-            assert!(interval.gt(&last_interval) || interval == last_interval);
+            let interval = Bed3::new(numeric_fields[0], numeric_fields[1], numeric_fields[2]);
+            assert!(interval.gt(&last_interval) || interval.eq(&last_interval));
             last_interval = interval;
             assert_eq!(fields[3], "0");
             assert_eq!(fields[4], "0.0");

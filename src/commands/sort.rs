@@ -1,26 +1,26 @@
 use crate::{
-    io::{
-        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
-    },
-    types::{InputFormat, Reorder, Retranslater, Translater},
+    cli::{SortArgs, SortParams},
+    dispatch_single_owned_tl,
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
+    types::{Reorder, SplitRetranslater, SplitTranslater},
 };
 use anyhow::Result;
-use bedrs::{traits::IntervalBounds, Container};
-use rayon::ThreadPoolBuilder;
+use bedrs::{traits::IntervalBounds, IntervalContainer};
 use serde::Serialize;
+use std::io::Write;
 
 fn sort_set<I>(
-    set: &mut impl Container<usize, usize, I>,
-    translater: Option<Translater>,
+    set: &mut IntervalContainer<I, usize, usize>,
+    translater: Option<SplitTranslater>,
     parallel: bool,
-) -> Option<Retranslater>
+) -> Option<SplitRetranslater>
 where
     I: IntervalBounds<usize, usize> + Reorder<I>,
 {
     let translater = if let Some(translater) = translater {
-        let retranslater = I::reorder_translater(set, translater);
-        Some(retranslater)
+        let (chr_tl, meta_tl) = translater.disband();
+        let retranslater = I::reorder_translater(set, chr_tl);
+        Some(SplitRetranslater::new(retranslater, meta_tl))
     } else {
         None
     };
@@ -32,133 +32,24 @@ where
     translater
 }
 
-fn sort_and_write<I>(
-    mut set: impl Container<usize, usize, I>,
-    output: Option<String>,
-    translater: Option<Translater>,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
+fn sort_and_write<I, W>(
+    mut set: IntervalContainer<I, usize, usize>,
+    translater: Option<SplitTranslater>,
+    params: SortParams,
+    writer: W,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Reorder<I>,
+    W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    let translater = sort_set(&mut set, translater, parallel);
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    write_records_iter_with(set.into_iter(), output_handle, translater.as_ref())?;
-    Ok(())
+    params.initialize_thread_pool()?;
+    let translater = sort_set(&mut set, translater, params.parallel());
+    write_records_iter_with(set.into_iter(), writer, translater.as_ref())
 }
 
-fn sort_bed3(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (set, translater) = read_bed3_set(input_handle, named)?;
-    sort_and_write(
-        set,
-        output,
-        translater,
-        parallel,
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn sort_bed6(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (set, translater) = read_bed6_set(input_handle, named)?;
-    sort_and_write(
-        set,
-        output,
-        translater,
-        parallel,
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn sort_bed12(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    parallel: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let (set, translater) = read_bed12_set(input_handle, named)?;
-    sort_and_write(
-        set,
-        output,
-        translater,
-        parallel,
-        compression_threads,
-        compression_level,
-    )
-}
-
-fn initialize_thread_pool(threads: usize) -> Result<bool> {
-    if threads > 1 {
-        ThreadPoolBuilder::new()
-            .num_threads(threads as usize)
-            .build_global()
-            .unwrap();
-        Ok(true)
-    } else if threads == 0 {
-        // by default, rayon uses all available cores
-        Ok(true)
-    } else {
-        Ok(false)
-    }
-}
-
-pub fn sort(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    format: InputFormat,
-    threads: usize,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let parallel = initialize_thread_pool(threads)?;
-    match format {
-        InputFormat::Bed3 => sort_bed3(
-            input,
-            output,
-            named,
-            parallel,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed6 => sort_bed6(
-            input,
-            output,
-            named,
-            parallel,
-            compression_threads,
-            compression_level,
-        ),
-        InputFormat::Bed12 => sort_bed12(
-            input,
-            output,
-            named,
-            parallel,
-            compression_threads,
-            compression_level,
-        ),
-    }
+pub fn sort(args: SortArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_writer()?;
+    dispatch_single_owned_tl!(reader, writer, args.params, sort_and_write)
 }

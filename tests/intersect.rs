@@ -4,7 +4,9 @@ mod testing {
     use assert_cmd::prelude::*;
     use std::{fmt::Display, process::Command};
 
-    fn build_expected_str<T: Display>(expected: &Vec<(T, u32, u32)>) -> String {
+    type Expected<T> = Vec<(T, u32, u32)>;
+
+    fn build_expected_str<T: Display>(expected: &Expected<T>) -> String {
         expected
             .iter()
             .map(|(chr, start, end)| format!("{}\t{}\t{}\n", chr, start, end))
@@ -52,8 +54,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed6")
             .output()?;
 
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
@@ -82,8 +82,6 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("--format")
-            .arg("bed12")
             .output()?;
 
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
@@ -293,7 +291,7 @@ mod testing {
             .arg(a)
             .arg("-b")
             .arg(b)
-            .arg("-S")
+            .arg("--stream")
             .output()?;
         let expected = vec![
             (1, 72, 222),

@@ -1,24 +1,16 @@
-use crate::io::{
-    build_reader, iter_unnamed, match_input, match_output, read_bed3_set, write_records_iter,
-    write_records_iter_with,
-};
-use anyhow::Result;
-use bedrs::{
-    types::iterator::ComplementIter, Complement, Container, GenomicInterval, Merge, MergeIter,
-};
+use std::io::Write;
 
-fn complement_inplace(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    // Build input handle
-    let input_handle = match_input(input)?;
+use crate::{
+    cli::ComplementArgs,
+    io::{build_reader, iter_unnamed, write_records_iter, write_records_iter_with, BedReader},
+    types::NumericBed3,
+};
+use anyhow::{bail, Result};
+use bedrs::{types::iterator::ComplementIter, MergeIter};
 
+fn complement_inplace<W: Write>(reader: BedReader, output: W) -> Result<()> {
     // Read records into a set
-    let (mut iset, translater) = read_bed3_set(input_handle, named)?;
+    let (mut iset, translater) = reader.bed3_set()?;
 
     // Sort the set
     iset.sort();
@@ -29,30 +21,18 @@ fn complement_inplace(
     // Complement the set
     let complement_iter = merged.complement()?;
 
-    // Match the output handle
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-
     // Write the records
-    write_records_iter_with(complement_iter, output_handle, translater.as_ref())?;
+    write_records_iter_with(complement_iter, output, translater.as_ref())?;
 
     Ok(())
 }
 
-fn complement_stream(
-    input: Option<String>,
-    output: Option<String>,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    // Build input handle
-    let input_handle = match_input(input)?;
-
+fn complement_stream<W: Write>(reader: BedReader, output: W) -> Result<()> {
     // Build the CSV reader
-    let mut csv_reader = build_reader(input_handle);
+    let mut csv_reader = build_reader(reader.reader());
 
     // Build the record iterator
-    let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> =
-        iter_unnamed(&mut csv_reader);
+    let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
 
     // Pipe the record iterator into the merge iterator
     let merged_iter = MergeIter::new(record_iter);
@@ -60,25 +40,20 @@ fn complement_stream(
     // Pipe the merge iterator into the complement iterator
     let comp_iter = ComplementIter::new(merged_iter);
 
-    // Match the output handle
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-
     // Write the records
-    write_records_iter(comp_iter, output_handle)?;
+    write_records_iter(comp_iter, output)?;
     Ok(())
 }
 
-pub fn complement(
-    input: Option<String>,
-    output: Option<String>,
-    named: bool,
-    stream: bool,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    if stream {
-        complement_stream(input, output, compression_threads, compression_level)
+pub fn complement(args: ComplementArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let output = args.output.get_writer()?;
+    if args.params.stream {
+        if reader.is_named() {
+            bail!("Cannot currently stream named records in complement - in development");
+        }
+        complement_stream(reader, output)
     } else {
-        complement_inplace(input, output, named, compression_threads, compression_level)
+        complement_inplace(reader, output)
     }
 }

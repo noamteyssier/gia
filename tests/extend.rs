@@ -4,7 +4,9 @@ mod testing {
     use assert_cmd::prelude::*;
     use std::process::Command;
 
-    fn build_expected_str(expected: &Vec<(u8, u32, u32)>) -> String {
+    type Expected = Vec<(u8, u32, u32)>;
+
+    fn build_expected_str(expected: &Expected) -> String {
         expected
             .iter()
             .map(|(chr, start, end)| format!("{}\t{}\t{}\n", chr, start, end))
@@ -115,7 +117,7 @@ mod testing {
             .arg("extend")
             .arg("-i")
             .arg(input)
-            .arg("-b")
+            .arg("-t")
             .arg("20")
             .output()?;
         let expected = vec![(1, 0, 40), (1, 10, 60), (2, 10, 60)];
@@ -133,7 +135,7 @@ mod testing {
             .arg("extend")
             .arg("-i")
             .arg(input)
-            .arg("-b")
+            .arg("-t")
             .arg("20")
             .arg("-g")
             .arg(genome)

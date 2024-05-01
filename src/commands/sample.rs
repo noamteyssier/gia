@@ -1,37 +1,32 @@
-use anyhow::{bail, Result};
-use bedrs::{traits::IntervalBounds, Container, Sample};
-use serde::Serialize;
-
 use crate::{
-    io::{
-        match_input, match_output, read_bed12_set, read_bed3_set, read_bed6_set,
-        write_records_iter_with, WriteNamedIter, WriteNamedIterImpl,
-    },
-    types::{InputFormat, Translater},
-    utils::build_rng,
+    cli::{SampleArgs, SampleParams},
+    dispatch_single,
+    io::{write_records_iter_with, WriteNamedIter, WriteNamedIterImpl},
+    types::SplitTranslater,
 };
+use anyhow::{bail, Result};
+use bedrs::{traits::IntervalBounds, IntervalContainer};
+use serde::Serialize;
+use std::io::Write;
 
-fn sample_from_set<I>(
-    set: &impl Container<usize, usize, I>,
-    number: Option<usize>,
-    fraction: Option<f64>,
-    seed: Option<usize>,
-    translater: Option<&Translater>,
-    output: Option<String>,
-    compression_threads: usize,
-    compression_level: u32,
+fn sample_from_set<I, W>(
+    set: IntervalContainer<I, usize, usize>,
+    translater: Option<&SplitTranslater>,
+    params: SampleParams,
+    writer: W,
 ) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize + Copy,
+    W: Write,
     WriteNamedIterImpl: WriteNamedIter<I>,
 {
     // build rng
-    let mut rng = build_rng(seed);
+    let mut rng = params.build_rng();
 
     // calculate number of intervals to sample
-    let num = if let Some(n) = number {
+    let num = if let Some(n) = params.number {
         n
-    } else if let Some(f) = fraction {
+    } else if let Some(f) = params.fraction {
         if f > 1.0 {
             bail!(
                 "Fraction must be less than or equal to 1.0:\n\ninput: {}",
@@ -48,69 +43,12 @@ where
     // sample intervals as iterator
     let subset = set.sample_iter_rng(num, &mut rng)?.copied();
 
-    // build output handle
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-
     // write intervals to output
-    write_records_iter_with(subset, output_handle, translater)?;
-
-    Ok(())
+    write_records_iter_with(subset, writer, translater)
 }
 
-pub fn sample(
-    input: Option<String>,
-    output: Option<String>,
-    number: Option<usize>,
-    fraction: Option<f64>,
-    seed: Option<usize>,
-    named: bool,
-    format: InputFormat,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    // read input
-    let input_handle = match_input(input)?;
-
-    // handle input format
-    match format {
-        InputFormat::Bed3 => {
-            let (set, translater) = read_bed3_set(input_handle, named)?;
-            sample_from_set(
-                &set,
-                number,
-                fraction,
-                seed,
-                translater.as_ref(),
-                output,
-                compression_threads,
-                compression_level,
-            )
-        }
-        InputFormat::Bed6 => {
-            let (set, translater) = read_bed6_set(input_handle, named)?;
-            sample_from_set(
-                &set,
-                number,
-                fraction,
-                seed,
-                translater.as_ref(),
-                output,
-                compression_threads,
-                compression_level,
-            )
-        }
-        InputFormat::Bed12 => {
-            let (set, translater) = read_bed12_set(input_handle, named)?;
-            sample_from_set(
-                &set,
-                number,
-                fraction,
-                seed,
-                translater.as_ref(),
-                output,
-                compression_threads,
-                compression_level,
-            )
-        }
-    }
+pub fn sample(args: SampleArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_writer()?;
+    dispatch_single!(reader, writer, args.params, sample_from_set)
 }

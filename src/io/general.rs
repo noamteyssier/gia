@@ -2,6 +2,13 @@ use anyhow::Result;
 use gzp::deflate::Bgzf;
 use gzp::{Compression, ZBuilder};
 use niffler::get_reader;
+use rust_htslib::{
+    bam::{Format as SamFormat, Header, HeaderView, Reader as BamReader, Writer as BamWriter},
+    bcf::{
+        header::HeaderView as BcfHeaderView, Format as BcfFormat, Header as BcfHeader,
+        Reader as BcfReader, Writer as BcfWriter,
+    },
+};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{
@@ -10,9 +17,10 @@ use std::{
 };
 
 fn compression_aware_read_buffer(file: File) -> Result<Box<dyn BufRead>> {
-    let buffer = BufReader::new(file);
-    let (reader, _compression) = get_reader(Box::new(buffer))?;
-    Ok(Box::new(BufReader::new(reader)))
+    let (reader, _compression) = get_reader(Box::new(file))?;
+    let mut buffer = BufReader::new(reader);
+    buffer.fill_buf()?;
+    Ok(Box::new(buffer))
 }
 
 pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
@@ -24,9 +32,24 @@ pub fn match_input(input: Option<String>) -> Result<Box<dyn BufRead>> {
         None => {
             let stdin = std::io::stdin();
             let handle = stdin.lock();
-            let buffer = BufReader::new(handle);
+            let mut buffer = BufReader::new(handle);
+            buffer.fill_buf()?;
             Ok(Box::new(buffer))
         }
+    }
+}
+
+pub fn match_bam_input(input: Option<String>) -> Result<BamReader> {
+    match input {
+        Some(filename) => Ok(BamReader::from_path(filename)?),
+        None => Ok(BamReader::from_stdin()?),
+    }
+}
+
+pub fn match_bcf_input(input: Option<String>) -> Result<BcfReader> {
+    match input {
+        Some(filename) => Ok(BcfReader::from_path(filename)?),
+        None => Ok(BcfReader::from_stdin()?),
     }
 }
 
@@ -64,6 +87,42 @@ pub fn match_output(
             Ok(Box::new(buffer))
         }
     }
+}
+
+pub fn match_bam_output(
+    path: Option<String>,
+    header: &HeaderView,
+    format: SamFormat,
+    n_threads: usize,
+) -> Result<BamWriter> {
+    let mut writer = if let Some(filename) = path {
+        BamWriter::from_path(filename, &Header::from_template(header), format)
+    } else {
+        BamWriter::from_stdout(&Header::from_template(header), format)
+    }?;
+    writer.set_threads(n_threads)?;
+    Ok(writer)
+}
+
+pub fn match_bcf_output(
+    path: Option<String>,
+    header: &BcfHeaderView,
+    format: BcfFormat,
+    compressed: bool,
+    n_threads: usize,
+) -> Result<BcfWriter> {
+    let mut writer = if let Some(filename) = path {
+        BcfWriter::from_path(
+            filename,
+            &BcfHeader::from_template(header),
+            !compressed,
+            format,
+        )
+    } else {
+        BcfWriter::from_stdout(&BcfHeader::from_template(header), !compressed, format)
+    }?;
+    writer.set_threads(n_threads)?;
+    Ok(writer)
 }
 
 #[cfg(test)]

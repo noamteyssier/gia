@@ -1,18 +1,18 @@
 mod general;
 mod iter;
-mod read;
+pub mod read;
 mod write;
-pub use general::{match_input, match_output};
-pub use iter::{NamedIter, UnnamedIter};
-pub use read::{
-    build_reader, iter_unnamed, read_bed12_set, read_bed3_set, read_bed6_set,
-    read_paired_bed12_sets, read_paired_bed3_sets, read_paired_bed6_sets,
+pub use general::{
+    match_bam_input, match_bam_output, match_bcf_input, match_bcf_output, match_input, match_output,
 };
+pub use iter::{NamedIter, UnnamedIter};
+pub use read::{build_reader, iter_unnamed, BedReader};
 use serde::{Deserialize, Serialize};
 pub use write::{
-    build_writer, write_3col_iter_with, write_named_pairs_iter, write_named_records_iter_dashmap,
-    write_pairs_iter, write_pairs_iter_with, write_records_iter, write_records_iter_with,
-    WriteIter, WriteIterImpl, WriteNamedIter, WriteNamedIterImpl,
+    build_writer, write_demoted_records_iter_with, write_depth_iter_with,
+    write_named_records_iter_dashmap, write_pairs_iter_with, write_records_iter,
+    write_records_iter_with, write_segment, write_spacing_iter_with, WriteNamedIter,
+    WriteNamedIterImpl,
 };
 
 #[derive(Deserialize, Serialize)]

@@ -32,8 +32,6 @@ mod testing {
             .arg(input)
             .arg("-n")
             .arg(num_samples.to_string())
-            .arg("--format")
-            .arg("bed6")
             .output()?;
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
         assert_eq!(num_intervals, num_samples);
@@ -51,8 +49,6 @@ mod testing {
             .arg(input)
             .arg("-n")
             .arg(num_samples.to_string())
-            .arg("--format")
-            .arg("bed12")
             .output()?;
         let num_intervals = output.stdout.split(|&c| c == b'\n').count() - 1;
         assert_eq!(num_intervals, num_samples);

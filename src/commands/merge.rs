@@ -1,122 +1,120 @@
-use std::io::{Read, Write};
-
 use crate::{
+    cli::{MergeArgs, MergeParams},
+    dispatch_single,
     io::{
-        build_reader, iter_unnamed, match_input, match_output, read_bed12_set, read_bed3_set,
-        read_bed6_set, write_3col_iter_with, write_records_iter,
+        build_reader, iter_unnamed, write_demoted_records_iter_with, write_records_iter_with,
+        BedReader, WriteNamedIter, WriteNamedIterImpl,
     },
-    types::InputFormat,
+    types::{
+        InputFormat, NumericBed12, NumericBed3, NumericBed4, NumericBed6, NumericBedGraph,
+        NumericGtf, SplitTranslater,
+    },
 };
-use anyhow::Result;
-use bedrs::{Container, GenomicInterval, Merge, MergeIter};
+use anyhow::{bail, Result};
+use bedrs::{traits::IntervalBounds, IntervalContainer, MergeIter};
+use serde::Serialize;
+use std::io::Write;
 
-fn merge_in_memory_bed3<R, W>(
-    input_handle: R,
-    output_handle: W,
-    sorted: bool,
-    named: bool,
+fn merge_in_memory<I, W>(
+    mut set: IntervalContainer<I, usize, usize>,
+    translater: Option<&SplitTranslater>,
+    params: MergeParams,
+    writer: W,
 ) -> Result<()>
 where
-    R: Read,
     W: Write,
+    I: IntervalBounds<usize, usize> + Serialize,
+    WriteNamedIterImpl: WriteNamedIter<I>,
 {
-    let (mut set, translater) = read_bed3_set(input_handle, named)?;
-    if !sorted {
+    if !params.sorted {
         set.sort();
     } else {
         set.set_sorted();
     }
-    let merged = set.merge()?;
-    write_3col_iter_with(
-        merged.records().into_iter(),
-        output_handle,
-        translater.as_ref(),
-    )?;
-    Ok(())
-}
-
-fn merge_in_memory_bed6<R, W>(
-    input_handle: R,
-    output_handle: W,
-    sorted: bool,
-    named: bool,
-) -> Result<()>
-where
-    R: Read,
-    W: Write,
-{
-    let (mut set, translater) = read_bed6_set(input_handle, named)?;
-    if !sorted {
-        set.sort();
+    let merged = if params.stranded {
+        set.merge_stranded()?
+    } else if let Some(strand) = params.specific {
+        set.merge_specific_strand(strand.into())?
     } else {
-        set.set_sorted();
-    }
-    let merged = set.merge()?;
-    write_3col_iter_with(
-        merged.records().into_iter(),
-        output_handle,
-        translater.as_ref(),
-    )?;
-    Ok(())
-}
-
-fn merge_in_memory_bed12<R, W>(
-    input_handle: R,
-    output_handle: W,
-    sorted: bool,
-    named: bool,
-) -> Result<()>
-where
-    R: Read,
-    W: Write,
-{
-    let (mut set, translater) = read_bed12_set(input_handle, named)?;
-    if !sorted {
-        set.sort();
-    } else {
-        set.set_sorted();
-    }
-    let merged = set.merge()?;
-    write_3col_iter_with(
-        merged.records().into_iter(),
-        output_handle,
-        translater.as_ref(),
-    )?;
-    Ok(())
-}
-
-fn merge_streamed<R, W>(input_handle: R, output_handle: W) -> Result<()>
-where
-    R: Read,
-    W: Write,
-{
-    let mut csv_reader = build_reader(input_handle);
-    let record_iter: Box<dyn Iterator<Item = GenomicInterval<usize>>> =
-        iter_unnamed(&mut csv_reader);
-    let merged_iter = MergeIter::new(record_iter);
-    write_records_iter(merged_iter, output_handle)?;
-    Ok(())
-}
-
-pub fn merge(
-    input: Option<String>,
-    output: Option<String>,
-    sorted: bool,
-    named: bool,
-    stream: bool,
-    format: InputFormat,
-    compression_threads: usize,
-    compression_level: u32,
-) -> Result<()> {
-    let input_handle = match_input(input)?;
-    let output_handle = match_output(output, compression_threads, compression_level)?;
-    if stream {
-        merge_streamed(input_handle, output_handle)
-    } else {
-        match format {
-            InputFormat::Bed3 => merge_in_memory_bed3(input_handle, output_handle, sorted, named),
-            InputFormat::Bed6 => merge_in_memory_bed6(input_handle, output_handle, sorted, named),
-            InputFormat::Bed12 => merge_in_memory_bed12(input_handle, output_handle, sorted, named),
+        Some(set.merge()?)
+    };
+    if let Some(merged_set) = merged {
+        if params.demote {
+            write_demoted_records_iter_with(merged_set.into_iter(), writer, translater)
+        } else {
+            write_records_iter_with(merged_set.into_iter(), writer, translater)
         }
+    } else {
+        bail!("No intervals to merge matching the specified criteria")
+    }
+}
+
+fn merge_streamed<Iv, W>(
+    record_iter: impl Iterator<Item = Iv>,
+    writer: W,
+    params: MergeParams,
+) -> Result<()>
+where
+    W: Write,
+    Iv: IntervalBounds<usize, usize> + Serialize,
+    WriteNamedIterImpl: WriteNamedIter<Iv>,
+{
+    let merged_iter = MergeIter::new(record_iter);
+    let no_transl: Option<&SplitTranslater> = None;
+    if params.demote {
+        write_demoted_records_iter_with(merged_iter, writer, no_transl)
+    } else {
+        write_records_iter_with(merged_iter, writer, no_transl)
+    }
+}
+
+fn merge_streamed_by_format<W: Write>(
+    bed_reader: BedReader,
+    writer: W,
+    params: MergeParams,
+) -> Result<()> {
+    if bed_reader.is_named() {
+        return Err(anyhow::anyhow!(
+            "Named input is not supported for streaming"
+        ));
+    }
+    let input_format = bed_reader.input_format();
+    let mut csv_reader = build_reader(bed_reader.reader());
+    match input_format {
+        InputFormat::Bed3 | InputFormat::Ambiguous => {
+            let record_iter: Box<dyn Iterator<Item = NumericBed3>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer, params)
+        }
+        InputFormat::Bed4 => {
+            let record_iter: Box<dyn Iterator<Item = NumericBed4>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer, params)
+        }
+        InputFormat::BedGraph => {
+            let record_iter: Box<dyn Iterator<Item = NumericBedGraph>> =
+                iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer, params)
+        }
+        InputFormat::Bed6 => {
+            let record_iter: Box<dyn Iterator<Item = NumericBed6>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer, params)
+        }
+        InputFormat::Bed12 => {
+            let record_iter: Box<dyn Iterator<Item = NumericBed12>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer, params)
+        }
+        InputFormat::Gtf => {
+            let record_iter: Box<dyn Iterator<Item = NumericGtf>> = iter_unnamed(&mut csv_reader);
+            merge_streamed(record_iter, writer, params)
+        }
+    }
+}
+
+pub fn merge(args: MergeArgs) -> Result<()> {
+    let reader = args.input.get_reader()?;
+    let writer = args.output.get_writer()?;
+    if args.params.stream {
+        merge_streamed_by_format(reader, writer, args.params)
+    } else {
+        dispatch_single!(reader, writer, args.params, merge_in_memory)
     }
 }
