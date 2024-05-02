@@ -3,16 +3,17 @@ mod iter;
 pub mod read;
 mod write;
 pub use general::{
-    match_bam_input, match_bam_output, match_bcf_input, match_bcf_output, match_input, match_output,
+    match_bam_input, match_bam_output, match_bcf_input, match_bcf_output, match_input,
+    match_output, match_output_mt,
 };
 pub use iter::{NamedIter, UnnamedIter};
 pub use read::{build_reader, iter_unnamed, BedReader};
 use serde::{Deserialize, Serialize};
 pub use write::{
     build_writer, write_demoted_records_iter_with, write_depth_iter_with,
-    write_named_records_iter_dashmap, write_pairs_iter_with, write_records_iter,
-    write_records_iter_with, write_segment, write_spacing_iter_with, WriteNamedIter,
-    WriteNamedIterImpl,
+    write_named_records_iter_dashmap, write_pairs_iter_with, write_par_depth_iter_with,
+    write_records_iter, write_records_iter_with, write_segment, write_spacing_iter_with,
+    WriteNamedIter, WriteNamedIterImpl,
 };
 
 #[derive(Deserialize, Serialize)]

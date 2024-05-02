@@ -1,4 +1,4 @@
-use crate::io::{match_bam_output, match_bcf_output, match_output};
+use crate::io::{match_bam_output, match_bcf_output, match_output, match_output_mt};
 use anyhow::Result;
 use clap::{Parser, ValueEnum};
 use rust_htslib::{
@@ -29,6 +29,9 @@ impl Output {
             self.compression_threads,
             self.compression_level,
         )
+    }
+    pub fn get_mt_writer(&self) -> Result<Box<dyn Write + Send + Sync>> {
+        match_output_mt(self.output.clone())
     }
 }
 

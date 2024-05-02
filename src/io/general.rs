@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use gzp::deflate::Bgzf;
 use gzp::{Compression, ZBuilder};
 use niffler::get_reader;
@@ -80,6 +80,26 @@ pub fn match_output(
     match output {
         Some(filename) => {
             compression_aware_write_buffer(filename, compression_threads, compression_level)
+        }
+        None => {
+            let stdout = std::io::stdout();
+            let buffer = BufWriter::new(stdout);
+            Ok(Box::new(buffer))
+        }
+    }
+}
+
+pub fn match_output_mt(output: Option<String>) -> Result<Box<dyn Write + Send + Sync>> {
+    match output {
+        Some(filename) => {
+            let file = File::create(filename.clone())?;
+            let buffer = BufWriter::new(file);
+            let ext = Path::new(&filename).extension();
+            if ext == Some(OsStr::new("gz")) || ext == Some(OsStr::new("bgz")) {
+                bail!("Multithreaded compression is not supported for bgzip output files currently")
+            } else {
+                Ok(Box::new(buffer))
+            }
         }
         None => {
             let stdout = std::io::stdout();
