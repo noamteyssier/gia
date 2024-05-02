@@ -5,8 +5,10 @@ use crate::types::{
 use anyhow::Result;
 use bedrs::{traits::IntervalBounds, Coordinates};
 use csv::QuoteStyle;
+use rayon::iter::ParallelIterator;
+use rayon::prelude::*;
 use serde::Serialize;
-use std::io::Write;
+use std::{io::Write, sync::Mutex};
 
 pub fn build_writer<W: Write>(writer: W) -> csv::Writer<W> {
     csv::WriterBuilder::new()
@@ -49,6 +51,26 @@ where
     }
 }
 
+pub fn write_par_depth_iter_with<'a, W, I, N, It>(
+    records: It,
+    chunk_size: usize,
+    writer: W,
+    translater: Option<&SplitTranslater>,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write + Send + Sync,
+    It: IndexedParallelIterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    if translater.is_some() {
+        write_par_named_depth_iter(records, chunk_size, writer)
+    } else {
+        write_par_depth_iter(records, chunk_size, writer)
+    }
+}
+
 fn write_depth_iter<'a, W, I, N, It>(records: It, writer: W) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize,
@@ -65,6 +87,27 @@ where
     Ok(())
 }
 
+fn write_par_depth_iter<'a, W, I, N, It>(records: It, chunk_size: usize, writer: W) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write + Send + Sync,
+    It: IndexedParallelIterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    let wtr = build_writer(writer);
+    let mutex = Mutex::new(wtr);
+    records.chunks(chunk_size).for_each(|chunk| {
+        let mut wtr = mutex.lock().unwrap();
+        for record in chunk {
+            wtr.serialize(record.get_tuple())
+                .expect("Error writing record");
+        }
+    });
+    mutex.lock().unwrap().flush()?;
+    Ok(())
+}
+
 pub fn write_named_depth_iter<'a, W, I, N, It>(records: It, writer: W) -> Result<()>
 where
     I: IntervalBounds<usize, usize> + Serialize,
@@ -78,6 +121,31 @@ where
         wtr.serialize(record.get_named_tuple())?;
     }
     wtr.flush()?;
+    Ok(())
+}
+
+pub fn write_par_named_depth_iter<'a, W, I, N, It>(
+    records: It,
+    chunk_size: usize,
+    writer: W,
+) -> Result<()>
+where
+    I: IntervalBounds<usize, usize> + Serialize,
+    N: IntervalBounds<&'a str, usize> + Serialize,
+    W: Write + Send + Sync,
+    It: IndexedParallelIterator<Item = IntervalDepth<'a, I, N>>,
+    Renamer: Rename<'a, I, N>,
+{
+    let wtr = build_writer(writer);
+    let mutex = Mutex::new(wtr);
+    records.chunks(chunk_size).for_each(|chunk| {
+        let mut wtr = mutex.lock().unwrap();
+        for record in chunk {
+            wtr.serialize(record.get_named_tuple())
+                .expect("Error writing record");
+        }
+    });
+    mutex.lock().unwrap().flush()?;
     Ok(())
 }
 
