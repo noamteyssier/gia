@@ -30,6 +30,9 @@ impl Output {
             self.compression_level,
         )
     }
+    pub fn get_mt_writer(&self) -> Result<Box<dyn Write + Send + Sync>> {
+        match_output_mt(self.output.clone())
+    }
 }
 
 #[derive(Parser, Debug, Clone)]
