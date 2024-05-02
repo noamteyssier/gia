@@ -1,4 +1,4 @@
-use crate::io::{match_bam_output, match_bcf_output, match_output};
+use crate::io::{match_bam_output, match_bcf_output, match_output, match_output_mt};
 use anyhow::Result;
 use clap::{Parser, ValueEnum};
 use rust_htslib::{

@@ -21,6 +21,14 @@ pub struct CoverageParams {
     #[clap(short = 'S', long)]
     pub sorted: bool,
 
+    /// Number of threads to use for parallel processing of intervals
+    #[clap(short = '@', long)]
+    pub threads: Option<usize>,
+
+    /// Batch size used when writing to the output in parallel
+    #[clap(short = 'C', long, default_value = "5000", requires("threads"))]
+    pub chunk_size: usize,
+
     #[clap(flatten)]
     pub overlap_predicates: OverlapPredicates,
 }
