@@ -1,6 +1,6 @@
 [package]
 name = "gia"
-version = "0.2.21"
+version = "0.2.22"
 edition = "2021"
 description = "A tool for set theoretic operations of genomic intervals"
 license = "MIT"
@@ -31,7 +31,7 @@ gzp = { version = "0.11.3", features = [
 ], default-features = false }
 rayon = "1.10.0"
 flate2 = "1.0.28"
-rust-htslib = "0.46.0"
+rust-htslib = { version = "0.46.0", default-features = false }
 paste = "1.0.14"
 
 [dev-dependencies]
