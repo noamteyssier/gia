@@ -206,8 +206,8 @@ pub fn write_pairs_iter_with<'a, W, Ia, Ib, Na, Nb, It>(
     translater: Option<&SplitTranslater>,
 ) -> Result<()>
 where
-    Ia: IntervalBounds<usize, usize> + Serialize,
-    Ib: IntervalBounds<usize, usize> + Serialize,
+    Ia: IntervalBounds<usize, usize> + Serialize + Copy,
+    Ib: IntervalBounds<usize, usize> + Serialize + Copy,
     Na: IntervalBounds<&'a str, usize> + Serialize,
     Nb: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,
@@ -224,8 +224,8 @@ where
 
 pub fn write_pairs_iter<'a, W, Ia, Ib, Na, Nb, It>(records: It, writer: W) -> Result<()>
 where
-    Ia: IntervalBounds<usize, usize> + Serialize,
-    Ib: IntervalBounds<usize, usize> + Serialize,
+    Ia: IntervalBounds<usize, usize> + Serialize + Copy,
+    Ib: IntervalBounds<usize, usize> + Serialize + Copy,
     Na: IntervalBounds<&'a str, usize> + Serialize,
     Nb: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,
@@ -241,8 +241,8 @@ where
 
 pub fn write_named_pairs_iter<'a, Ia, Ib, Na, Nb, W, It>(records: It, writer: W) -> Result<()>
 where
-    Ia: IntervalBounds<usize, usize> + Serialize,
-    Ib: IntervalBounds<usize, usize> + Serialize,
+    Ia: IntervalBounds<usize, usize> + Serialize + Copy,
+    Ib: IntervalBounds<usize, usize> + Serialize + Copy,
     Na: IntervalBounds<&'a str, usize> + Serialize,
     Nb: IntervalBounds<&'a str, usize> + Serialize,
     W: Write,

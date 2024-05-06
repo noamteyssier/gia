@@ -11,6 +11,7 @@ mod get_fasta;
 mod growth;
 mod inputs;
 mod intersect;
+mod join;
 mod merge;
 mod outputs;
 mod overlap_predicates;
@@ -37,6 +38,7 @@ pub use inputs::{
     DualInput, MixedInputBam, MixedInputVcf, MultiInput, SingleInput, SingleInputBam,
 };
 pub use intersect::{IntersectArgs, IntersectParams, OutputMethod};
+pub use join::{JoinArgs, JoinMethod, JoinParams};
 pub use merge::{MergeArgs, MergeParams};
 pub use outputs::{BamOutput, Output};
 pub use overlap_predicates::OverlapPredicates;

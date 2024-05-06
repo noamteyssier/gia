@@ -9,8 +9,8 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{bam::BamCommand, bcf::BcfCommand, Cli, Command};
 use commands::{
-    bam, bcf, closest, cluster, complement, coverage, extend, flank, get_fasta, intersect, merge,
-    random, sample, segment, shift, sort, spacing, subtract, unionbedgraph, window,
+    bam, bcf, closest, cluster, complement, coverage, extend, flank, get_fasta, intersect, join,
+    merge, random, sample, segment, shift, sort, spacing, subtract, unionbedgraph, window,
 };
 
 fn main() -> Result<()> {
@@ -32,6 +32,7 @@ fn main() -> Result<()> {
         Command::Flank(args) => flank(args)?,
         Command::GetFasta(args) => get_fasta(args)?,
         Command::Intersect(args) => intersect(args)?,
+        Command::Join(args) => join(args)?,
         Command::Merge(args) => merge(args)?,
         Command::Random(args) => random(args)?,
         Command::Sample(args) => sample(args)?,

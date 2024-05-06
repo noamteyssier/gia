@@ -8,10 +8,12 @@ pub struct Translater {
 }
 impl Translater {
     pub fn new() -> Self {
-        Self {
+        let mut tx = Self {
             name_to_idx: HashMap::new(),
             idx_to_name: HashMap::new(),
-        }
+        };
+        tx.add_name(".");
+        tx
     }
     pub fn has_name(&self, name: &str) -> bool {
         self.name_to_idx.contains_key(name)

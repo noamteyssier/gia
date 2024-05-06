@@ -1,7 +1,8 @@
 use super::{
     bam::BamCommand, bcf::BcfCommand, ClosestArgs, ClusterArgs, ComplementArgs, CoverageArgs,
-    ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs, MergeArgs, RandomArgs, SampleArgs,
-    SegmentArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs, UnionBedGraphArgs, WindowArgs,
+    ExtendArgs, FlankArgs, GetFastaArgs, IntersectArgs, JoinArgs, MergeArgs, RandomArgs,
+    SampleArgs, SegmentArgs, ShiftArgs, SortArgs, SpacingArgs, SubtractArgs, UnionBedGraphArgs,
+    WindowArgs,
 };
 use clap::Subcommand;
 
@@ -48,6 +49,9 @@ pub enum Command {
 
     /// Intersects two BED files
     Intersect(IntersectArgs),
+
+    /// Joins two BED files
+    Join(JoinArgs),
 
     /// Merges intervals of a BED file with overlapping regions
     Merge(MergeArgs),
