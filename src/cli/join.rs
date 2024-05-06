@@ -29,8 +29,10 @@ pub struct JoinParams {
 
 #[derive(Parser, Debug, ValueEnum, Clone, Copy)]
 pub enum JoinMethod {
+    /// Return all records in the left input even if no match is found in right
     Left,
+    /// Return all records in the right input even if no match is found in left
     Right,
+    /// Return only records that have a match in both inputs
     Inner,
-    Outer,
 }
